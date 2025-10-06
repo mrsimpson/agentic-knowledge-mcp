@@ -114,6 +114,26 @@ export class KnowledgeError extends Error {
 export const DEFAULT_TEMPLATE = `Search for '{{keywords}}' in folder {{local_path}}. Use your normal text search tools (grep, rg, or similar) to find relevant files. Consider these broader search terms as well: {{generalized_keywords}}. Start with searching for the most specific keywords first, then expand to the generalized terms if needed.`;
 
 /**
+ * Allowed template variables that can be used in instruction templates
+ */
+export const ALLOWED_TEMPLATE_VARIABLES = [
+  'local_path',
+  'keywords', 
+  'generalized_keywords',
+  'docset_id',
+  'docset_name',
+  'docset_description'
+] as const;
+
+/**
+ * Required template variables that must be present in every template
+ */
+export const REQUIRED_TEMPLATE_VARIABLES = [
+  'local_path',
+  'keywords'
+] as const;
+
+/**
  * Configuration file name pattern
  */
 export const CONFIG_FILENAME = 'config.yaml';

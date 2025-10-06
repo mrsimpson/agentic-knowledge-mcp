@@ -3,7 +3,13 @@
  */
 
 import type { TemplateContext, DocsetConfig } from '../types.js';
-import { KnowledgeError, ErrorType, DEFAULT_TEMPLATE } from '../types.js';
+import { 
+  KnowledgeError, 
+  ErrorType, 
+  DEFAULT_TEMPLATE, 
+  ALLOWED_TEMPLATE_VARIABLES,
+  REQUIRED_TEMPLATE_VARIABLES 
+} from '../types.js';
 
 /**
  * Process a template with variable substitution
@@ -31,14 +37,22 @@ export function processTemplate(template: string, context: TemplateContext): str
       processed = processed.replace(regex, value);
     }
     
-    // Check for unreplaced variables and warn about them
+    // Check for unreplaced variables - this should never happen in production
+    // because templates are validated at startup
     const unreplacedMatches = processed.match(/\{\{[^}]+\}\}/g);
     if (unreplacedMatches) {
-      console.warn(`Warning: Unreplaced template variables found: ${unreplacedMatches.join(', ')}`);
+      throw new KnowledgeError(
+        ErrorType.TEMPLATE_ERROR,
+        `Template contains invalid variables: ${unreplacedMatches.join(', ')}`,
+        { template, unreplacedMatches }
+      );
     }
     
     return processed.trim();
   } catch (error) {
+    if (error instanceof KnowledgeError) {
+      throw error;
+    }
     throw new KnowledgeError(
       ErrorType.TEMPLATE_ERROR,
       `Failed to process template: ${(error as Error).message}`,
@@ -59,7 +73,46 @@ export function getEffectiveTemplate(docset: DocsetConfig, globalTemplate?: stri
 }
 
 /**
- * Validate that a template contains required variables
+ * Validate that a template contains only allowed variables and has required variables
+ * This should be called during configuration loading to fail fast on invalid templates
+ * @param template - Template string to validate
+ * @returns True if template is valid, throws KnowledgeError if invalid
+ */
+export function validateTemplateStrict(template: string): boolean {
+  // Extract all variables from template
+  const variables = extractVariables(template);
+  
+  // Check for invalid variables
+  const invalidVariables = variables.filter(
+    variable => !ALLOWED_TEMPLATE_VARIABLES.includes(variable as any)
+  );
+  
+  if (invalidVariables.length > 0) {
+    throw new KnowledgeError(
+      ErrorType.TEMPLATE_ERROR,
+      `Template contains invalid variables: ${invalidVariables.join(', ')}. Allowed variables: ${ALLOWED_TEMPLATE_VARIABLES.join(', ')}`,
+      { template, invalidVariables, allowedVariables: ALLOWED_TEMPLATE_VARIABLES }
+    );
+  }
+  
+  // Check for required variables
+  const missingRequired = REQUIRED_TEMPLATE_VARIABLES.filter(
+    required => !variables.includes(required)
+  );
+  
+  if (missingRequired.length > 0) {
+    throw new KnowledgeError(
+      ErrorType.TEMPLATE_ERROR,
+      `Template missing required variables: ${missingRequired.join(', ')}. Required variables: ${REQUIRED_TEMPLATE_VARIABLES.join(', ')}`,
+      { template, missingRequired, requiredVariables: REQUIRED_TEMPLATE_VARIABLES }
+    );
+  }
+  
+  return true;
+}
+
+/**
+ * Validate that a template contains required variables (legacy function for backward compatibility)
  * @param template - Template string to validate
  * @param requiredVars - Array of required variable names
  * @returns True if all required variables are present

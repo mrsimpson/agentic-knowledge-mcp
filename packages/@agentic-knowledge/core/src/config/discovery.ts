@@ -3,6 +3,7 @@
  */
 
 import { promises as fs } from 'node:fs';
+import * as fsSync from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { CONFIG_DIR, CONFIG_FILENAME } from '../types.js';
 
@@ -13,9 +14,8 @@ import { CONFIG_DIR, CONFIG_FILENAME } from '../types.js';
  */
 export async function findConfigPath(startPath: string = process.cwd()): Promise<string | null> {
   let currentDir = resolve(startPath);
-  const rootDir = dirname(currentDir);
-
-  while (currentDir !== rootDir) {
+  
+  while (true) {
     const configDir = join(currentDir, CONFIG_DIR);
     const configPath = join(configDir, CONFIG_FILENAME);
     
@@ -47,15 +47,13 @@ export async function findConfigPath(startPath: string = process.cwd()): Promise
  */
 export function findConfigPathSync(startPath: string = process.cwd()): string | null {
   let currentDir = resolve(startPath);
-  const rootDir = dirname(currentDir);
-
-  while (currentDir !== rootDir) {
+  
+  while (true) {
     const configDir = join(currentDir, CONFIG_DIR);
     const configPath = join(configDir, CONFIG_FILENAME);
     
     try {
-      const fs = require('node:fs');
-      const stats = fs.statSync(configPath);
+      const stats = fsSync.statSync(configPath);
       if (stats.isFile()) {
         return configPath;
       }

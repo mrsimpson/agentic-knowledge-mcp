@@ -1,0 +1,18 @@
+version: "1.0"
+docsets:
+  - id: "react-docs"
+    name: "React Documentation"
+    description: "Official React documentation and guides"
+    local_path: "./docs/react"
+    template: "Search for '{{keywords}}' in React docs at {{local_path}}. Focus on: {{generalized_keywords}}"
+  
+  - id: "typescript-handbook"
+    name: "TypeScript Handbook"
+    description: "TypeScript official handbook and reference"
+    local_path: "/absolute/path/to/typescript"
+  
+  - id: "api-reference"
+    name: "API Reference"
+    local_path: "../shared/api-docs"
+
+template: "Default search instruction: Look for '{{keywords}}' in {{local_path}}. Also consider: {{generalized_keywords}}"

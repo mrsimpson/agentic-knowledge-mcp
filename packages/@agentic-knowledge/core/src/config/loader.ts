@@ -3,12 +3,14 @@
  */
 
 import { promises as fs } from 'node:fs';
+import * as fsSync from 'node:fs';
 import { load } from 'js-yaml';
 import type { KnowledgeConfig, DocsetConfig } from '../types.js';
 import { KnowledgeError, ErrorType } from '../types.js';
+import { validateTemplateStrict } from '../templates/processor.js';
 
 /**
- * Load configuration from a YAML file
+ * Load configuration from a YAML file with strict template validation
  * @param configPath - Path to the configuration file
  * @returns Parsed configuration object
  */
@@ -24,6 +26,9 @@ export async function loadConfig(configPath: string): Promise<KnowledgeConfig> {
         { configPath, parsed }
       );
     }
+    
+    // Validate templates strictly at load time
+    validateAllTemplates(parsed, configPath);
     
     return parsed;
   } catch (error) {
@@ -48,14 +53,13 @@ export async function loadConfig(configPath: string): Promise<KnowledgeConfig> {
 }
 
 /**
- * Synchronous version of loadConfig
+ * Synchronous version of loadConfig with strict template validation
  * @param configPath - Path to the configuration file
  * @returns Parsed configuration object
  */
 export function loadConfigSync(configPath: string): KnowledgeConfig {
   try {
-    const fs = require('node:fs');
-    const content = fs.readFileSync(configPath, 'utf-8');
+    const content = fsSync.readFileSync(configPath, 'utf-8');
     const parsed = load(content) as unknown;
     
     if (!validateConfig(parsed)) {
@@ -65,6 +69,9 @@ export function loadConfigSync(configPath: string): KnowledgeConfig {
         { configPath, parsed }
       );
     }
+    
+    // Validate templates strictly at load time
+    validateAllTemplates(parsed, configPath);
     
     return parsed;
   } catch (error) {
@@ -85,6 +92,41 @@ export function loadConfigSync(configPath: string): KnowledgeConfig {
       `Failed to parse YAML configuration: ${(error as Error).message}`,
       { configPath, error }
     );
+  }
+}
+
+/**
+ * Validate all templates in configuration at load time
+ * @param config - Configuration object to validate
+ * @param configPath - Path to config file for error context
+ */
+function validateAllTemplates(config: KnowledgeConfig, configPath: string): void {
+  // Validate global template if present
+  if (config.template) {
+    try {
+      validateTemplateStrict(config.template);
+    } catch (error) {
+      throw new KnowledgeError(
+        ErrorType.TEMPLATE_ERROR,
+        `Invalid global template in configuration: ${(error as Error).message}`,
+        { configPath, template: config.template, originalError: error }
+      );
+    }
+  }
+  
+  // Validate each docset template if present
+  for (const docset of config.docsets) {
+    if (docset.template) {
+      try {
+        validateTemplateStrict(docset.template);
+      } catch (error) {
+        throw new KnowledgeError(
+          ErrorType.TEMPLATE_ERROR,
+          `Invalid template for docset '${docset.id}': ${(error as Error).message}`,
+          { configPath, docsetId: docset.id, template: docset.template, originalError: error }
+        );
+      }
+    }
   }
 }
 

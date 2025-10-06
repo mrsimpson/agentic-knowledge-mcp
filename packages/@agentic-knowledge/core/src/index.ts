@@ -19,7 +19,8 @@ export { calculateLocalPath, formatPath, validatePath, validatePathSync, getRela
 export { 
   processTemplate, 
   getEffectiveTemplate, 
-  validateTemplate, 
+  validateTemplate,
+  validateTemplateStrict,
   extractVariables, 
   createTemplateContext 
 } from './templates/processor.js';

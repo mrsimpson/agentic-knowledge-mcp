@@ -1,0 +1,3 @@
+version: "1.0"
+# Missing required docsets field
+template: "Global template only"

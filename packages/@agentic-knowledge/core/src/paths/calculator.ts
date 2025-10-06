@@ -3,6 +3,9 @@
  */
 
 import { resolve, dirname, isAbsolute, join, normalize } from 'node:path';
+import { promises as fs } from 'node:fs';
+import * as fsSync from 'node:fs';
+import * as pathModule from 'node:path';
 import type { DocsetConfig } from '../types.js';
 import { KnowledgeError, ErrorType } from '../types.js';
 
@@ -14,15 +17,17 @@ import { KnowledgeError, ErrorType } from '../types.js';
  */
 export function calculateLocalPath(docset: DocsetConfig, configPath: string): string {
   try {
-    const configDir = dirname(configPath);
+    // Get the directory that contains .knowledge folder (project root)
+    const configDir = dirname(configPath); // This is the .knowledge directory
+    const projectRoot = dirname(configDir); // This is the project root
     
     // If the path is absolute, use it as-is
     if (isAbsolute(docset.local_path)) {
       return normalize(docset.local_path);
     }
     
-    // If relative, resolve relative to config directory
-    const resolvedPath = resolve(configDir, docset.local_path);
+    // If relative, resolve relative to project root directory
+    const resolvedPath = resolve(projectRoot, docset.local_path);
     return normalize(resolvedPath);
   } catch (error) {
     throw new KnowledgeError(
@@ -54,7 +59,6 @@ export function formatPath(path: string): string {
  */
 export async function validatePath(path: string): Promise<boolean> {
   try {
-    const fs = await import('node:fs/promises');
     await fs.access(path);
     return true;
   } catch {
@@ -69,8 +73,7 @@ export async function validatePath(path: string): Promise<boolean> {
  */
 export function validatePathSync(path: string): boolean {
   try {
-    const fs = require('node:fs');
-    fs.accessSync(path);
+    fsSync.accessSync(path);
     return true;
   } catch {
     return false;
@@ -84,6 +87,5 @@ export function validatePathSync(path: string): boolean {
  * @returns Relative path from 'from' to 'to'
  */
 export function getRelativePath(from: string, to: string): string {
-  const path = require('node:path');
-  return path.relative(from, to);
+  return pathModule.relative(from, to);
 }
