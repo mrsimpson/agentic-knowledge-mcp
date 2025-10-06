@@ -1,0 +1,23 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "paths": {
+      "@agentic-knowledge/core": ["../core/src/index.ts"],
+      "@agentic-knowledge/core/*": ["../core/src/*"],
+      "@agentic-knowledge/mcp-server": ["./src/index.ts"],
+      "@agentic-knowledge/mcp-server/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ]
+}
