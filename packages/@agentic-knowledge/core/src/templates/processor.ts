@@ -2,7 +2,8 @@
  * Template processing functionality
  */
 
-import type { TemplateContext } from '../types.js';
+import type { TemplateContext, DocsetConfig } from '../types.js';
+import { KnowledgeError, ErrorType, DEFAULT_TEMPLATE } from '../types.js';
 
 /**
  * Process a template with variable substitution
@@ -11,6 +12,101 @@ import type { TemplateContext } from '../types.js';
  * @returns Processed template string
  */
 export function processTemplate(template: string, context: TemplateContext): string {
-  // TODO: Implement template processing logic
-  return template;
+  try {
+    let processed = template;
+    
+    // Replace template variables using double curly brace syntax
+    const variables: Record<string, string> = {
+      local_path: context.local_path,
+      keywords: context.keywords,
+      generalized_keywords: context.generalized_keywords,
+      docset_id: context.docset.id,
+      docset_name: context.docset.name,
+      docset_description: context.docset.description || ''
+    };
+    
+    // Replace each variable
+    for (const [key, value] of Object.entries(variables)) {
+      const regex = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
+      processed = processed.replace(regex, value);
+    }
+    
+    // Check for unreplaced variables and warn about them
+    const unreplacedMatches = processed.match(/\{\{[^}]+\}\}/g);
+    if (unreplacedMatches) {
+      console.warn(`Warning: Unreplaced template variables found: ${unreplacedMatches.join(', ')}`);
+    }
+    
+    return processed.trim();
+  } catch (error) {
+    throw new KnowledgeError(
+      ErrorType.TEMPLATE_ERROR,
+      `Failed to process template: ${(error as Error).message}`,
+      { template, context, error }
+    );
+  }
+}
+
+/**
+ * Get the effective template for a docset (docset template or global template or default)
+ * @param docset - Docset configuration
+ * @param globalTemplate - Global template from config (optional)
+ * @returns Template string to use
+ */
+export function getEffectiveTemplate(docset: DocsetConfig, globalTemplate?: string): string {
+  // Priority: docset template > global template > default template
+  return docset.template || globalTemplate || DEFAULT_TEMPLATE;
+}
+
+/**
+ * Validate that a template contains required variables
+ * @param template - Template string to validate
+ * @param requiredVars - Array of required variable names
+ * @returns True if all required variables are present
+ */
+export function validateTemplate(template: string, requiredVars: string[] = ['local_path', 'keywords']): boolean {
+  for (const varName of requiredVars) {
+    const regex = new RegExp(`\\{\\{\\s*${varName}\\s*\\}\\}`);
+    if (!regex.test(template)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Extract variable names from a template
+ * @param template - Template string
+ * @returns Array of variable names found in the template
+ */
+export function extractVariables(template: string): string[] {
+  const matches = template.match(/\{\{\s*([^}]+)\s*\}\}/g);
+  if (!matches) return [];
+  
+  return matches.map(match => {
+    const varName = match.replace(/\{\{\s*/, '').replace(/\s*\}\}/, '');
+    return varName.trim();
+  });
+}
+
+/**
+ * Create template context from search parameters
+ * @param localPath - Calculated local path
+ * @param keywords - Search keywords
+ * @param generalizedKeywords - Generalized keywords
+ * @param docset - Docset configuration
+ * @returns Template context object
+ */
+export function createTemplateContext(
+  localPath: string,
+  keywords: string,
+  generalizedKeywords: string,
+  docset: DocsetConfig
+): TemplateContext {
+  return {
+    local_path: localPath,
+    keywords,
+    generalized_keywords: generalizedKeywords,
+    docset
+  };
 }

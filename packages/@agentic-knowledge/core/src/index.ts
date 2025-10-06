@@ -8,8 +8,18 @@
 // Export all types and interfaces
 export * from './types.js';
 
-// Export core functionality (will be implemented in next steps)
-export { findConfigPath } from './config/discovery.js';
-export { loadConfig, validateConfig } from './config/loader.js';
-export { calculateLocalPath } from './paths/calculator.js';
-export { processTemplate } from './templates/processor.js';
+// Export configuration functionality
+export { findConfigPath, findConfigPathSync } from './config/discovery.js';
+export { loadConfig, loadConfigSync, validateConfig } from './config/loader.js';
+
+// Export path calculation utilities
+export { calculateLocalPath, formatPath, validatePath, validatePathSync, getRelativePath } from './paths/calculator.js';
+
+// Export template processing
+export { 
+  processTemplate, 
+  getEffectiveTemplate, 
+  validateTemplate, 
+  extractVariables, 
+  createTemplateContext 
+} from './templates/processor.js';

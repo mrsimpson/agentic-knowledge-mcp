@@ -116,22 +116,22 @@ Build a standalone agentic knowledge guidance system with a search_docs() interf
 - [x] Setup testing framework (Vitest) for each package
 
 **Milestone 2: Core Package Implementation** (_Duration: 3-4 days_) 
-- [ ] Implement configuration discovery logic (_Requirements: REQ-3_)
-  - [ ] Create findConfigPath() function with directory tree walking
-  - [ ] Add YAML loading and parsing (_Requirements: REQ-4_)
-  - [ ] Create configuration validation
-- [ ] Create docset path calculation logic (_Requirements: REQ-5_)
-  - [ ] Implement calculateLocalPath() function
-  - [ ] Handle relative and absolute path resolution
-  - [ ] Create path formatting utilities
-- [ ] Build template engine for instruction generation (_Requirements: REQ-6_)
-  - [ ] Create template variable substitution
-  - [ ] Support default and custom templates
-  - [ ] Add template validation
-- [ ] Add comprehensive error handling (_Requirements: REQ-7_)
-  - [ ] Create typed error classes
-  - [ ] Add detailed error messages with context
-  - [ ] Implement error recovery strategies
+- [x] Implement configuration discovery logic (_Requirements: REQ-3_)
+  - [x] Create findConfigPath() function with directory tree walking
+  - [x] Add YAML loading and parsing (_Requirements: REQ-4_)
+  - [x] Create configuration validation
+- [x] Create docset path calculation logic (_Requirements: REQ-5_)
+  - [x] Implement calculateLocalPath() function
+  - [x] Handle relative and absolute path resolution
+  - [x] Create path formatting utilities
+- [x] Build template engine for instruction generation (_Requirements: REQ-6_)
+  - [x] Create template variable substitution
+  - [x] Support default and custom templates
+  - [x] Add template validation
+- [x] Add comprehensive error handling (_Requirements: REQ-7_)
+  - [x] Create typed error classes
+  - [x] Add detailed error messages with context
+  - [x] Implement error recovery strategies
 - [ ] Write unit tests for all core functionality
   - [ ] Configuration loading tests
   - [ ] Path calculation tests
