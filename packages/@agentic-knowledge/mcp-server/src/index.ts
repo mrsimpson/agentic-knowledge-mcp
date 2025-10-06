@@ -5,6 +5,6 @@
  * Provides search_docs and list_docsets tools via the Model Context Protocol.
  */
 
-// Export the main server functionality (will be implemented in next steps)
-export { createAgenticKnowledgeServer } from './server.js';
+// Export the main server functionality
+export { createAgenticKnowledgeServer, startMCPServer } from './server.js';
 export { startServer } from './cli.js';

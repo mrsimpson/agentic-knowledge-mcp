@@ -1,0 +1,22 @@
+version: "1.0"
+docsets:
+  - id: "my-project-docs"
+    name: "My Project Documentation"
+    description: "Main project documentation and guides"
+    local_path: "./docs"
+  - id: "api-reference"
+    name: "API Reference"
+    description: "API documentation and reference materials"
+    local_path: "./api-docs"
+template: |
+  Search for '{{keywords}}' in {{docset_name}} ({{docset_description}}).
+  
+  **Location**: {{local_path}}
+  **Primary Terms**: {{keywords}}
+  **Related Terms**: {{generalized_keywords}}
+  
+  **Strategy**:
+  1. Use grep/rg to search for: {{keywords}}
+  2. If needed, expand to: {{generalized_keywords}}
+  3. Check common file types: .md, .mdx, .rst, .txt
+  4. Look in typical locations: README, docs/, guides/, examples/

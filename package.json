@@ -1,21 +1,25 @@
 {
-  "name": "modern-monorepo-example",
-  "version": "0.0.0-development",
-  "description": "Template for a typescript based monorepo, batteries included",
+  "name": "agentic-knowledge",
+  "version": "0.1.0",
+  "description": "A standalone agentic knowledge guidance system with search_docs() interface that returns intelligent navigation instructions",
   "authors": [
-    "Luke Baker <luke.baker@live.com>",
     "Oliver Jägle <github@beimir.net>"
   ],
   "license": "MIT",
   "keywords": [
-    "NPM",
-    "package",
-    "monorepo",
-    "typescript"
+    "agentic",
+    "knowledge",
+    "guidance",
+    "search",
+    "documentation",
+    "mcp",
+    "server",
+    "AI",
+    "assistant"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/mrsimpson/template-typescript-monorepo"
+    "url": "https://github.com/yourusername/agentic-knowledge"
   },
   "publishConfig": {
     "access": "public"
@@ -26,9 +30,12 @@
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "agentic-knowledge": "./dist/bin.js"
+  },
   "type": "module",
   "scripts": {
-    "build": "turbo run build",
+    "build": "turbo run build && tsc -p tsconfig.root.json",
     "build:clean": "turbo run clean:build",
     "dev": "turbo run dev",
     "docs:dev": "vitepress dev docs",
@@ -42,16 +49,20 @@
     "lint:oxlint:fix": "oxlint --fix",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
-    "test": "turbo run test",
+    "test": "turbo run test && vitest run test/",
+    "test:e2e": "vitest run test/e2e/",
     "test:watch": "turbo run test",
     "typecheck": "turbo run --parallel typecheck",
     "update-deps": "pnpm update --latest --recursive",
     "update-deps:interactive": "pnpm update --latest --interactive --recursive",
-    "prepare": "husky"
+    "prepare": "husky",
+    "start": "node dist/bin.js",
+    "clean": "rimraf dist"
   },
   "devDependencies": {
     "@braintree/sanitize-url": "7.1.1",
     "@eslint/js": "9.34.0",
+    "@modelcontextprotocol/sdk": "^1.19.1",
     "@swc/core": "^1.13.5",
     "@tsconfig/node22": "22.0.2",
     "@tsconfig/strictest": "2.0.5",

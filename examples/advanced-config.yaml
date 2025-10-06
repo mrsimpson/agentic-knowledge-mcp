@@ -1,0 +1,34 @@
+version: "1.0"
+docsets:
+  - id: "react-docs"
+    name: "React Documentation"
+    description: "React framework documentation and tutorials"
+    local_path: "./node_modules/react/docs"
+    template: |
+      Looking for React information about '{{keywords}}'.
+      Search {{local_path}} using these approaches:
+      1. Component docs: search for component names, props, hooks
+      2. API reference: look for method signatures and parameters
+      3. Examples: check code samples and usage patterns
+      Related concepts: {{generalized_keywords}}
+  
+  - id: "typescript-docs"
+    name: "TypeScript Documentation"
+    description: "TypeScript language and compiler documentation"
+    local_path: "./node_modules/typescript/doc"
+  
+  - id: "project-source"
+    name: "Project Source Code"
+    description: "Main application source code"
+    local_path: "./src"
+    template: |
+      Searching project source for '{{keywords}}'.
+      Location: {{local_path}}
+      Focus on: implementation files, tests, utilities
+      Expand search with: {{generalized_keywords}}
+
+# Global template (used when docset doesn't have its own)
+template: |
+  Search for documentation about '{{keywords}}' in {{docset_name}}.
+  Path: {{local_path}}
+  Also consider: {{generalized_keywords}}
