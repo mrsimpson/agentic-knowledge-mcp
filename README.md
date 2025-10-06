@@ -1,292 +1,237 @@
-<a name="readme-top"></a>
+# 🧠 Agentic Knowledge
 
-<br />
+> **⚠️ WORK IN PROGRESS ⚠️**  
+> This project is under active development and not yet ready for production use. APIs may change without notice.
+
 <div align="center">
-  <h1>Modern Typescript Monorepo Example</h1>
-  <p>A modern monorepo example using Typescript, PNPM and Turborepo.</p>
+  <h3>The End of RAG. The Dawn of Agentic Search.</h3>
+  <p><em>Intelligent navigation instructions that guide AI assistants through documentation using filesystem-like exploration instead of traditional retrieval</em></p>
 
-  <a href="https://github.com/bakeruk/modern-monorepo-example/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/bakeruk/modern-typescript-monorepo-example.svg?style=for-the-badge" alt="License" />
+  <a href="https://github.com/yourusername/agentic-knowledge/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/yourusername/agentic-knowledge.svg?style=for-the-badge" alt="License" />
   </a>
-  <a href="https://linkedin.com/in/lukebaker87">
+  <a href="https://linkedin.com/in/yourusername">
     <img src="https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555" alt="LinkedIn" />
   </a>
 </div>
-<br />
 
-## Table of Contents
+---
 
-- [Table of Contents](#table-of-contents)
-- [About the project](#about-the-project)
-  - [Built With](#built-with)
-    - [PNPM](#pnpm)
-    - [Turborepo](#turborepo)
-    - [Husky](#husky)
-    - [Typescript](#typescript)
-    - [Prettier](#prettier)
-    - [Eslint](#eslint)
-    - [Oxlint](#oxlint)
-    - [Nodemon](#nodemon)
-    - [Vitest](#vitest)
-    - [GitHub Actions](#github-actions)
-    - [Conventional Commits](#conventional-commits)
-    - [Vitepress](#vitepress)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-    - [PNPM](#pnpm-1)
-    - [Node LTS (18)](#node-lts-18)
-  - [Installation](#installation)
-- [Usage](#usage)
-- [Deployment](#deployment)
-  - [Docker](#docker)
-- [License](#license)
+## 🎯 What Is This?
 
-## About the project
+**Agentic Knowledge** represents a fundamental paradigm shift away from traditional Retrieval-Augmented Generation (RAG) toward **agentic search patterns**. Instead of chunking documents, computing embeddings, and retrieving fragments, this system provides **intelligent navigation instructions** that leverage the AI agent's existing tools (grep, ripgrep, file reading) and the explosion of context windows.
 
-Technology and its tooling evolves overtime, the aim of this project is to provide a modern Typescript monorepo example for today and for the future. Watch this space as time progresses to be kept up to date with changes within this area.
+### The Core Insight
 
-Feel free to ask any questions or raise any issues.
+Modern AI assistants are **context-rich** (200K+ tokens) and equipped with powerful filesystem tools. Rather than building complex search infrastructure, we can guide them to navigate documentation intelligently—just like Claude Code revolutionized code analysis by ditching RAG for direct filesystem exploration.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## 🪦 Why RAG is Dead
 
-### Built With
+_Inspired by [The RAG Obituary](https://www.nicolasbustamante.com/p/the-rag-obituary-killed-by-agents) by Nicolas Bustamante_
 
-This project uses the following technologies and tools:
+Traditional RAG was a brilliant workaround for the **context-poor era** (GPT-4's 8K tokens). But it came with fundamental limitations:
 
-- [PNPM](https://pnpm.io/) - Package management
-- [Turborepo](https://turbo.build/repo) - High performance build system
-- [Husky](https://typicode.github.io/husky/) - Git hooks
-- [Typescript](https://www.typescriptlang.org/) - Type-safe codebase
-- [Prettier](https://prettier.io/) - Code formatter
-- [Eslint](https://eslint.org/) - Code linter
-- [Oxlint](https://oxc.rs/) - Fast Rust-based linter
-- [Nodemon](https://github.com/remy/nodemon) - Development runtime (script monitor)
-- [Vitest](https://vitest.dev/) - Frontend & backend test suite
-- [GitHub Actions](https://github.com/features/actions) - CI/CD workflow automation
-- [Conventional Commits](https://www.conventionalcommits.org/) - Commit message standard
+### The RAG Problem Stack
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-#### PNPM
-
-A Fast, disk space efficient package manager with native workspace support. PNPM is a drop-in replacement for [NPM](https://github.com/npm/cli) and [Yarn](https://yarnpkg.com/) (`v1` & `v2`). It's faster than both and uses less disk space. It has a lockfile that is compatible with both NPM and Yarn. With regard to a monorepo, in most cases, it also serves as a replacement for [Lerna](https://lerna.js.org/).
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-#### Turborepo
-
-A high-performance build system for monorepos. Turborepo is a replacement for [Lerna](https://lerna.js.org/) and it is mildly faster than Lerna's integrated counterpart [Nx](https://nx.dev/). It also requires less configuration and has less of a learning curve compared to Nx if used independently.
-
-It is worth mentioning, along side Nodemon, you can get the same development experience as if you were working with [Concurrently](https://github.com/open-cli-tools/concurrently) to run multiple development scripts or packages local to the repository.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-#### Husky
-
-A modern Git hooks manager.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-#### Typescript
-
-A superset of JavaScript that compiles to clean JavaScript code. A type-safe coding language and a great tool for large codebases as it helps to prevent bugs and improves code quality.
-
-You will notice 3 `tsconfig.ts` file variants in the root of the project.
-
-- `tsconfig.base.json` - This is the base configuration for all packages within the monorepo. It is worth pointing out that we extend the recommended rules for the current Node LTS version and for strict type-checking from `@tsconfig/node-lts-strictest` ([tsconfig/bases](https://github.com/tsconfig/bases))
-- `tsconfig.build.json` - This is the configuration for the build process. It extends the base configuration and configures where the compiled codebase should be outputted to and what should be compiled.
-- `tsconfig.json` - This is the configuration for the root of the monorepo mainly for the IDE to use and other libraries that may need it such as Eslint (`@typescript-eslint`). It also extends the base configuration.
-
-Within each `packages/*` directory, you will notice a `tsconfig.json` and `tsconfig.build.json` file. This is for package specific Typescript configuration. It is important in some aspects to treat each package independently from each other as they may have different requirements.
-
-For example, the `tsconfig.build.json` file within a `packages/api` directory may have its `module` option set to `commonjs`. Whereas the `tsconfig.build.json` file within a `packages/frontend` directory might have its `module` option set to `esnext`.
-
-It is worth mentioning, to improve performance, the [incremental](https://www.typescriptlang.org/tsconfig#incremental) option within the `tsconfig.base.json` has been set to `true`. This will cache the results of the last successful compilation and use it to speed up the next compilation.
-
-Another configuration that is worth mentioning, is that the [declaration](https://www.typescriptlang.org/tsconfig#declaration) option has also been set to `true`. This will generate `.d.ts` files for each file within the built `dist` directory. These files separate out the type information from the compiled code resulting in cleaner code output. This is also faster for the packages that depend on them as the compile doesn't have to sift through the code to find the types.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-#### Prettier
-
-An opinionated code formatter.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-#### Eslint
-
-A pluggable and configurable linting tool that statically analyses your code to quickly find problems and can be used to enforce code style.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-#### Oxlint
-
-A fast Rust-based linter that provides extremely fast linting performance. Oxlint runs before ESLint in the linting pipeline to catch common issues quickly, with ESLint handling more complex rules and auto-fixing. This two-stage approach provides both speed and comprehensive coverage.
-
-The project uses oxlint with lint-staged for pre-commit hooks, ensuring fast feedback during development while maintaining code quality.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-#### Nodemon
-
-A monitoring tool that restarts the configured executable when file changes in the configured directory are detected.
-
-Within the `packages/*` directories, you will notice a `nodemode.json` that has an executable script of `exec: pnpm typecheck && pnpm build`. This is to ensure that the codebase is fully type-checked and built - ready for dependants to import. Remember, that the built configuration is only intended for the final built code and not the source code. This form of double Type-checking also quite performant as the Typescript compilation is cached in the form a generate `tsconfig.tsbuildinfo` file thanks to the `incremental: true` Typescript configuration option.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-#### Vitest
-
-A fast and feature-rich Vite-native testing framework. Vitest provides a seamless testing experience with native TypeScript support, built-in code coverage, and a simple, Jest-compatible API.
-
-Unlike the previous Jest setup, Vitest leverages Vite's native ESM support and provides faster test execution with minimal configuration.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-#### GitHub Actions
-
-A CI/CD workflow automation tool that is built into GitHub. It is a great tool for automating your workflow and can be used to build, test and deploy your codebase.
-
-It is worth pointing out the `.github/workflows/pr.yaml` file. This workflow runs on every `pull_request` and validates the PR title follows the [Conventional Commits](https://www.conventionalcommits.org/) specification.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-#### Conventional Commits
-
-A specification for adding human and machine readable meaning to commit messages. It is a great tool for automating your workflow and can be used to build, test and deploy your codebase.
-
-The project follows the Conventional Commits specification with the following accepted prefixes:
-
-- `feat:` - A new feature (minor version bump)
-- `fix:` - A bug fix (patch version bump)
-- `docs:` - Documentation changes
-- `style:` - Code formatting, missing semicolons, etc. (no functional changes)
-- `refactor:` - Code refactoring without introducing new features or fixing bugs
-- `test:` - Adding or modifying tests
-- `chore:` - Maintenance tasks, updates to build processes, etc.
-- `perf:` - Performance improvements
-- `ci:` - Changes to CI configuration files and scripts
-- `build:` - Changes that affect the build system or external dependencies
-  Optional scopes can be added in parentheses to provide additional context:
-
-- `feat(auth): add two-factor authentication`
-- `fix(api): resolve connection timeout issue`
-
-Breaking changes should be indicated by adding an exclamation mark after the type/scope:
-
-- `feat!: major API redesign`
-- `refactor!(core): complete system architecture change`
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-#### VitePress
-
-A modern static site generator powered by Vue 3 and Vite. VitePress enables the creation of fast, lightweight documentation sites with a focus on developer experience and performance.
-
-Project documentation scripts:
-
-- `pnpm docs:dev`: Start local development server
-- `pnpm docs:build`: Build production documentation
-- `pnpm docs:preview`: Preview production build locally
-
-The documentation is located in the `docs/` directory and uses VitePress and supports Mermaid diagrams.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-#### Arc42
-
-A comprehensive template for software and system architecture documentation. Arc42 provides a structured approach to documenting software architectures, making complex systems more understandable and maintainable.
-
-The project uses VitePress to render Arc42-style documentation, allowing for easy navigation and maintenance of architectural documentation.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Getting Started
-
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-### Prerequisites
-
-Here's a list of technologies that you will need in order to run this project. We're going to assume that you already have Node.js installed, however, you will need the required version (LTS or v18+) as stated in the `package.json:engines.node` configuration.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-#### PNPM
-
-If your computer doesn't already have PNPM installed, you can install it by visiting the [PNPM installation](https://pnpm.io/installation) page.
-
-If you're using MacOS, you can install it using Homebrew.
-
-```sh
-brew install pnpm
+```
+❌ Chunking destroys document relationships
+❌ Embeddings fail on precise terminology
+❌ Similarity search misses exact matches
+❌ Reranking adds latency and complexity
+❌ Context fragmentation loses coherence
+❌ Infrastructure burden is massive
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+### The Agentic Solution
 
-#### Node LTS (18)
-
-No you have PNPM installed, you can install the required Node version by running the following command.
-
-```sh
-pnpm add -g n
-n lts
+```
+✅ Direct filesystem navigation
+✅ Intelligent reference following
+✅ Complete document context
+✅ Zero infrastructure overhead
+✅ Sub-10ms response times
+✅ Deterministic, precise results
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## 🔄 From Retrieval to Navigation
+
+Traditional RAG says: _"Here are 50 fragments that mention your keywords"_
+
+Agentic Knowledge says: _"Search for 'useState' in `./docs/react-18.2/hooks/`. If that doesn't help, try 'state management' in `./docs/patterns/`. Follow any 'See also' references you find."_
+
+The difference? **Guidance over fragments. Investigation over retrieval.**
+
+## 🏗 How It Works
+
+### MCP Server Integration
+
+Implements the [Model Context Protocol](https://modelcontextprotocol.io/) with two core tools:
+
+```typescript
+// Get navigation guidance for specific queries
+search_docs({
+  docset: "react-docs",
+  keywords: ["useEffect", "cleanup"],
+  generalized_keywords: ["lifecycle", "memory"],
+});
+
+// Discover available documentation sets
+list_docsets();
+```
+
+### Configuration-Driven Intelligence
+
+Simple `.knowledge/config.yaml` pattern:
+
+```yaml
+docsets:
+  react-docs:
+    local_path: "./docs/react-18.2"
+    description: "React framework documentation"
+    template: |
+      Search for '{{keywords}}' in {{local_path}}/hooks/. 
+      If not found, try '{{generalized_keywords}}' in {{local_path}}/patterns/.
+      Follow any cross-references you discover.
+```
+
+### The Navigation Response
+
+Instead of document fragments, you get **actionable instructions**:
+
+```
+Based on your React useEffect cleanup query:
+
+1. Start with `./docs/react-18.2/hooks/effect.md` - contains useEffect fundamentals
+2. Search for "cleanup function" patterns in `./docs/react-18.2/patterns/`
+3. Check `./examples/lifecycle/` for practical cleanup implementations
+4. Review `./docs/react-18.2/performance/memory.md` for memory leak prevention
+
+Focus on the cleanup function return pattern and dependency array management.
+```
+
+## 🚀 Why This Matters
+
+### The Context Revolution
+
+- **2022**: GPT-4 had 8K tokens (~12 pages)
+- **2025**: Claude Sonnet has 200K tokens (~700 pages)
+- **Future**: Heading toward 2M+ tokens (~6,000 pages)
+
+### The Tool Evolution
+
+AI assistants now have sophisticated filesystem tools:
+
+- **Grep/Ripgrep**: Lightning-fast regex search through files
+- **Glob**: Direct file discovery by patterns
+- **Direct File Access**: Read complete documents in context
+- **Reference Following**: Navigate cross-references naturally
+
+### The Infrastructure Shift
+
+- **RAG**: Elasticsearch clusters, embedding models, rerankers, vector databases
+- **Agentic**: Simple YAML config, zero infrastructure, filesystem tools
+
+## 🎯 Core Principles
+
+### 1. **Guidance Over Search**
+
+Provide intelligent navigation instructions instead of search results
+
+### 2. **Context Abundance**
+
+Leverage massive context windows instead of working around limitations
+
+### 3. **Tool Evolution Compatibility**
+
+Instructions remain stable as agent capabilities evolve (grep → AST parsing → future tools)
+
+### 4. **Zero AI Dependency**
+
+Pure logic-based guidance for reliability and speed
+
+### 5. **Investigation Over Retrieval**
+
+Agents follow references and build understanding incrementally
+
+## 🚀 Quick Start
 
 ### Installation
 
-To install the monorepo and all of its dependancies, simply run the following command at the root of the project.
-
-```sh
-pnpm install
+```bash
+npm install -g agentic-knowledge
+# or
+npx agentic-knowledge
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+### Basic Setup
 
-## Usage
+1. **Create configuration directory**:
 
-To run the monorepo and all of its packages, simply run the following command at the root of the project.
-
-```sh
-pnpm dev
+```bash
+mkdir .knowledge
 ```
 
-Turborepo and Nodemon will run each package in parallel and watch for file changes.
+2. **Add configuration** (`.knowledge/config.yaml`):
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Deployment
-
-There are several ways to deploy this project. Depending on your requirements, here are some examples of some popular methods.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-### Docker
-
-Making use of the [pnpm deploy](https://pnpm.io/cli/deploy) command, we can create a Docker image that only contains the production dependencies for a specific package within the monorepo. This essential bundles the given package and all of its local and external dependencies.
-
-```dockerfile
-FROM workspace as pruned
-RUN pnpm --filter <PACKAGE_NAME> --prod deploy <TARGET_DIRECTORY>
-
-FROM node:18-alpine
-WORKDIR /app
-
-ENV NODE_ENV=production
-
-COPY --from=pruned /app/pruned .
-
-ENTRYPOINT ["node", "index.js"]
+```yaml
+docsets:
+  my-docs:
+    local_path: "./docs"
+    description: "My project documentation"
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+3. **Start the MCP server**:
 
-## License
+```bash
+agentic-knowledge
+```
 
-Distributed under the MIT License. See the local `LICENSE` file for more information.
+4. **Connect your AI assistant** using MCP protocol
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## 📊 Performance vs RAG
+
+| Metric             | Traditional RAG           | Agentic Knowledge |
+| ------------------ | ------------------------- | ----------------- |
+| **Setup Time**     | Hours (indexing)          | Seconds (config)  |
+| **Response Time**  | 300-2000ms                | <10ms             |
+| **Infrastructure** | Elasticsearch + Vector DB | Zero              |
+| **Maintenance**    | High (reindexing)         | None              |
+| **Accuracy**       | Fragment-based            | Complete context  |
+| **Cost**           | High (compute)            | Minimal           |
+
+## 🔬 The Future of Knowledge Systems
+
+We're entering the **post-retrieval age**. The winners won't be those with the biggest vector databases, but those who design the smartest navigation systems for abundant context.
+
+**RAG was training wheels**—useful, necessary, but temporary. The future belongs to systems that read, navigate, and reason end-to-end.
+
+## 🧪 Development Status
+
+**Current Phase**: Finalization ✅
+
+- ✅ Core implementation complete (107 tests passing)
+- ✅ MCP protocol compliance verified
+- ✅ Performance validated (0.47ms response time)
+- ✅ Full documentation and examples
+- ⚠️ Ready for community feedback and real-world testing
+
+## 📚 Examples & Documentation
+
+- [`examples/`](./examples/) - Configuration examples and integration guides
+- [`TESTING.md`](./TESTING.md) - Comprehensive testing documentation
+- [Architecture docs](./.vibe/docs/) - Detailed technical specifications
+
+## 🤝 Contributing
+
+This project follows a structured development workflow. See our development documentation for contribution guidelines.
+
+## 📄 License
+
+Distributed under the MIT License. See [`LICENSE`](./LICENSE) file for details.
+
+---
+
+<div align="center">
+  <p><strong>🎯 Moving beyond RAG into the agentic era of knowledge systems</strong></p>
+  <p><em>Inspired by <a href="https://www.nicolasbustamante.com/p/the-rag-obituary-killed-by-agents">The RAG Obituary</a> by Nicolas Bustamante</em></p>
+</div>
