@@ -7,7 +7,7 @@ import * as fsSync from 'node:fs';
 import { load } from 'js-yaml';
 import type { KnowledgeConfig, DocsetConfig } from '../types.js';
 import { KnowledgeError, ErrorType } from '../types.js';
-import { validateTemplateStrict } from '../templates/processor.js';
+import { validateTemplate } from '../templates/processor.js';
 
 /**
  * Load configuration from a YAML file with strict template validation
@@ -104,7 +104,7 @@ function validateAllTemplates(config: KnowledgeConfig, configPath: string): void
   // Validate global template if present
   if (config.template) {
     try {
-      validateTemplateStrict(config.template);
+      validateTemplate(config.template);
     } catch (error) {
       throw new KnowledgeError(
         ErrorType.TEMPLATE_ERROR,
@@ -118,7 +118,7 @@ function validateAllTemplates(config: KnowledgeConfig, configPath: string): void
   for (const docset of config.docsets) {
     if (docset.template) {
       try {
-        validateTemplateStrict(docset.template);
+        validateTemplate(docset.template);
       } catch (error) {
         throw new KnowledgeError(
           ErrorType.TEMPLATE_ERROR,

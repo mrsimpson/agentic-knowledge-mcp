@@ -20,7 +20,6 @@ export {
   processTemplate, 
   getEffectiveTemplate, 
   validateTemplate,
-  validateTemplateStrict,
   extractVariables, 
   createTemplateContext 
 } from './templates/processor.js';

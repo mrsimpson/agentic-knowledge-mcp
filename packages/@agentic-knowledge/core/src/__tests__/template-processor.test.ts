@@ -7,7 +7,6 @@ import {
   processTemplate, 
   getEffectiveTemplate, 
   validateTemplate,
-  validateTemplateStrict,
   extractVariables, 
   createTemplateContext 
 } from '../templates/processor.js';
@@ -79,26 +78,26 @@ describe('Template Processing', () => {
     });
   });
 
-  describe('validateTemplateStrict - validation at startup', () => {
+  describe('validateTemplate - validation at startup', () => {
     test('should accept valid template with required variables', () => {
       const validTemplate = 'Search {{keywords}} in {{local_path}}';
       
-      expect(() => validateTemplateStrict(validTemplate)).not.toThrow();
+      expect(() => validateTemplate(validTemplate)).not.toThrow();
     });
 
     test('should accept template with all allowed variables', () => {
       const fullTemplate = '{{keywords}} {{generalized_keywords}} {{local_path}} {{docset_id}} {{docset_name}} {{docset_description}}';
       
-      expect(() => validateTemplateStrict(fullTemplate)).not.toThrow();
+      expect(() => validateTemplate(fullTemplate)).not.toThrow();
     });
 
     test('should reject template with invalid variables', () => {
       const invalidTemplate = 'Search {{keywords}} in {{local_path}} with {{invalid_variable}}';
       
-      expect(() => validateTemplateStrict(invalidTemplate)).toThrow(KnowledgeError);
+      expect(() => validateTemplate(invalidTemplate)).toThrow(KnowledgeError);
       
       try {
-        validateTemplateStrict(invalidTemplate);
+        validateTemplate(invalidTemplate);
       } catch (error) {
         expect(error).toBeInstanceOf(KnowledgeError);
         expect((error as KnowledgeError).type).toBe(ErrorType.TEMPLATE_ERROR);
@@ -110,10 +109,10 @@ describe('Template Processing', () => {
     test('should reject template missing required variables', () => {
       const incompleteTemplate = 'Only has {{keywords}}';
       
-      expect(() => validateTemplateStrict(incompleteTemplate)).toThrow(KnowledgeError);
+      expect(() => validateTemplate(incompleteTemplate)).toThrow(KnowledgeError);
       
       try {
-        validateTemplateStrict(incompleteTemplate);
+        validateTemplate(incompleteTemplate);
       } catch (error) {
         expect(error).toBeInstanceOf(KnowledgeError);
         expect((error as KnowledgeError).message).toContain('missing required variables: local_path');
@@ -123,10 +122,10 @@ describe('Template Processing', () => {
     test('should reject template with multiple invalid variables', () => {
       const template = '{{keywords}} {{local_path}} {{bad_var1}} {{bad_var2}}';
       
-      expect(() => validateTemplateStrict(template)).toThrow(KnowledgeError);
+      expect(() => validateTemplate(template)).toThrow(KnowledgeError);
       
       try {
-        validateTemplateStrict(template);
+        validateTemplate(template);
       } catch (error) {
         expect((error as KnowledgeError).message).toContain('bad_var1');
         expect((error as KnowledgeError).message).toContain('bad_var2');
@@ -195,7 +194,7 @@ describe('Template Processing', () => {
 
   describe('integration with strict validation', () => {
     test('should validate default template is compliant', () => {
-      expect(() => validateTemplateStrict(DEFAULT_TEMPLATE)).not.toThrow();
+      expect(() => validateTemplate(DEFAULT_TEMPLATE)).not.toThrow();
     });
 
     test('should validate that all required variables are in default template', () => {
@@ -219,20 +218,20 @@ describe('Template Processing', () => {
     test('should handle template with only required variables', () => {
       const minimalTemplate = 'Search {{keywords}} in {{local_path}}';
       
-      expect(() => validateTemplateStrict(minimalTemplate)).not.toThrow();
+      expect(() => validateTemplate(minimalTemplate)).not.toThrow();
       
       const result = processTemplate(minimalTemplate, sampleContext);
       expect(result).toBe('Search react hooks in /project/docs');
     });
 
     test('should handle empty template gracefully', () => {
-      expect(() => validateTemplateStrict('')).toThrow(KnowledgeError);
+      expect(() => validateTemplate('')).toThrow(KnowledgeError);
     });
 
     test('should handle malformed variable syntax', () => {
       const malformed = 'Search {keywords} in {{local_path}}';
       
-      expect(() => validateTemplateStrict(malformed)).toThrow();
+      expect(() => validateTemplate(malformed)).toThrow();
     });
   });
 });

@@ -74,11 +74,11 @@ export function getEffectiveTemplate(docset: DocsetConfig, globalTemplate?: stri
 
 /**
  * Validate that a template contains only allowed variables and has required variables
- * This should be called during configuration loading to fail fast on invalid templates
+ * This is called during configuration loading to fail fast on invalid templates
  * @param template - Template string to validate
  * @returns True if template is valid, throws KnowledgeError if invalid
  */
-export function validateTemplateStrict(template: string): boolean {
+export function validateTemplate(template: string): boolean {
   // Extract all variables from template
   const variables = extractVariables(template);
   
@@ -108,22 +108,6 @@ export function validateTemplateStrict(template: string): boolean {
     );
   }
   
-  return true;
-}
-
-/**
- * Validate that a template contains required variables (legacy function for backward compatibility)
- * @param template - Template string to validate
- * @param requiredVars - Array of required variable names
- * @returns True if all required variables are present
- */
-export function validateTemplate(template: string, requiredVars: string[] = ['local_path', 'keywords']): boolean {
-  for (const varName of requiredVars) {
-    const regex = new RegExp(`\\{\\{\\s*${varName}\\s*\\}\\}`);
-    if (!regex.test(template)) {
-      return false;
-    }
-  }
   return true;
 }
 
