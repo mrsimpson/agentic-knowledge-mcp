@@ -1,5 +1,5 @@
 /**
- * @agentic-knowledge/core
+ * @codemcp/knowledge-core
  *
  * Core functionality for the agentic knowledge guidance system.
  * Provides configuration discovery, path calculation, and template processing.

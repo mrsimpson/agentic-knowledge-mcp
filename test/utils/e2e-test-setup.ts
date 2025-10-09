@@ -74,7 +74,7 @@ export async function createMCPClient(projectPath: string): Promise<{
   cleanup: () => Promise<void>;
 }> {
   // Get path to our server binary
-  const serverBinaryPath = join(process.cwd(), 'packages/@agentic-knowledge/mcp-server/dist/bin.js');
+  const serverBinaryPath = join(process.cwd(), 'packages/@codemcp/knowledge-mcp-server/dist/bin.js');
   
   // Create client with proper capabilities
   const client = new Client(

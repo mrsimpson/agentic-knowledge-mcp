@@ -1,12 +1,12 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": ".",
     "outDir": "./dist",
     "rootDir": "./src",
     "paths": {
-      "@agentic-knowledge/core": ["./src/index.ts"],
-      "@agentic-knowledge/core/*": ["./src/*"]
+      "@codemcp/knowledge-core": ["./src/index.ts"],
+      "@codemcp/knowledge-core/*": ["./src/*"]
     }
   },
   "include": [

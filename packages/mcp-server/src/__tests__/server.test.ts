@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createAgenticKnowledgeServer } from '../server.js';
 
 // Mock the core module
-vi.mock('@agentic-knowledge/core', () => ({
+vi.mock('@codemcp/knowledge-core', () => ({
   loadConfiguration: vi.fn(),
   calculateLocalPath: vi.fn(),
   processTemplate: vi.fn(),

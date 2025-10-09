@@ -1,94 +1,97 @@
 {
-  "name": "agentic-knowledge",
+  "name": "@codemcp/knowledge",
   "version": "0.1.0",
-  "description": "A standalone agentic knowledge guidance system with search_docs() interface that returns intelligent navigation instructions",
-  "authors": [
-    "Oliver Jägle <github@beimir.net>"
-  ],
-  "license": "MIT",
-  "keywords": [
-    "agentic",
-    "knowledge",
-    "guidance",
-    "search",
-    "documentation",
-    "mcp",
-    "server",
-    "AI",
-    "assistant"
+  "description": "A Model Context Protocol server for agentic knowledge guidance with web-based documentation loading and intelligent search instructions",
+  "type": "module",
+  "main": "packages/mcp-server/dist/index.js",
+  "bin": {
+    "agentic-knowledge": "packages/mcp-server/dist/bin.js"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.14.2",
+  "files": [
+    "packages/*/dist/**/*",
+    "packages/*/package.json",
+    "README.md",
+    "LICENSE",
+    "package.json"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/agentic-knowledge"
+    "url": "git+https://github.com/yourusername/agentic-knowledge.git"
   },
-  "publishConfig": {
-    "access": "public"
-  },
-  "engines": {
-    "node": ">=22",
-    "pnpm": ">=9.0.0"
-  },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "bin": {
-    "agentic-knowledge": "./dist/bin.js"
-  },
-  "type": "module",
   "scripts": {
-    "build": "turbo run build && tsc -p tsconfig.root.json",
-    "build:clean": "turbo run clean:build",
-    "dev": "turbo run dev",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs",
-    "lint-format": "turbo run --parallel lint format ",
-    "lint-format:fix": "turbo run --parallel lint:fix format:fix",
-    "lint": "oxlint && eslint",
-    "lint:fix": "oxlint --fix && eslint --fix",
-    "lint:oxlint": "oxlint",
-    "lint:oxlint:fix": "oxlint --fix",
-    "format": "prettier --check .",
-    "format:fix": "prettier --write .",
+    "build": "turbo run build",
+    "pack:dist": "pnpm pack",
+    "inspector": "npx @modelcontextprotocol/inspector",
+    "dev": "turbo run dev --filter=@codemcp/knowledge-core --filter=@codemcp/knowledge-mcp-server",
+    "clean": "turbo run clean:build",
+    "prepublishOnly": "npm run build",
+    "lint-staged": "npx lint-staged",
     "test": "turbo run test && vitest run test/",
+    "test:run": "turbo run test && vitest run test/",
+    "test:manual": "npm run build && npm run inspector",
     "test:e2e": "vitest run test/e2e/",
     "test:watch": "turbo run test",
+    "lint": "turbo run --parallel lint",
+    "lint:fix": "turbo run --parallel lint:fix",
+    "format:check": "turbo run --parallel format",
+    "format": "turbo run --parallel format:fix",
     "typecheck": "turbo run --parallel typecheck",
-    "update-deps": "pnpm update --latest --recursive",
-    "update-deps:interactive": "pnpm update --latest --interactive --recursive",
     "prepare": "husky",
-    "start": "node dist/bin.js",
-    "clean": "rimraf dist"
+    "clean:build": "turbo run clean:build"
+  },
+  "dependencies": {
+    "@codemcp/knowledge-core": "workspace:*",
+    "@codemcp/knowledge-content-loader": "workspace:*",
+    "@codemcp/knowledge-mcp-server": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.19.1",
+    "@types/js-yaml": "4.0.9",
+    "js-yaml": "4.1.0"
   },
   "devDependencies": {
-    "@braintree/sanitize-url": "7.1.1",
-    "@eslint/js": "9.34.0",
-    "@modelcontextprotocol/sdk": "^1.19.1",
-    "@swc/core": "^1.13.5",
+    "@modelcontextprotocol/inspector": "0.16.8",
     "@tsconfig/node22": "22.0.2",
     "@tsconfig/strictest": "2.0.5",
-    "@types/eslint-config-prettier": "6.11.3",
     "@types/node": "^24.3.0",
     "@typescript-eslint/eslint-plugin": "^8.42.0",
     "@typescript-eslint/parser": "^8.42.0",
     "@vitest/coverage-v8": "^3.2.4",
-    "cytoscape": "3.33.1",
-    "cytoscape-cose-bilkent": "4.1.0",
-    "dayjs": "1.11.18",
-    "debug": "4.4.1",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.6",
-    "nodemon": "^3.1.10",
     "oxlint": "1.14.0",
     "prettier": "^3.6.2",
     "rimraf": "^6.0.1",
     "turbo": "^2.5.6",
     "typescript": "^5.9.2",
-    "typescript-eslint": "8.42.0",
-    "vitepress": "1.6.4",
-    "vitepress-plugin-mermaid": "2.0.17",
     "vitest": "^3.2.4"
   },
-  "packageManager": "pnpm@9.14.2"
+  "lint-staged": {
+    "*.{ts,js,mts,cts,tsx,jsx}": [
+      "prettier --write",
+      "oxlint --fix"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "agentic",
+    "knowledge",
+    "guidance",
+    "search",
+    "documentation",
+    "ai",
+    "assistant",
+    "web-loading"
+  ],
+  "author": "Oliver Jägle <github@beimir.net>",
+  "license": "MIT"
 }

@@ -5,4 +5,4 @@
  * Delegates to the MCP server implementation
  */
 
-import('./packages/@agentic-knowledge/mcp-server/dist/bin.js');
+import('./packages/mcp-server/dist/bin.js');

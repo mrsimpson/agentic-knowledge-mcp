@@ -12,7 +12,7 @@ export {
   createAgenticKnowledgeServer, 
   startMCPServer, 
   startServer 
-} from './packages/@agentic-knowledge/mcp-server/dist/index.js';
+} from './packages/mcp-server/dist/index.js';
 
 // Export core functionality for advanced usage
 export {
@@ -24,7 +24,7 @@ export {
   getEffectiveTemplate,
   validateTemplate,
   extractVariables
-} from './packages/@agentic-knowledge/core/dist/index.js';
+} from './packages/core/dist/index.js';
 
 // Export types
 export type {
@@ -35,6 +35,6 @@ export type {
   ListDocsetsResponse,
   TemplateContext,
   ErrorType
-} from './packages/@agentic-knowledge/core/dist/index.js';
+} from './packages/core/dist/index.js';
 
-export { KnowledgeError } from './packages/@agentic-knowledge/core/dist/index.js';
+export { KnowledgeError } from './packages/core/dist/index.js';

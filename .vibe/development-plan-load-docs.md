@@ -94,17 +94,29 @@ Add a feature to create docsets by loading documentation from the web. This will
 
 #### Phase 4: Package Refactoring & CLI Interface
 
-- [x] **ARCHITECTURE DECISION**: Create two new packages: `@agentic-knowledge/content-loader` and `@agentic-knowledge/cli`
-- [x] Create `@agentic-knowledge/content-loader` package structure
+- [x] **ARCHITECTURE DECISION**: Create two new packages: `@codemcp/knowledge-content-loader` and `@codemcp/knowledge-cli`
+- [x] Create `@codemcp/knowledge-content-loader` package structure
 - [x] Move `content/` directory from core to content-loader package
 - [x] Move web source types from core/types.ts to content-loader package
 - [x] Update core package to remove web source dependencies and restore clean interfaces
-- [ ] Create `@agentic-knowledge/cli` package structure
+- [ ] Create `@codemcp/knowledge-cli` package structure
 - [ ] Implement CLI commands: `init`, `refresh`, `status`
 - [ ] Add progress indicators and error reporting to CLI
 - [ ] Update package.json workspace configuration
 - [ ] Update imports across all packages
 - [ ] Ensure all tests pass after refactoring
+
+#### Phase 6: Packaging & Publishing Setup
+
+- [ ] **PRIORITY: Setup monorepo packaging and publishing following responsible-vibe patterns**
+- [ ] Update root package.json with @codemcp/knowledge-\* naming and publishing config
+- [ ] Configure workspace package.json files with consistent versioning
+- [ ] Set up GitHub Actions release workflow with automated version bumping
+- [ ] Configure npm publishing with proper package structure
+- [ ] Add build and distribution scripts
+- [ ] Set up proper package exports and dependencies
+- [ ] Test packaging workflow with dry-run publish
+- [ ] Document installation and usage instructions
 
 #### Phase 5: Integration & Testing
 
@@ -207,7 +219,7 @@ This approach ensures tests provide value by catching real bugs and verifying th
 
 ### Architecture Decision: Three Package Structure
 
-**Decision**: Create two new packages: `@agentic-knowledge/content-loader` and `@agentic-knowledge/cli` instead of extending core.
+**Decision**: Create two new packages: `@codemcp/knowledge-content-loader` and `@codemcp/knowledge-cli` instead of extending core.
 
 **Rationale**:
 
@@ -219,21 +231,21 @@ This approach ensures tests provide value by catching real bugs and verifying th
 **Final Package Structure**:
 
 ```
-@agentic-knowledge/core/           # Configuration, templates, path calculation (unchanged)
-@agentic-knowledge/content-loader/ # Web content loading, metadata management
+@codemcp/knowledge-core/           # Configuration, templates, path calculation (unchanged)
+@codemcp/knowledge-content-loader/ # Web content loading, metadata management
 ├── src/
 │   ├── loaders/                   # GitRepoLoader, DocumentationSiteLoader, etc.
 │   ├── metadata/                  # MetadataManager
 │   ├── processors/                # ContentProcessor
 │   └── types.ts                   # Web source types
 
-@agentic-knowledge/cli/            # Command-line interface
+@codemcp/knowledge-cli/            # Command-line interface
 ├── src/
 │   ├── commands/                  # init, refresh, status commands
 │   ├── utils/                     # Progress indicators, error reporting
 │   └── index.ts                   # CLI entry point
 
-@agentic-knowledge/mcp-server/     # MCP protocol (minimal integration changes)
+@codemcp/knowledge-mcp-server/     # MCP protocol (minimal integration changes)
 ```
 
 **Dependencies Flow**:

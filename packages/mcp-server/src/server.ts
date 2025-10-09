@@ -16,7 +16,7 @@ import {
   createTemplateContext,
   getEffectiveTemplate,
   type KnowledgeConfig
-} from '@agentic-knowledge/core';
+} from '@codemcp/knowledge-core';
 
 /**
  * Create an agentic knowledge MCP server

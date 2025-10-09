@@ -1,13 +1,10 @@
 {
-  "name": "@agentic-knowledge/mcp-server",
+  "name": "@codemcp/knowledge-core",
   "version": "0.1.0",
-  "description": "MCP server implementation for agentic knowledge guidance system",
+  "description": "Core functionality for agentic knowledge guidance system",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "bin": {
-    "agentic-knowledge": "./dist/bin.js"
-  },
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -22,7 +19,6 @@
     "build:watch": "tsc -p tsconfig.build.json --watch",
     "clean": "rimraf dist",
     "dev": "tsc -p tsconfig.build.json --watch",
-    "start": "node dist/bin.js",
     "lint": "oxlint && eslint .",
     "lint:fix": "oxlint --fix && eslint . --fix",
     "format": "prettier --check .",
@@ -33,10 +29,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@agentic-knowledge/core": "workspace:*",
-    "@modelcontextprotocol/sdk": "^1.19.1"
+    "js-yaml": "^4.1.0"
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.3.0",
     "rimraf": "^6.0.1",
     "typescript": "^5.9.2",
@@ -45,9 +41,9 @@
   "keywords": [
     "agentic",
     "knowledge",
-    "mcp",
-    "server",
-    "guidance"
+    "configuration",
+    "path-calculation",
+    "templates"
   ],
   "author": "Oliver Jägle <github@beimir.net>",
   "license": "MIT"

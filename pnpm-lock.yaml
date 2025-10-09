@@ -96,12 +96,12 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@24.3.0)(yaml@2.8.1)
 
-  packages/@agentic-knowledge/cli:
+  packages/cli:
     dependencies:
-      '@agentic-knowledge/content-loader':
+      '@codemcp/knowledge-content-loader':
         specifier: workspace:*
         version: link:../content-loader
-      '@agentic-knowledge/core':
+      '@codemcp/knowledge-core':
         specifier: workspace:*
         version: link:../core
       chalk:
@@ -127,7 +127,7 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@24.3.0)(yaml@2.8.1)
 
-  packages/@agentic-knowledge/content-loader:
+  packages/content-loader:
     dependencies:
       simple-git:
         specifier: ^3.22.0
@@ -146,7 +146,7 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@24.3.0)(yaml@2.8.1)
 
-  packages/@agentic-knowledge/core:
+  packages/core:
     dependencies:
       js-yaml:
         specifier: ^4.1.0
@@ -168,9 +168,9 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@24.3.0)(yaml@2.8.1)
 
-  packages/@agentic-knowledge/mcp-server:
+  packages/mcp-server:
     dependencies:
-      '@agentic-knowledge/core':
+      '@codemcp/knowledge-core':
         specifier: workspace:*
         version: link:../core
       '@modelcontextprotocol/sdk':

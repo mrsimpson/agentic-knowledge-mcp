@@ -16,8 +16,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@agentic-knowledge/core': './packages/@agentic-knowledge/core/src/index.ts',
-      '@agentic-knowledge/mcp-server': './packages/@agentic-knowledge/mcp-server/src/index.ts'
+      '@codemcp/knowledge-core': './packages/core/src/index.ts',
+      '@codemcp/knowledge-mcp-server': './packages/mcp-server/src/index.ts'
     }
   }
 });

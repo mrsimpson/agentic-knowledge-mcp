@@ -1,7 +1,7 @@
 {
-  "name": "@agentic-knowledge/core",
+  "name": "@codemcp/knowledge-content-loader",
   "version": "0.1.0",
-  "description": "Core functionality for agentic knowledge guidance system",
+  "description": "Web content loading and metadata management for agentic knowledge system",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -29,10 +29,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "js-yaml": "^4.1.0"
+    "simple-git": "^3.22.0"
   },
   "devDependencies": {
-    "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.3.0",
     "rimraf": "^6.0.1",
     "typescript": "^5.9.2",
@@ -41,9 +40,10 @@
   "keywords": [
     "agentic",
     "knowledge",
-    "configuration",
-    "path-calculation",
-    "templates"
+    "content-loading",
+    "web-sources",
+    "git",
+    "metadata"
   ],
   "author": "Oliver Jägle <github@beimir.net>",
   "license": "MIT"

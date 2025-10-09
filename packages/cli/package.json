@@ -1,5 +1,5 @@
 {
-  "name": "@agentic-knowledge/cli",
+  "name": "@codemcp/knowledge-cli",
   "version": "0.1.0",
   "description": "Command-line interface for agentic knowledge web content management",
   "type": "module",
@@ -32,8 +32,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@agentic-knowledge/core": "workspace:*",
-    "@agentic-knowledge/content-loader": "workspace:*",
+    "@codemcp/knowledge-core": "workspace:*",
+    "@codemcp/knowledge-content-loader": "workspace:*",
     "commander": "^12.0.0",
     "chalk": "^5.3.0",
     "ora": "^8.0.1"

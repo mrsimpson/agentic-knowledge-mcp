@@ -1,10 +1,13 @@
 {
-  "name": "@agentic-knowledge/content-loader",
+  "name": "@codemcp/knowledge-mcp-server",
   "version": "0.1.0",
-  "description": "Web content loading and metadata management for agentic knowledge system",
+  "description": "MCP server implementation for agentic knowledge guidance system",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "agentic-knowledge": "./dist/bin.js"
+  },
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -19,6 +22,7 @@
     "build:watch": "tsc -p tsconfig.build.json --watch",
     "clean": "rimraf dist",
     "dev": "tsc -p tsconfig.build.json --watch",
+    "start": "node dist/bin.js",
     "lint": "oxlint && eslint .",
     "lint:fix": "oxlint --fix && eslint . --fix",
     "format": "prettier --check .",
@@ -29,7 +33,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "simple-git": "^3.22.0"
+    "@codemcp/knowledge-core": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.19.1"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",
@@ -40,10 +45,9 @@
   "keywords": [
     "agentic",
     "knowledge",
-    "content-loading",
-    "web-sources",
-    "git",
-    "metadata"
+    "mcp",
+    "server",
+    "guidance"
   ],
   "author": "Oliver Jägle <github@beimir.net>",
   "license": "MIT"

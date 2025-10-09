@@ -12,7 +12,7 @@ import {
   loadConfigSync,
   calculateLocalPath,
   ensureKnowledgeGitignoreSync,
-} from "@agentic-knowledge/core";
+} from "@codemcp/knowledge-core";
 
 export const initCommand = new Command("init")
   .description("Initialize web sources for a docset from configuration")
