@@ -186,3 +186,94 @@ Complex requirements for unwanted behavior also include the If-Then keywords.
 - WHEN installed globally THEN the system SHALL be available as "agentic-knowledge-mcp" command  
 - The system SHALL follow semantic versioning for releases
 - The system SHALL include TypeScript type definitions for programmatic use
+
+## REQ-11: Web Source Configuration
+
+**User Story:** As a developer, I want to configure docsets from web sources so that I can load documentation that isn't available locally.
+
+**Acceptance Criteria:**
+
+- WHEN config.yaml contains docset with web_sources array THEN the system SHALL support both local_path and web_sources configuration
+- WHEN docset has only web_sources and no local_path THEN the system SHALL calculate local_path as ".knowledge/docsets/{docset_id}/"
+- WHEN docset has both local_path and web_sources THEN the system SHALL use configured local_path
+- WHEN web_sources contains git_repo type source THEN the system SHALL validate URL format
+- WHEN web_sources contains invalid source type THEN the system SHALL return validation error
+- The system SHALL maintain backward compatibility with existing local_path-only docsets
+
+## REQ-12: Git Repository Loading
+
+**User Story:** As a developer, I want to load documentation from Git repositories so that I can access up-to-date docs from GitHub, GitLab, and other Git hosts.
+
+**Acceptance Criteria:**
+
+- WHEN CLI command "agentic-knowledge init {docset-id}" executed THEN the system SHALL clone configured Git repositories
+- WHEN Git repository requires authentication THEN the system SHALL use system Git credentials
+- WHEN Git repository URL is invalid THEN the system SHALL return clear error message
+- WHEN Git repository is unreachable THEN the system SHALL return network error with retry suggestion
+- WHEN Git clone succeeds THEN the system SHALL extract only configured paths if specified
+- WHEN no paths specified in git_repo options THEN the system SHALL extract entire repository
+- WHEN specified branch does not exist THEN the system SHALL return branch error with available branches
+- The system SHALL create .knowledge/.gitignore with "docsets/" entry if not exists
+
+## REQ-13: Metadata Management
+
+**User Story:** As a developer, I want to track when web sources were last updated so that I can know if my local documentation is current.
+
+**Acceptance Criteria:**
+
+- WHEN web source is successfully loaded THEN the system SHALL create .agentic-metadata.json in docset directory
+- WHEN metadata file exists THEN the system SHALL track last_fetched timestamp for each source
+- WHEN metadata file exists THEN the system SHALL track content_hash for change detection
+- WHEN metadata file exists THEN the system SHALL track list of files created from each source
+- WHEN refresh operation runs THEN the system SHALL update metadata with new timestamps and hashes
+- The system SHALL validate metadata file format and recover from corruption
+
+## REQ-14: CLI Web Source Operations
+
+**User Story:** As a developer, I want CLI commands to manage web sources so that I can initialize and refresh documentation easily.
+
+**Acceptance Criteria:**
+
+- WHEN "agentic-knowledge init {docset-id}" executed AND docset has web_sources THEN the system SHALL download all configured sources
+- WHEN "agentic-knowledge refresh" executed without docset-id THEN the system SHALL refresh all docsets with web_sources
+- WHEN "agentic-knowledge refresh {docset-id}" executed THEN the system SHALL refresh only specified docset
+- WHEN "agentic-knowledge status" executed THEN the system SHALL show last update time for each web source
+- WHEN network is unavailable during refresh THEN the system SHALL report error but continue with other sources
+- The system SHALL show progress indicators for long-running downloads
+
+## REQ-15: Error Handling for Web Sources
+
+**User Story:** As a developer, I want clear error messages when web loading fails so that I can troubleshoot configuration issues.
+
+**Acceptance Criteria:**
+
+- WHEN Git clone fails due to authentication THEN the system SHALL suggest checking Git credentials
+- WHEN Git clone fails due to network THEN the system SHALL suggest checking internet connection
+- WHEN specified path does not exist in repository THEN the system SHALL list available paths
+- WHEN disk space is insufficient THEN the system SHALL report storage error before download
+- WHEN web source fails THEN the system SHALL continue processing other sources in same docset
+- The system SHALL log detailed error information while showing user-friendly messages
+
+## REQ-16: Content Processing for Web Sources
+
+**User Story:** As a developer, I want web-loaded content to work seamlessly with existing search tools so that AI assistants can find information regardless of source.
+
+**Acceptance Criteria:**
+
+- WHEN Git repository contains Markdown files THEN the system SHALL preserve original content and structure
+- WHEN Git repository contains non-Markdown files THEN the system SHALL copy them without modification
+- WHEN web source creates files THEN they SHALL appear in calculated local_path directory
+- WHEN search_docs called on docset with web sources THEN the system SHALL return same format instructions
+- The system SHALL maintain file timestamps from original sources when possible
+
+## REQ-17: Automatic Gitignore Management
+
+**User Story:** As a developer, I want downloaded web content to be automatically ignored by Git so that I don't accidentally commit large documentation files.
+
+**Acceptance Criteria:**
+
+- WHEN any web source is processed THEN the system SHALL check for .knowledge/.gitignore file
+- WHEN .knowledge/.gitignore does not exist THEN the system SHALL create it with "docsets/" entry
+- WHEN .knowledge/.gitignore exists but missing "docsets/" entry THEN the system SHALL add the entry
+- WHEN .knowledge/.gitignore exists with "docsets/" entry THEN the system SHALL not modify it
+- The system SHALL handle gitignore updates atomically to prevent corruption

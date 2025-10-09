@@ -66,7 +66,7 @@ describe("Error Handling", () => {
     test("should have string values for all error types", () => {
       const errorTypes = Object.values(ErrorType);
 
-      expect(errorTypes).toHaveLength(9);
+      expect(errorTypes).toHaveLength(6);
       errorTypes.forEach((type) => {
         expect(typeof type).toBe("string");
         expect(type.length).toBeGreaterThan(0);

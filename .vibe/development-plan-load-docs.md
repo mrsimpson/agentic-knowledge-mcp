@@ -111,7 +111,12 @@ Add a feature to create docsets by loading documentation from the web. This will
 - [ ] Update MCP server to handle docsets with web sources
 - [ ] Add error handling for web loading failures
 - [ ] Implement graceful degradation when sources are unavailable
-- [ ] Write comprehensive unit tests for all new components
+- [x] **PRIORITY: Replace terrible unit tests with behavior-driven tests**
+  - [x] **DELETED**: Removed awful `types.test.ts` that only tested constants and static properties
+  - [x] **CREATED**: `git-repo-loader.test.ts` - 11 behavior-driven tests for REQ-12 (Git Repository Loading)
+  - [x] **CREATED**: Updated requirements documentation with REQ-11 through REQ-17 for web loading
+  - [x] **VALIDATED**: All behavior-driven tests are now passing and test actual functionality
+  - [x] **DOCUMENTED**: Added "Shameful Testing vs. Behavior-Driven Testing" decision to capture the lesson learned
 - [ ] Write integration tests for CLI commands
 - [ ] Add end-to-end tests with mock web sources
 
@@ -159,6 +164,37 @@ Add a feature to create docsets by loading documentation from the web. This will
 _None yet_
 
 ## Key Decisions
+
+### Shameful Testing vs. Behavior-Driven Testing
+
+**Problem**: Initially created terrible unit tests that only tested constants, enums, and static properties instead of actual user behavior and system functionality.
+
+**User Feedback**: "what the heck of unit tests should this be? we need to test behaviour, not static code like constants! Shame on you."
+
+**Solution**: Complete rewrite of test strategy:
+
+**What We DELETED (Bad Tests)**:
+
+- `types.test.ts` - Only tested enum string values and interface property assignments
+- Tests like `expect(WebSourceType.GIT_REPO).toBe("git_repo")` - completely useless
+- Tests that only validated TypeScript interfaces worked - not behavior
+
+**What We CREATED (Good Tests)**:
+
+- **Requirements Documentation**: REQ-11 through REQ-17 with specific behavioral acceptance criteria using EARS format
+- **Git Repository Loading Tests**: Test actual URL validation, content ID generation, error handling scenarios
+- **Metadata Management Tests**: Test actual file operations, data persistence, error recovery
+- **Tests match real user workflows**: "WHEN Git repository URL is invalid THEN system SHALL return clear error message"
+
+**Behavior-Driven Testing Principles Applied**:
+
+1. Test user workflows and system behavior, not static code
+2. Use descriptive test names that explain business value
+3. Focus on "WHEN...THEN" scenarios from requirements
+4. Test error conditions and edge cases that users will encounter
+5. Verify actual functionality, not just interface compliance
+
+This approach ensures tests provide value by catching real bugs and verifying the system works as users expect, rather than just confirming TypeScript compilation.
 
 ### Architecture Decision: Three Package Structure
 
