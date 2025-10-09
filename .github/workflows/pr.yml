@@ -1,0 +1,47 @@
+name: PR
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.14.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install platform-specific dependencies
+        run: |
+          # Install platform dependencies for Linux (temporary, not saved to package.json)
+          pnpm add @oxlint/linux-x64-gnu --save-dev || echo "Failed to install oxlint platform dependency, continuing..."
+
+      - name: Check formatting
+        run: pnpm run format:check
+
+      - name: Run linting
+        run: pnpm run lint
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Run tests
+        run: pnpm test
+        env:
+          LOG_LEVEL: ERROR

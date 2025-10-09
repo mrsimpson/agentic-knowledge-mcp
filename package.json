@@ -1,11 +1,11 @@
 {
-  "name": "@codemcp/knowledge",
+  "name": "agentic-knowledge-mcp",
   "version": "0.1.0",
   "description": "A Model Context Protocol server for agentic knowledge guidance with web-based documentation loading and intelligent search instructions",
   "type": "module",
   "main": "packages/mcp-server/dist/index.js",
   "bin": {
-    "agentic-knowledge": "packages/mcp-server/dist/bin.js"
+    "agentic-knowledge": "packages/cli/dist/cli.js"
   },
   "engines": {
     "node": ">=18.0.0",
@@ -21,7 +21,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/agentic-knowledge.git"
+    "url": "git+https://github.com/mrsimpson/agentic-knowledge-mcp.git"
   },
   "scripts": {
     "build": "turbo run build",

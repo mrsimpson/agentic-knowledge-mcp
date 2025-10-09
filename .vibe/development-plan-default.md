@@ -108,7 +108,7 @@ Build a standalone agentic knowledge guidance system with a search_docs() interf
 
 **Milestone 1: Foundation Setup** (_Duration: 1-2 days_)
 - [x] Initialize TypeScript monorepo from ~/projects/templates/typescript-monorepo
-- [x] Setup package structure: @agentic-knowledge/core, @agentic-knowledge/mcp-server
+- [x] Setup package structure: @codemcp/knowledge-core, @codemcp/knowledge-mcp-server
 - [x] Configure build system (Turbo) and development tools
 - [x] Add @modelcontextprotocol/sdk dependency
 - [x] Add YAML parsing dependencies (js-yaml)
