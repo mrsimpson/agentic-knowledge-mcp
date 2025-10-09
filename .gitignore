@@ -3,6 +3,10 @@ node_modules
 **/dist
 **/*.tsbuildinfo
 
+# Downloaded documentation
+docs/
+**/docs/
 
 # local test
 .knowledge
+demo/
