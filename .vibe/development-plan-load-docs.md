@@ -108,15 +108,24 @@ Add a feature to create docsets by loading documentation from the web. This will
 
 #### Phase 5: Integration & Testing
 
-- [ ] Update MCP server to handle docsets with web sources
-- [ ] Add error handling for web loading failures
-- [ ] Implement graceful degradation when sources are unavailable
+- [x] **Update MCP server to handle docsets with web sources**
+  - [x] **VERIFIED**: MCP server already supports web source configurations
+  - [x] **CONFIRMED**: Path calculation correctly handles both web sources and local docsets
+  - [x] **VALIDATED**: Web sources use standardized `.knowledge/docsets/{id}` paths
+  - [x] **TESTED**: Local docsets continue using configured `local_path`
+- [x] Add error handling for web loading failures
+- [x] Implement graceful degradation when sources are unavailable
 - [x] **PRIORITY: Replace terrible unit tests with behavior-driven tests**
   - [x] **DELETED**: Removed awful `types.test.ts` that only tested constants and static properties
   - [x] **CREATED**: `git-repo-loader.test.ts` - 11 behavior-driven tests for REQ-12 (Git Repository Loading)
   - [x] **CREATED**: Updated requirements documentation with REQ-11 through REQ-17 for web loading
   - [x] **VALIDATED**: All behavior-driven tests are now passing and test actual functionality
   - [x] **DOCUMENTED**: Added "Shameful Testing vs. Behavior-Driven Testing" decision to capture the lesson learned
+- [x] **Write comprehensive E2E tests for MCP server web sources integration**
+  - [x] **CREATED**: `web-sources.test.ts` - 6 E2E tests validating MCP server handles web sources correctly
+  - [x] **VERIFIED**: MCP server returns proper standardized paths for web source docsets
+  - [x] **VERIFIED**: MCP server continues using configured local_path for traditional docsets
+  - [x] **TESTED**: Error handling and template processing work correctly with web sources
 - [ ] Write integration tests for CLI commands
 - [ ] Add end-to-end tests with mock web sources
 
