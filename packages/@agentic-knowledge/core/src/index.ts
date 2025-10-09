@@ -19,6 +19,8 @@ export {
   validatePath,
   validatePathSync,
   getRelativePath,
+  ensureKnowledgeGitignore,
+  ensureKnowledgeGitignoreSync,
 } from "./paths/calculator.js";
 
 // Export template processing

@@ -7,6 +7,9 @@ node_modules
 docs/
 **/docs/
 
-# local test
-.knowledge
+# Agentic Knowledge system files (config tracked, downloaded content ignored)
+.knowledge/docsets/
+.knowledge/.gitignore
+
+# Demo and test directories
 demo/

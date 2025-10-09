@@ -12,10 +12,24 @@ export interface DocsetConfig {
   name: string;
   /** Description of what this docset contains */
   description?: string;
-  /** Path to the documentation (relative to .knowledge folder or absolute) */
-  local_path: string;
+  /** Path to the documentation (relative to .knowledge folder or absolute) - optional for web sources */
+  local_path?: string;
   /** Optional custom instruction template for this docset */
   template?: string;
+  /** Optional web sources to load content from */
+  web_sources?: WebSourceConfig[];
+}
+
+/**
+ * Basic web source configuration (for core package validation)
+ */
+export interface WebSourceConfig {
+  /** URL of the web source */
+  url: string;
+  /** Type of web source */
+  type: string;
+  /** Type-specific options */
+  options?: Record<string, unknown>;
 }
 
 /**

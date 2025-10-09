@@ -5,7 +5,11 @@
 import { promises as fs } from "node:fs";
 import * as fsSync from "node:fs";
 import { load } from "js-yaml";
-import type { KnowledgeConfig, DocsetConfig } from "../types.js";
+import type {
+  KnowledgeConfig,
+  DocsetConfig,
+  WebSourceConfig,
+} from "../types.js";
 import { KnowledgeError, ErrorType } from "../types.js";
 import { validateTemplate } from "../templates/processor.js";
 
@@ -195,11 +199,22 @@ function validateDocset(docset: unknown): docset is DocsetConfig {
     return false;
   }
 
+  // local_path is optional if web_sources are provided
+  const hasWebSources =
+    Array.isArray(obj["web_sources"]) && obj["web_sources"].length > 0;
+  const hasLocalPath =
+    typeof obj["local_path"] === "string" &&
+    obj["local_path"].toString().trim() !== "";
+
+  if (!hasWebSources && !hasLocalPath) {
+    return false; // Must have either web_sources or local_path
+  }
+
   if (
-    typeof obj["local_path"] !== "string" ||
-    obj["local_path"].toString().trim() === ""
+    obj["local_path"] !== undefined &&
+    typeof obj["local_path"] !== "string"
   ) {
-    return false;
+    return false; // If local_path is provided, it must be a valid string
   }
 
   // Check optional fields
@@ -211,6 +226,58 @@ function validateDocset(docset: unknown): docset is DocsetConfig {
   }
 
   if (obj["template"] !== undefined && typeof obj["template"] !== "string") {
+    return false;
+  }
+
+  // Check optional web_sources field
+  if (obj["web_sources"] !== undefined) {
+    if (!Array.isArray(obj["web_sources"])) {
+      return false;
+    }
+
+    // Validate each web source
+    for (const webSource of obj["web_sources"]) {
+      if (!validateWebSource(webSource)) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Validate a web source configuration object
+ * @param webSource - Web source to validate
+ * @returns True if valid, false if invalid
+ */
+function validateWebSource(webSource: unknown): webSource is WebSourceConfig {
+  if (!webSource || typeof webSource !== "object") {
+    return false;
+  }
+
+  const obj = webSource as Record<string, unknown>;
+
+  // Check required fields
+  if (typeof obj["url"] !== "string" || obj["url"].toString().trim() === "") {
+    return false;
+  }
+
+  if (typeof obj["type"] !== "string") {
+    return false;
+  }
+
+  // Validate type is one of the supported values
+  const validTypes = ["git_repo", "documentation_site", "api_documentation"];
+  if (!validTypes.includes(obj["type"] as string)) {
+    return false;
+  }
+
+  // Check optional options field
+  if (
+    obj["options"] !== undefined &&
+    (typeof obj["options"] !== "object" || obj["options"] === null)
+  ) {
     return false;
   }
 
