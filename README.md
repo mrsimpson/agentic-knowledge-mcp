@@ -205,6 +205,63 @@ We're entering the **post-retrieval age**. The winners won't be those with the b
 
 **RAG was training wheels**—useful, necessary, but temporary. The future belongs to systems that read, navigate, and reason end-to-end.
 
+## 🚀 Local Development & Installation
+
+### Installing from Source (Before NPM Publication)
+
+Since the packages aren't published to npm yet, you can install them locally:
+
+1. **Build all packages:**
+
+   ```bash
+   pnpm install
+   pnpm build
+   ```
+
+2. **Create local installation packages:**
+
+   ```bash
+   pnpm run pack:local
+   ```
+
+   This creates `dist-local/` directory with packages that have workspace dependencies converted to relative file paths.
+
+3. **Install the MCP server locally:**
+
+   ```bash
+   # Option 1: Install from tarball
+   cd dist-local/mcp-server && npm pack
+   npm install -g codemcp-knowledge-mcp-server-0.1.0.tgz
+
+   # Option 2: Install directly from directory
+   npm install -g ./dist-local/mcp-server/
+   ```
+
+4. **Verify installation:**
+   ```bash
+   agentic-knowledge --help
+   ```
+
+### Development
+
+```bash
+# Install dependencies
+pnpm install
+
+# Start development mode
+pnpm dev
+
+# Run tests
+pnpm test
+
+# Build all packages
+pnpm build
+
+# Format and lint
+pnpm format
+pnpm lint
+```
+
 ## 🧪 Development Status
 
 **Current Phase**: Finalization ✅

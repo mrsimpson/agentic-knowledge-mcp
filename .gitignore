@@ -3,13 +3,10 @@ node_modules
 **/dist
 **/*.tsbuildinfo
 
-# Downloaded documentation
-docs/
-**/docs/
 
 # Agentic Knowledge system files (config tracked, downloaded content ignored)
 .knowledge/docsets/
 .knowledge/.gitignore
 
-# Demo and test directories
-demo/
+# local build
+dist-local

@@ -117,6 +117,8 @@ Add a feature to create docsets by loading documentation from the web. This will
 - [x] Set up proper package exports and dependencies
 - [x] Test packaging workflow with dry-run publish
 - [x] Fixed TypeScript build issues by properly setting `noEmit: false` in build configs
+- [x] **LOCAL INSTALLATION SOLUTION**: Created `scripts/prepare-local.cjs` to convert workspace dependencies to relative file paths
+- [x] Added `pack:local` npm script for creating locally installable packages before npm publication
 - [ ] Document installation and usage instructions
 
 #### Phase 5: Integration & Testing

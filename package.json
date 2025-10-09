@@ -25,7 +25,7 @@
   },
   "scripts": {
     "build": "turbo run build",
-    "pack:dist": "pnpm pack",
+    "pack:local": "node scripts/prepare-local.cjs",
     "inspector": "npx @modelcontextprotocol/inspector",
     "dev": "turbo run dev --filter=@codemcp/knowledge-core --filter=@codemcp/knowledge-mcp-server",
     "clean": "turbo run clean:build",
