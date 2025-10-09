@@ -94,11 +94,11 @@ Add a feature to create docsets by loading documentation from the web. This will
 
 #### Phase 4: Package Refactoring & CLI Interface
 
-- [ ] **ARCHITECTURE DECISION**: Create two new packages: `@agentic-knowledge/content-loader` and `@agentic-knowledge/cli`
-- [ ] Create `@agentic-knowledge/content-loader` package structure
-- [ ] Move `content/` directory from core to content-loader package
-- [ ] Move web source types from core/types.ts to content-loader package
-- [ ] Update core package to remove web source dependencies and restore clean interfaces
+- [x] **ARCHITECTURE DECISION**: Create two new packages: `@agentic-knowledge/content-loader` and `@agentic-knowledge/cli`
+- [x] Create `@agentic-knowledge/content-loader` package structure
+- [x] Move `content/` directory from core to content-loader package
+- [x] Move web source types from core/types.ts to content-loader package
+- [x] Update core package to remove web source dependencies and restore clean interfaces
 - [ ] Create `@agentic-knowledge/cli` package structure
 - [ ] Implement CLI commands: `init`, `refresh`, `status`
 - [ ] Add progress indicators and error reporting to CLI
