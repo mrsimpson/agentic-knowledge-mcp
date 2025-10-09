@@ -1,0 +1,388 @@
+# Development Plan: agentic-knowledge (load-docs branch)
+
+_Generated on 2025-10-09 by Vibe Feature MCP_
+_Workflow: [epcc](https://mrsimpson.github.io/responsible-vibe-mcp/workflows/epcc)_
+
+## Goal
+
+Add a feature to create docsets by loading documentation from the web. This will extend the current local filesystem-based agentic knowledge system to support web-based documentation sources, allowing users to configure docsets that can fetch and cache documentation from URLs.
+
+## Explore
+
+### Tasks
+
+- [x] Analyze existing codebase structure and patterns
+- [x] Understand current configuration system (`DocsetConfig`, `KnowledgeConfig`)
+- [x] Review MCP server implementation and tool interface
+- [x] Examine template processing and instruction generation
+- [x] Define web loading requirements and use cases
+- [x] Identify integration points for web loading functionality
+- [x] Analyze security considerations for web content loading
+- [x] Document technical constraints and limitations
+
+### Completed
+
+- [x] Created development plan file
+
+## Plan
+
+### Phase Entrance Criteria:
+
+- [x] Existing codebase structure is understood
+- [x] Current documentation loading mechanisms are analyzed
+- [x] Web loading requirements are clearly defined
+- [x] Technical constraints and limitations are identified
+- [x] Integration points with existing system are documented
+
+### Tasks
+
+- [x] Review existing architecture and design documents
+- [x] Design configuration schema extension for web sources
+- [x] Design content loading and processing architecture
+- [x] Plan CLI interface for initialize/refresh operations
+- [x] Design metadata management system
+- [x] Plan integration with existing MCP server
+- [x] Design error handling for web loading scenarios
+- [x] Plan testing strategy for web loading features
+
+### Completed
+
+- [x] Comprehensive implementation plan created with 5 development phases
+- [x] Configuration schema extension designed with backward compatibility
+- [x] New core components architecture planned (ContentLoader, MetadataManager, etc.)
+- [x] CLI interface design following existing patterns
+- [x] Security and error handling strategies defined
+
+## Code
+
+### Phase Entrance Criteria:
+
+- [x] Implementation strategy is clearly defined
+- [x] Architecture and design decisions are documented
+- [x] Technical approach for web loading is planned
+- [x] Dependencies and integration points are identified
+- [x] Test strategy is defined
+
+### Tasks
+
+#### Phase 1: Core Type Extensions
+
+- [x] Extend `DocsetConfig` interface with optional `web_sources` field
+- [x] Create `WebSourceConfig` interface with URL, type, and options
+- [x] Add `WebSourceType` enum (git_repo, documentation_site, api_documentation)
+- [x] Add metadata types (`WebSourceMetadata`, `DocsetMetadata`)
+- [x] Add new error types (WEB_SOURCE_ERROR, GIT_REPO_ERROR, NOT_IMPLEMENTED)
+- [x] Update configuration validation to handle web sources
+- [x] Update existing tests for backward compatibility
+
+#### Phase 2: Content Loading Infrastructure
+
+- [x] Create abstract `ContentLoader` base class
+- [x] **PRIORITY: Implement `GitRepoLoader` for Git repositories (GitHub, GitLab, any Git repo)**
+- [x] Create stub `DocumentationSiteLoader` (throws NotImplementedError for now)
+- [x] Create stub `ApiDocumentationLoader` (throws NotImplementedError for now)
+- [x] Create `ContentProcessor` for content → Markdown conversion (focus on .md files initially)
+- [x] Add URL validation and security checks
+
+#### Phase 3: Metadata Management
+
+- [x] Create `MetadataManager` class for `.agentic-metadata.json` handling
+- [x] Implement metadata schema with versioning support
+- [x] Add methods for reading/writing metadata files
+- [x] Implement content change detection (hashing)
+- [x] Add metadata validation and error recovery
+
+#### Phase 4: Package Refactoring & CLI Interface
+
+- [ ] **ARCHITECTURE DECISION**: Create two new packages: `@agentic-knowledge/content-loader` and `@agentic-knowledge/cli`
+- [ ] Create `@agentic-knowledge/content-loader` package structure
+- [ ] Move `content/` directory from core to content-loader package
+- [ ] Move web source types from core/types.ts to content-loader package
+- [ ] Update core package to remove web source dependencies and restore clean interfaces
+- [ ] Create `@agentic-knowledge/cli` package structure
+- [ ] Implement CLI commands: `init`, `refresh`, `status`
+- [ ] Add progress indicators and error reporting to CLI
+- [ ] Update package.json workspace configuration
+- [ ] Update imports across all packages
+- [ ] Ensure all tests pass after refactoring
+
+#### Phase 5: Integration & Testing
+
+- [ ] Update MCP server to handle docsets with web sources
+- [ ] Add error handling for web loading failures
+- [ ] Implement graceful degradation when sources are unavailable
+- [ ] Write comprehensive unit tests for all new components
+- [ ] Write integration tests for CLI commands
+- [ ] Add end-to-end tests with mock web sources
+
+### Completed
+
+**Phase 1: Core Type Extensions (✅ Complete)**
+
+- Extended `DocsetConfig` interface with optional `web_sources` field
+- Created comprehensive type system for web sources (`WebSourceType`, `WebSourceConfig`, etc.)
+- Added metadata types for tracking downloads (`WebSourceMetadata`, `DocsetMetadata`)
+- Updated configuration validation with web source support
+- Maintained backward compatibility (all 107 tests passing)
+
+**Phase 2: Content Loading Infrastructure (✅ Complete)**
+
+- Implemented abstract `ContentLoader` base class with clean interface
+- **GitRepoLoader**: Full implementation supporting any Git repository (GitHub, GitLab, etc.)
+- Stub implementations for future scrapers (DocumentationSiteLoader, ApiDocumentationLoader)
+- ContentProcessor for Markdown frontmatter and metadata handling
+- Comprehensive URL validation and security checks
+
+**Phase 3: Metadata Management (✅ Complete)**
+
+- MetadataManager for `.agentic-metadata.json` handling
+- Versioned metadata schema with change detection
+- Content hashing for incremental updates
+- Full CRUD operations for source metadata
+
+## Commit
+
+### Phase Entrance Criteria:
+
+- [ ] Core web loading functionality is implemented
+- [ ] Integration with existing system is complete
+- [ ] Tests are passing
+- [ ] Code quality standards are met
+- [ ] Feature is ready for delivery
+
+### Tasks
+
+- [ ] _To be added when this phase becomes active_
+
+### Completed
+
+_None yet_
+
+## Key Decisions
+
+### Architecture Decision: Three Package Structure
+
+**Decision**: Create two new packages: `@agentic-knowledge/content-loader` and `@agentic-knowledge/cli` instead of extending core.
+
+**Rationale**:
+
+- **Single Responsibility Violation**: Core package should only handle "configuration and path logic" per design doc
+- **Component Boundary Violation**: Web content loading is a different concern from configuration/templates
+- **CLI Separation**: CLI should be its own package with its own dependencies and concerns
+- **Future Extensibility**: Content loading will grow significantly (scrapers, API docs, etc.)
+
+**Final Package Structure**:
+
+```
+@agentic-knowledge/core/           # Configuration, templates, path calculation (unchanged)
+@agentic-knowledge/content-loader/ # Web content loading, metadata management
+├── src/
+│   ├── loaders/                   # GitRepoLoader, DocumentationSiteLoader, etc.
+│   ├── metadata/                  # MetadataManager
+│   ├── processors/                # ContentProcessor
+│   └── types.ts                   # Web source types
+
+@agentic-knowledge/cli/            # Command-line interface
+├── src/
+│   ├── commands/                  # init, refresh, status commands
+│   ├── utils/                     # Progress indicators, error reporting
+│   └── index.ts                   # CLI entry point
+
+@agentic-knowledge/mcp-server/     # MCP protocol (minimal integration changes)
+```
+
+**Dependencies Flow**:
+
+- CLI → Content Loader → Core
+- MCP Server → Content Loader → Core
+- No circular dependencies
+
+**Refactoring Required**:
+
+1. Move `content/` directory and web source types from core to content-loader package
+2. Create new CLI package with commands
+3. Update all imports and dependencies
+
+### Current System Analysis
+
+- **Architecture**: MCP server with configuration-driven docsets pointing to local filesystem paths
+- **Core Types**: `DocsetConfig` has `local_path` field for filesystem locations
+- **Template System**: Supports variable substitution for generating search instructions
+- **Tools**: `search_docs` and `list_docsets` tools for MCP protocol integration
+
+### Web Loading Implementation Plan
+
+#### 1. Configuration Schema Extension
+
+```yaml
+# Extended DocsetConfig to support web sources
+docsets:
+  - id: "react-docs"
+    name: "React Documentation"
+    description: "Official React documentation"
+    local_path: "./docs/react"
+    web_sources:
+      # Git repositories (GitHub, GitLab, any Git repo)
+      - url: "https://github.com/facebook/react.git"
+        type: "git_repo"
+        options:
+          paths: ["docs/", "README.md", "CONTRIBUTING.md"]
+          branch: "main"
+
+      - url: "https://gitlab.com/some-org/project.git"
+        type: "git_repo"
+        options:
+          paths: ["documentation/"]
+          branch: "develop"
+
+      # Documentation sites (STUB - will throw NotImplementedError)
+      - url: "https://react.dev/learn"
+        type: "documentation_site"
+        options:
+          max_depth: 3
+          include_patterns: ["*.html", "*.md", "*.mdx"]
+
+      # API documentation (STUB - will throw NotImplementedError)
+      - url: "https://docs.oracle.com/en/java/javase/17/docs/api/"
+        type: "api_documentation"
+        options:
+          doc_format: "javadoc"
+```
+
+**Implementation Priority:**
+
+1. **`git_repo`**: Full implementation (supports GitHub, GitLab, any Git repo)
+2. **`documentation_site`**: Stub implementation (throws NotImplementedError)
+3. **`api_documentation`**: Stub implementation (throws NotImplementedError)
+
+#### 2. New Core Components
+
+**Phase 1 - Git Repository Support:**
+
+- **WebSourceConfig**: Type definitions for web source configuration with `WebSourceType` enum
+- **ContentLoader**: Abstract base class for different loading strategies
+- **GitRepoLoader**: Full implementation for Git repositories (GitHub, GitLab, any Git repo)
+- **MetadataManager**: Handles `.agentic-metadata.json` files in each docset
+- **ContentProcessor**: Converts content to Markdown with frontmatter metadata
+
+**Phase 2 - Scraping Support (Future):**
+
+- **DocumentationSiteLoader**: Stub implementation (throws NotImplementedError)
+- **ApiDocumentationLoader**: Stub implementation (throws NotImplementedError)
+
+#### 3. CLI Interface Design
+
+Following existing patterns, add new CLI commands:
+
+- `agentic-knowledge init <docset-id>` - Initialize new web sources
+- `agentic-knowledge refresh [docset-id]` - Refresh existing web sources
+- `agentic-knowledge status` - Show web source status and last update times
+
+#### 4. Integration Strategy
+
+- **Backward Compatibility**: Existing `local_path` docsets continue working unchanged
+- **Seamless Search**: Downloaded web content appears in `local_path`, searchable by existing tools
+- **Optional Feature**: Web sources are optional, system works without them
+- **Error Isolation**: Web loading failures don't break existing local docsets
+
+#### 5. Metadata Management
+
+Store in `{local_path}/.agentic-metadata.json`:
+
+```json
+{
+  "version": "1.0",
+  "docset_id": "react-docs",
+  "sources": [
+    {
+      "url": "https://react.dev/learn",
+      "type": "site_scraper",
+      "last_fetched": "2024-01-15T10:30:00Z",
+      "content_hash": "abc123...",
+      "files_created": ["components.md", "hooks.md"],
+      "status": "success"
+    }
+  ],
+  "last_refresh": "2024-01-15T10:30:00Z"
+}
+```
+
+#### 6. Error Handling Strategy
+
+- **Network Failures**: Graceful degradation, use cached content
+- **Invalid URLs**: Clear error messages with validation
+- **Rate Limiting**: Implement exponential backoff
+- **Parsing Errors**: Log errors, continue with other sources
+- **Disk Space**: Check available space before downloading
+
+#### 8. Step-wise Implementation Strategy
+
+**Phase 1 Implementation (Current Focus):**
+
+- **`git_repo`**: Full implementation with Git operations
+  - Supports any Git repository (GitHub, GitLab, Bitbucket, self-hosted)
+  - Clone/download repo content, extract specified paths
+  - Handle authentication via Git credentials
+  - Support different branches and tags
+
+**Phase 2 Implementation (Future):**
+
+- **`documentation_site`**: Web scraping implementation
+  - HTML parsing and crawling
+  - Content extraction and conversion
+  - Rate limiting and politeness
+- **`api_documentation`**: Structured doc parsing
+  - Format-specific parsers (JavaDoc, OpenAPI, etc.)
+  - Specialized content extraction
+
+**Rationale:** Git operations are well-defined and have established tooling, while web scraping involves much more complexity (parsing, rate limiting, site-specific handling).
+
+- **URL Validation**: Whitelist protocols (https only)
+- **Path Traversal**: Sanitize all downloaded file paths
+- **Content Sanitization**: Strip dangerous HTML before Markdown conversion
+- **Rate Limiting**: Respect robots.txt and implement delays
+
+## Notes
+
+### Existing Codebase Understanding
+
+- System uses YAML configuration with `docsets` array containing local file paths
+- Template processor supports multiple variables: `local_path`, `keywords`, `generalized_keywords`, `docset_*`
+- MCP server caches configuration for 1 minute to avoid repeated file reads
+- Error handling includes specific error types: `CONFIG_NOT_FOUND`, `CONFIG_INVALID`, etc.
+- Path calculation resolves relative paths against config file location
+
+### Potential Integration Points
+
+1. **Config Schema Extension**: Add web source configuration alongside `local_path`
+2. **Path Calculator**: Extend to handle web URLs and local cache paths
+3. **Content Loader**: New component to fetch and cache web content
+4. **Template Context**: May need web-specific variables (URL, last-fetched, etc.)
+
+### Security Considerations
+
+- **URL Validation**: Prevent SSRF attacks by validating/restricting URLs
+- **Content Sanitization**: Clean HTML content to prevent XSS when converting to Markdown
+- **Rate Limiting**: Implement delays between requests to be respectful to source sites
+- **User Agent**: Use appropriate User-Agent headers for ethical scraping
+- **Robots.txt**: Respect robots.txt when scraping public sites
+
+### Technical Constraints & Limitations
+
+**Operational Requirements:**
+
+- **Two Operation Modes**: Must support both initialize/recreate (setup new sources) and refresh (update existing)
+- **State Management**: Need to track configured sources vs. available content
+- **Incremental Updates**: Refresh should be efficient and not re-download unchanged content
+
+**Network & Performance:**
+
+- **Network Dependency**: Web loading requires internet connectivity
+- **Site Structure Changes**: Scraped content may break if source sites change structure
+- **Authentication**: Initial version won't support authenticated sources
+- **Large Sites**: May need pagination/incremental loading for very large doc sites
+- **Rate Limits**: Must respect source site rate limits and implement backoff strategies
+
+---
+
+_This plan is maintained by the LLM. Tool responses provide guidance on which section to focus on and what tasks to work on._

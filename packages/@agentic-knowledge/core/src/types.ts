@@ -83,15 +83,15 @@ export interface TemplateContext {
 }
 
 /**
- * Error types that can occur in the system
+ * Error types that can occur in the core system
  */
 export enum ErrorType {
-  CONFIG_NOT_FOUND = 'CONFIG_NOT_FOUND',
-  CONFIG_INVALID = 'CONFIG_INVALID',
-  DOCSET_NOT_FOUND = 'DOCSET_NOT_FOUND',
-  PATH_INVALID = 'PATH_INVALID',
-  TEMPLATE_ERROR = 'TEMPLATE_ERROR',
-  YAML_PARSE_ERROR = 'YAML_PARSE_ERROR'
+  CONFIG_NOT_FOUND = "CONFIG_NOT_FOUND",
+  CONFIG_INVALID = "CONFIG_INVALID",
+  DOCSET_NOT_FOUND = "DOCSET_NOT_FOUND",
+  PATH_INVALID = "PATH_INVALID",
+  TEMPLATE_ERROR = "TEMPLATE_ERROR",
+  YAML_PARSE_ERROR = "YAML_PARSE_ERROR",
 }
 
 /**
@@ -101,10 +101,10 @@ export class KnowledgeError extends Error {
   constructor(
     public type: ErrorType,
     message: string,
-    public context?: Record<string, unknown>
+    public context?: Record<string, unknown>,
   ) {
     super(message);
-    this.name = 'KnowledgeError';
+    this.name = "KnowledgeError";
   }
 }
 
@@ -117,28 +117,25 @@ export const DEFAULT_TEMPLATE = `Search for '{{keywords}}' in folder {{local_pat
  * Allowed template variables that can be used in instruction templates
  */
 export const ALLOWED_TEMPLATE_VARIABLES = [
-  'local_path',
-  'keywords', 
-  'generalized_keywords',
-  'docset_id',
-  'docset_name',
-  'docset_description'
+  "local_path",
+  "keywords",
+  "generalized_keywords",
+  "docset_id",
+  "docset_name",
+  "docset_description",
 ] as const;
 
 /**
  * Required template variables that must be present in every template
  */
-export const REQUIRED_TEMPLATE_VARIABLES = [
-  'local_path',
-  'keywords'
-] as const;
+export const REQUIRED_TEMPLATE_VARIABLES = ["local_path", "keywords"] as const;
 
 /**
  * Configuration file name pattern
  */
-export const CONFIG_FILENAME = 'config.yaml';
+export const CONFIG_FILENAME = "config.yaml";
 
 /**
  * Configuration directory name
  */
-export const CONFIG_DIR = '.knowledge';
+export const CONFIG_DIR = ".knowledge";

@@ -2,193 +2,200 @@
  * Tests for error handling and edge cases
  */
 
-import { describe, test, expect } from 'vitest';
-import { KnowledgeError, ErrorType } from '../types.js';
+import { describe, test, expect } from "vitest";
+import { KnowledgeError, ErrorType } from "../types.js";
 
-describe('Error Handling', () => {
-  describe('KnowledgeError', () => {
-    test('should create error with type and message', () => {
+describe("Error Handling", () => {
+  describe("KnowledgeError", () => {
+    test("should create error with type and message", () => {
       const error = new KnowledgeError(
         ErrorType.CONFIG_NOT_FOUND,
-        'Configuration file not found'
+        "Configuration file not found",
       );
-      
+
       expect(error).toBeInstanceOf(Error);
       expect(error).toBeInstanceOf(KnowledgeError);
       expect(error.type).toBe(ErrorType.CONFIG_NOT_FOUND);
-      expect(error.message).toBe('Configuration file not found');
-      expect(error.name).toBe('KnowledgeError');
+      expect(error.message).toBe("Configuration file not found");
+      expect(error.name).toBe("KnowledgeError");
     });
 
-    test('should create error with context', () => {
-      const context = { configPath: '/path/to/config.yaml', line: 5 };
+    test("should create error with context", () => {
+      const context = { configPath: "/path/to/config.yaml", line: 5 };
       const error = new KnowledgeError(
         ErrorType.YAML_PARSE_ERROR,
-        'Invalid YAML syntax',
-        context
+        "Invalid YAML syntax",
+        context,
       );
-      
+
       expect(error.context).toEqual(context);
-      expect(error.context?.configPath).toBe('/path/to/config.yaml');
+      expect(error.context?.configPath).toBe("/path/to/config.yaml");
       expect(error.context?.line).toBe(5);
     });
 
-    test('should handle error without context', () => {
+    test("should handle error without context", () => {
       const error = new KnowledgeError(
         ErrorType.CONFIG_INVALID,
-        'Invalid configuration structure'
+        "Invalid configuration structure",
       );
-      
+
       expect(error.context).toBeUndefined();
     });
 
-    test('should preserve error stack trace', () => {
+    test("should preserve error stack trace", () => {
       const error = new KnowledgeError(
         ErrorType.TEMPLATE_ERROR,
-        'Template processing failed'
+        "Template processing failed",
       );
-      
+
       expect(error.stack).toBeDefined();
-      expect(error.stack).toContain('KnowledgeError');
+      expect(error.stack).toContain("KnowledgeError");
     });
   });
 
-  describe('ErrorType enum', () => {
-    test('should have all expected error types', () => {
-      expect(ErrorType.CONFIG_NOT_FOUND).toBe('CONFIG_NOT_FOUND');
-      expect(ErrorType.CONFIG_INVALID).toBe('CONFIG_INVALID');
-      expect(ErrorType.DOCSET_NOT_FOUND).toBe('DOCSET_NOT_FOUND');
-      expect(ErrorType.PATH_INVALID).toBe('PATH_INVALID');
-      expect(ErrorType.TEMPLATE_ERROR).toBe('TEMPLATE_ERROR');
-      expect(ErrorType.YAML_PARSE_ERROR).toBe('YAML_PARSE_ERROR');
+  describe("ErrorType enum", () => {
+    test("should have all expected error types", () => {
+      expect(ErrorType.CONFIG_NOT_FOUND).toBe("CONFIG_NOT_FOUND");
+      expect(ErrorType.CONFIG_INVALID).toBe("CONFIG_INVALID");
+      expect(ErrorType.DOCSET_NOT_FOUND).toBe("DOCSET_NOT_FOUND");
+      expect(ErrorType.PATH_INVALID).toBe("PATH_INVALID");
+      expect(ErrorType.TEMPLATE_ERROR).toBe("TEMPLATE_ERROR");
+      expect(ErrorType.YAML_PARSE_ERROR).toBe("YAML_PARSE_ERROR");
     });
 
-    test('should have string values for all error types', () => {
+    test("should have string values for all error types", () => {
       const errorTypes = Object.values(ErrorType);
-      
-      expect(errorTypes).toHaveLength(6);
-      errorTypes.forEach(type => {
-        expect(typeof type).toBe('string');
+
+      expect(errorTypes).toHaveLength(9);
+      errorTypes.forEach((type) => {
+        expect(typeof type).toBe("string");
         expect(type.length).toBeGreaterThan(0);
       });
     });
   });
 
-  describe('error context handling', () => {
-    test('should handle complex context objects', () => {
+  describe("error context handling", () => {
+    test("should handle complex context objects", () => {
       const complexContext = {
-        configPath: '/complex/path/config.yaml',
+        configPath: "/complex/path/config.yaml",
         docset: {
-          id: 'test',
-          name: 'Test Docs',
-          local_path: './docs'
+          id: "test",
+          name: "Test Docs",
+          local_path: "./docs",
         },
         line: 10,
         column: 5,
         nested: {
-          property: 'value',
-          array: [1, 2, 3]
-        }
+          property: "value",
+          array: [1, 2, 3],
+        },
       };
-      
+
       const error = new KnowledgeError(
         ErrorType.CONFIG_INVALID,
-        'Complex error scenario',
-        complexContext
+        "Complex error scenario",
+        complexContext,
       );
-      
+
       expect(error.context).toEqual(complexContext);
-      expect(error.context?.nested?.property).toBe('value');
+      expect(error.context?.nested?.property).toBe("value");
       expect(error.context?.nested?.array).toEqual([1, 2, 3]);
     });
 
-    test('should handle null and undefined context values', () => {
+    test("should handle null and undefined context values", () => {
       const contextWithNulls = {
         configPath: null,
         undefinedValue: undefined,
-        emptyString: '',
+        emptyString: "",
         zero: 0,
-        falsy: false
+        falsy: false,
       };
-      
+
       const error = new KnowledgeError(
         ErrorType.PATH_INVALID,
-        'Error with null values',
-        contextWithNulls
+        "Error with null values",
+        contextWithNulls,
       );
-      
+
       expect(error.context?.configPath).toBeNull();
       expect(error.context?.undefinedValue).toBeUndefined();
-      expect(error.context?.emptyString).toBe('');
+      expect(error.context?.emptyString).toBe("");
       expect(error.context?.zero).toBe(0);
       expect(error.context?.falsy).toBe(false);
     });
   });
 
-  describe('error serialization', () => {
-    test('should have accessible error properties', () => {
+  describe("error serialization", () => {
+    test("should have accessible error properties", () => {
       const error = new KnowledgeError(
         ErrorType.DOCSET_NOT_FOUND,
-        'Docset not found',
-        { docsetId: 'missing-docs', searchPath: '/project' }
+        "Docset not found",
+        { docsetId: "missing-docs", searchPath: "/project" },
       );
-      
+
       // Test that properties are accessible (Error serialization is complex)
-      expect(error.name).toBe('KnowledgeError');
-      expect(error.message).toBe('Docset not found');
+      expect(error.name).toBe("KnowledgeError");
+      expect(error.message).toBe("Docset not found");
       expect(error.type).toBe(ErrorType.DOCSET_NOT_FOUND);
-      expect(error.context).toEqual({ docsetId: 'missing-docs', searchPath: '/project' });
-      
+      expect(error.context).toEqual({
+        docsetId: "missing-docs",
+        searchPath: "/project",
+      });
+
       // Test manual serialization
       const manualSerialized = {
         name: error.name,
         message: error.message,
         type: error.type,
-        context: error.context
+        context: error.context,
       };
-      
-      expect(manualSerialized.name).toBe('KnowledgeError');
-      expect(manualSerialized.message).toBe('Docset not found');
+
+      expect(manualSerialized.name).toBe("KnowledgeError");
+      expect(manualSerialized.message).toBe("Docset not found");
       expect(manualSerialized.type).toBe(ErrorType.DOCSET_NOT_FOUND);
-      expect(manualSerialized.context).toEqual({ docsetId: 'missing-docs', searchPath: '/project' });
+      expect(manualSerialized.context).toEqual({
+        docsetId: "missing-docs",
+        searchPath: "/project",
+      });
     });
 
-    test('should handle circular references in context', () => {
-      const circularObj: any = { name: 'circular' };
+    test("should handle circular references in context", () => {
+      const circularObj: any = { name: "circular" };
       circularObj.self = circularObj;
-      
+
       const error = new KnowledgeError(
         ErrorType.TEMPLATE_ERROR,
-        'Circular reference error',
-        { circular: circularObj }
+        "Circular reference error",
+        { circular: circularObj },
       );
-      
+
       // Should not throw when accessing the error
-      expect(error.context?.circular?.name).toBe('circular');
+      expect(error.context?.circular?.name).toBe("circular");
       expect(error.context?.circular?.self).toBe(circularObj);
     });
   });
 
-  describe('error message formatting', () => {
-    test('should format error messages consistently', () => {
+  describe("error message formatting", () => {
+    test("should format error messages consistently", () => {
       const testCases = [
         {
           type: ErrorType.CONFIG_NOT_FOUND,
-          message: 'Configuration file not found: /path/to/config.yaml',
-          expectedPattern: /Configuration file not found:/
+          message: "Configuration file not found: /path/to/config.yaml",
+          expectedPattern: /Configuration file not found:/,
         },
         {
           type: ErrorType.YAML_PARSE_ERROR,
-          message: 'Failed to parse YAML configuration: Unexpected token',
-          expectedPattern: /Failed to parse YAML configuration:/
+          message: "Failed to parse YAML configuration: Unexpected token",
+          expectedPattern: /Failed to parse YAML configuration:/,
         },
         {
           type: ErrorType.PATH_INVALID,
-          message: 'Failed to calculate local path for docset \'react-docs\': Path resolution error',
-          expectedPattern: /Failed to calculate local path for docset/
-        }
+          message:
+            "Failed to calculate local path for docset 'react-docs': Path resolution error",
+          expectedPattern: /Failed to calculate local path for docset/,
+        },
       ];
-      
+
       testCases.forEach(({ type, message, expectedPattern }) => {
         const error = new KnowledgeError(type, message);
         expect(error.message).toMatch(expectedPattern);
