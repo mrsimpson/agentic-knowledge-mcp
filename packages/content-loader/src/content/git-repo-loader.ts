@@ -240,8 +240,12 @@ export class GitRepoLoader extends ContentLoader {
         }
       }
     } else {
-      // Extract all content (excluding .git directory)
-      await this.copyDirectory(sourceDir, targetDir, extractedFiles, [".git"]);
+      // Use smart filtering to extract only documentation files (REQ-18)
+      await this.extractDocumentationFiles(
+        sourceDir,
+        targetDir,
+        extractedFiles,
+      );
     }
 
     return extractedFiles;
@@ -319,5 +323,149 @@ export class GitRepoLoader extends ContentLoader {
         `Warning: Could not clean up temp directory ${tempDir}: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
+  }
+
+  /**
+   * Filter list of files to only include documentation-relevant files (REQ-18)
+   * @param files - Array of file paths to filter
+   * @returns Array of file paths that are considered documentation
+   */
+  private filterDocumentationFiles(files: string[]): string[] {
+    return files.filter((file) => this.isDocumentationFile(file));
+  }
+
+  /**
+   * Determine if a file is considered documentation content (REQ-18)
+   * @param filePath - Path to the file to check
+   * @returns True if file should be included as documentation
+   */
+  private isDocumentationFile(filePath: string): boolean {
+    const filename = path.basename(filePath);
+    const extension = path.extname(filePath).toLowerCase();
+    const directory = path.dirname(filePath);
+
+    // Exclude project metadata files (REQ-18)
+    const metadataFiles =
+      /^(CHANGELOG|LICENSE|CONTRIBUTING|AUTHORS|CODE_OF_CONDUCT)/i;
+    if (metadataFiles.test(filename)) {
+      return false;
+    }
+
+    // Exclude source code, build, and development directories (REQ-18)
+    const excludedDirPatterns = [
+      "node_modules",
+      "vendor",
+      ".git",
+      "build",
+      "dist",
+      "target",
+      ".cache",
+      "src",
+      "lib",
+      "components",
+      "__tests__",
+      ".github",
+      ".vscode",
+      ".idea",
+    ];
+
+    for (const pattern of excludedDirPatterns) {
+      if (directory.includes(pattern)) {
+        return false;
+      }
+    }
+
+    // Include README files anywhere (REQ-18)
+    if (/^README/i.test(filename)) {
+      return true;
+    }
+
+    // Include documentation file extensions anywhere, regardless of directory (REQ-18)
+    const docExtensions = [".md", ".mdx", ".rst", ".txt"];
+    if (docExtensions.includes(extension)) {
+      return true;
+    }
+
+    // Special case: examples directory - include other file types as they're often documentation (REQ-18)
+    const isInExamples = /\b(examples?)\b/i.test(directory);
+    if (isInExamples) {
+      // In examples, exclude only binary files
+      const excludedInExamples = [
+        ".exe",
+        ".bin",
+        ".so",
+        ".dll",
+        ".dylib",
+        ".a",
+        ".o",
+        ".obj",
+      ];
+      return !excludedInExamples.includes(extension);
+    }
+
+    return false;
+  }
+
+  /**
+   * Extract only documentation files from source directory (REQ-18)
+   * @param sourceDir - Source directory to scan
+   * @param targetDir - Target directory to copy files to
+   * @param extractedFiles - Array to track extracted file paths
+   */
+  private async extractDocumentationFiles(
+    sourceDir: string,
+    targetDir: string,
+    extractedFiles: string[],
+  ): Promise<void> {
+    // First, scan all files in the repository
+    const allFiles = await this.scanAllFiles(sourceDir);
+
+    // Filter to only documentation files
+    const docFiles = this.filterDocumentationFiles(allFiles);
+
+    // Copy the filtered files
+    for (const filePath of docFiles) {
+      const relativePath = path.relative(sourceDir, filePath);
+      const targetPath = path.join(targetDir, relativePath);
+
+      try {
+        await fs.mkdir(path.dirname(targetPath), { recursive: true });
+        await fs.copyFile(filePath, targetPath);
+        extractedFiles.push(relativePath);
+      } catch (error) {
+        console.warn(
+          `Warning: Could not copy ${relativePath}: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    }
+  }
+
+  /**
+   * Recursively scan all files in a directory
+   * @param dir - Directory to scan
+   * @returns Array of absolute file paths
+   */
+  private async scanAllFiles(dir: string): Promise<string[]> {
+    const files: string[] = [];
+
+    async function scan(currentDir: string) {
+      const items = await fs.readdir(currentDir);
+
+      for (const item of items) {
+        if (item === ".git") continue; // Always skip .git
+
+        const fullPath = path.join(currentDir, item);
+        const stat = await fs.stat(fullPath);
+
+        if (stat.isDirectory()) {
+          await scan(fullPath);
+        } else if (stat.isFile()) {
+          files.push(fullPath);
+        }
+      }
+    }
+
+    await scan(dir);
+    return files;
   }
 }

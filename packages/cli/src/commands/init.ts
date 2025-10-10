@@ -1,18 +1,20 @@
 /**
- * Initialize command - set up web sources for a docset (integration test)
+ * Initialize command - set up web sources for a docset using GitRepoLoader
  */
 
 import { Command } from "commander";
 import chalk from "chalk";
-import { execSync } from "node:child_process";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import {
-  findConfigPathSync,
-  loadConfigSync,
+  ConfigManager,
   calculateLocalPath,
   ensureKnowledgeGitignoreSync,
 } from "@codemcp/knowledge-core";
+import {
+  GitRepoLoader,
+  WebSourceType,
+} from "@codemcp/knowledge-content-loader";
 
 export const initCommand = new Command("init")
   .description("Initialize web sources for a docset from configuration")
@@ -24,16 +26,11 @@ export const initCommand = new Command("init")
       console.log(chalk.blue("🚀 Agentic Knowledge Integration Test"));
 
       try {
-        // Find and load configuration
-        const configPath = options.config || findConfigPathSync(process.cwd());
-        if (!configPath) {
-          throw new Error(
-            "No configuration file found. Run this command from a directory with .knowledge/config.yaml",
-          );
-        }
-
-        console.log(chalk.gray(`📄 Loading config: ${configPath}`));
-        const config = loadConfigSync(configPath);
+        // Use ConfigManager for all config operations
+        const configManager = new ConfigManager();
+        const { config, configPath } = await configManager.loadConfig(
+          process.cwd(),
+        );
 
         // Ensure .knowledge/.gitignore exists and contains docsets/ ignore rule
         ensureKnowledgeGitignoreSync(configPath);
@@ -89,6 +86,7 @@ export const initCommand = new Command("init")
         await fs.mkdir(localPath, { recursive: true });
 
         let totalFiles = 0;
+        const allDiscoveredPaths: string[] = [];
 
         // Process each web source
         for (const [index, webSource] of docset.web_sources.entries()) {
@@ -99,95 +97,59 @@ export const initCommand = new Command("init")
           );
 
           if (webSource.type === "git_repo") {
-            // Create temp directory for cloning
-            const tempDir = path.join(localPath, ".tmp", `git-${Date.now()}`);
-            await fs.mkdir(tempDir, { recursive: true });
+            // Use GitRepoLoader for all Git operations (REQ-19)
+            const loader = new GitRepoLoader();
 
-            try {
-              // Clone repository
-              const options = webSource.options || {};
-              const branch = (options as any).branch || "main";
-              const paths = (options as any).paths || [];
+            console.log(
+              chalk.gray(`  Using GitRepoLoader for smart content filtering`),
+            );
 
-              console.log(
-                chalk.gray(`  Git clone --depth 1 --branch ${branch}`),
+            const webSourceConfig = {
+              url: webSource.url,
+              type: WebSourceType.GIT_REPO,
+              options: webSource.options || {},
+            };
+
+            // Validate configuration
+            const validation = loader.validateConfig(webSourceConfig);
+            if (validation !== true) {
+              throw new Error(
+                `Invalid Git repository configuration: ${validation}`,
               );
-              execSync(
-                `git clone --depth 1 --branch ${branch} ${webSource.url} ${tempDir}`,
-                {
-                  stdio: "pipe",
-                  timeout: 60000,
-                },
-              );
-
-              // Copy specified paths or all markdown files
-              const filesToCopy: string[] = [];
-
-              if (paths.length > 0) {
-                // Copy specified paths
-                for (const relPath of paths) {
-                  const sourcePath = path.join(tempDir, relPath);
-                  const targetPath = path.join(localPath, relPath);
-
-                  try {
-                    const stat = await fs.stat(sourcePath);
-                    if (stat.isDirectory()) {
-                      const dirFiles = await copyDirectory(
-                        sourcePath,
-                        targetPath,
-                      );
-                      filesToCopy.push(...dirFiles);
-                    } else {
-                      await fs.mkdir(path.dirname(targetPath), {
-                        recursive: true,
-                      });
-                      await fs.copyFile(sourcePath, targetPath);
-                      filesToCopy.push(relPath);
-                    }
-                  } catch (error) {
-                    console.log(
-                      chalk.red(
-                        `    ⚠️  Skipping ${relPath}: ${error instanceof Error ? error.message : String(error)}`,
-                      ),
-                    );
-                  }
-                }
-              } else {
-                // Copy all markdown files
-                const allFiles = await findMarkdownFiles(tempDir);
-                for (const file of allFiles) {
-                  const relativePath = path.relative(tempDir, file);
-                  const targetPath = path.join(localPath, relativePath);
-
-                  await fs.mkdir(path.dirname(targetPath), { recursive: true });
-                  await fs.copyFile(file, targetPath);
-                  filesToCopy.push(relativePath);
-                }
-              }
-
-              totalFiles += filesToCopy.length;
-              console.log(
-                chalk.green(`    ✅ Copied ${filesToCopy.length} files`),
-              );
-
-              // Create source metadata
-              const metadata = {
-                source_url: webSource.url,
-                source_type: webSource.type,
-                downloaded_at: new Date().toISOString(),
-                files_count: filesToCopy.length,
-                files: filesToCopy,
-                docset_id: docsetId,
-              };
-
-              await fs.writeFile(
-                path.join(localPath, `.agentic-source-${index}.json`),
-                JSON.stringify(metadata, null, 2),
-              );
-            } finally {
-              // Cleanup temp directory
-              await fs.rm(tempDir, { recursive: true, force: true });
             }
+
+            // Load content using GitRepoLoader
+            const result = await loader.load(webSourceConfig, localPath);
+
+            if (!result.success) {
+              throw new Error(`Git repository loading failed: ${result.error}`);
+            }
+
+            // Collect discovered paths for config update
+            allDiscoveredPaths.push(...result.files);
+
+            totalFiles += result.files.length;
+            console.log(
+              chalk.green(
+                `    ✅ Copied ${result.files.length} files using smart filtering`,
+              ),
+            );
+
+            // Create source metadata
+            const metadata = {
+              source_url: webSource.url,
+              source_type: webSource.type,
+              downloaded_at: new Date().toISOString(),
+              files_count: result.files.length,
+              files: result.files,
+              docset_id: docsetId,
+              content_hash: result.contentHash,
+            };
+
+            await fs.writeFile(
+              path.join(localPath, `.agentic-source-${index}.json`),
+              JSON.stringify(metadata, null, 2),
+            );
           } else {
             console.log(
               chalk.red(
@@ -211,6 +173,29 @@ export const initCommand = new Command("init")
           JSON.stringify(overallMetadata, null, 2),
         );
 
+        // Update configuration with discovered paths (only if paths were discovered and force flag used)
+        if (allDiscoveredPaths.length > 0 && options.force) {
+          console.log(
+            chalk.yellow(
+              `\n📝 Updating configuration with discovered paths...`,
+            ),
+          );
+          try {
+            await configManager.updateDocsetPaths(docsetId, allDiscoveredPaths);
+            console.log(
+              chalk.green(
+                `    ✅ Updated config with ${allDiscoveredPaths.length} discovered paths`,
+              ),
+            );
+          } catch (configError) {
+            console.log(
+              chalk.yellow(
+                `    ⚠️  Could not update config: ${configError instanceof Error ? configError.message : String(configError)}`,
+              ),
+            );
+          }
+        }
+
         console.log(
           chalk.green(`\n🎉 Successfully initialized docset '${docsetId}'`),
         );
@@ -228,52 +213,3 @@ export const initCommand = new Command("init")
       }
     },
   );
-
-async function findMarkdownFiles(dir: string): Promise<string[]> {
-  const files: string[] = [];
-
-  async function scan(currentDir: string) {
-    const items = await fs.readdir(currentDir);
-
-    for (const item of items) {
-      if (item.startsWith(".git")) continue;
-
-      const fullPath = path.join(currentDir, item);
-      const stat = await fs.stat(fullPath);
-
-      if (stat.isDirectory()) {
-        await scan(fullPath);
-      } else if (item.endsWith(".md") || item.endsWith(".mdx")) {
-        files.push(fullPath);
-      }
-    }
-  }
-
-  await scan(dir);
-  return files;
-}
-
-async function copyDirectory(
-  source: string,
-  target: string,
-): Promise<string[]> {
-  const files: string[] = [];
-  await fs.mkdir(target, { recursive: true });
-  const items = await fs.readdir(source);
-
-  for (const item of items) {
-    const sourcePath = path.join(source, item);
-    const targetPath = path.join(target, item);
-    const stat = await fs.stat(sourcePath);
-
-    if (stat.isDirectory()) {
-      const subFiles = await copyDirectory(sourcePath, targetPath);
-      files.push(...subFiles.map((f) => path.join(item, f)));
-    } else {
-      await fs.copyFile(sourcePath, targetPath);
-      files.push(item);
-    }
-  }
-
-  return files;
-}

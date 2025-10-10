@@ -11,6 +11,7 @@ export * from "./types.js";
 // Export configuration functionality
 export { findConfigPath, findConfigPathSync } from "./config/discovery.js";
 export { loadConfig, loadConfigSync, validateConfig } from "./config/loader.js";
+export { ConfigManager } from "./config/manager.js";
 
 // Export path calculation utilities
 export {

@@ -146,7 +146,7 @@ Complex requirements for unwanted behavior also include the If-Then keywords.
 **Acceptance Criteria:**
 
 - WHEN docset name contains invalid characters THEN the system SHALL return validation error
-- WHEN keywords array exceeds reasonable size limit THEN the system SHALL return validation error  
+- WHEN keywords array exceeds reasonable size limit THEN the system SHALL return validation error
 - WHEN configuration file cannot be read THEN the system SHALL return file access error
 - WHEN docset referenced but not configured THEN the system SHALL return error listing available docsets
 - The system SHALL provide specific error messages with actionable remediation steps
@@ -183,7 +183,7 @@ Complex requirements for unwanted behavior also include the If-Then keywords.
 
 - The system SHALL be distributable as NPM package
 - The system SHALL provide executable binary for MCP server
-- WHEN installed globally THEN the system SHALL be available as "agentic-knowledge-mcp" command  
+- WHEN installed globally THEN the system SHALL be available as "agentic-knowledge-mcp" command
 - The system SHALL follow semantic versioning for releases
 - The system SHALL include TypeScript type definitions for programmatic use
 
@@ -211,7 +211,7 @@ Complex requirements for unwanted behavior also include the If-Then keywords.
 - WHEN Git repository URL is invalid THEN the system SHALL return clear error message
 - WHEN Git repository is unreachable THEN the system SHALL return network error with retry suggestion
 - WHEN Git clone succeeds THEN the system SHALL extract only configured paths if specified
-- WHEN no paths specified in git_repo options THEN the system SHALL extract entire repository
+- WHEN no paths specified in git_repo options THEN the system SHALL apply smart content filtering to extract only documentation files
 - WHEN specified branch does not exist THEN the system SHALL return branch error with available branches
 - The system SHALL create .knowledge/.gitignore with "docsets/" entry if not exists
 
@@ -266,14 +266,32 @@ Complex requirements for unwanted behavior also include the If-Then keywords.
 - WHEN search_docs called on docset with web sources THEN the system SHALL return same format instructions
 - The system SHALL maintain file timestamps from original sources when possible
 
-## REQ-17: Automatic Gitignore Management
+## REQ-18: Smart Git Repository Content Filtering
 
-**User Story:** As a developer, I want downloaded web content to be automatically ignored by Git so that I don't accidentally commit large documentation files.
+**User Story:** As a developer, I want Git repository loading to intelligently extract only documentation-relevant files by default so that I don't download unnecessary source code, build artifacts, and project metadata files.
 
 **Acceptance Criteria:**
 
-- WHEN any web source is processed THEN the system SHALL check for .knowledge/.gitignore file
-- WHEN .knowledge/.gitignore does not exist THEN the system SHALL create it with "docsets/" entry
-- WHEN .knowledge/.gitignore exists but missing "docsets/" entry THEN the system SHALL add the entry
-- WHEN .knowledge/.gitignore exists with "docsets/" entry THEN the system SHALL not modify it
-- The system SHALL handle gitignore updates atomically to prevent corruption
+- WHEN git_repo has explicit paths configured THEN the system SHALL extract only the specified paths (explicit BOM)
+- WHEN git_repo has no paths configured THEN the system SHALL scan repository and identify documentation files using intelligent filtering
+- WHEN applying default filtering THEN the system SHALL include files with extensions: .md, .mdx, .rst, .txt
+- WHEN applying default filtering THEN the system SHALL include README\* files only (main project documentation)
+- WHEN applying default filtering THEN the system SHALL include files in documentation directories: docs/, documentation/, guides/, examples/, tutorials/
+- WHEN applying default filtering THEN the system SHALL exclude project metadata files: CHANGELOG*, LICENSE*, CONTRIBUTING*, AUTHORS*, CODE_OF_CONDUCT\*
+- WHEN applying default filtering THEN the system SHALL exclude directories: node_modules/, vendor/, .git/, build/, dist/, target/, .cache/, src/, lib/
+- WHEN applying default filtering THEN the system SHALL exclude binary files and files larger than 1MB
+- WHEN content filtering completes THEN the system SHALL return explicit list of selected files (not patterns)
+- WHEN filtering identifies no documentation files THEN the system SHALL warn user and suggest explicit paths configuration
+- The GitRepoLoader SHALL be the single source of truth for all content filtering logic (CLI SHALL NOT implement filtering)
+
+## REQ-19: Centralized Content Loading Architecture
+
+**User Story:** As a developer, I want consistent content filtering behavior across all interfaces (CLI, API, etc.) so that the same docset configuration produces identical results regardless of how it's invoked.
+
+**Acceptance Criteria:**
+
+- WHEN CLI initializes web sources THEN it SHALL delegate all content extraction to GitRepoLoader
+- WHEN GitRepoLoader processes web sources THEN it SHALL apply the same filtering logic regardless of caller
+- WHEN CLI, refresh command, or future APIs call GitRepoLoader THEN they SHALL receive identical file lists for same configuration
+- The CLI SHALL NOT contain any file filtering, pattern matching, or content selection logic
+- All content filtering logic SHALL be centralized in content-loader package only

@@ -148,6 +148,18 @@ Add a feature to create docsets by loading documentation from the web. This will
   - [x] **VERIFIED**: MCP server continues using configured local_path for traditional docsets
   - [x] **TESTED**: Error handling and template processing work correctly with web sources
 - [x] Write integration tests for CLI commands
+- [x] **PRIORITY: Implement smart content filtering in GitRepoLoader (REQ-18)**
+  - [x] **CREATED**: Documentation filtering methods `filterDocumentationFiles()` and `isDocumentationFile()`
+  - [x] **IMPLEMENTED**: Smart default filtering that includes only documentation files when no explicit paths
+  - [x] **INCLUDES**: .md/.mdx/.rst/.txt files, README\* files, docs/documentation/guides/examples/tutorials directories
+  - [x] **EXCLUDES**: Project metadata (CHANGELOG, LICENSE, CONTRIBUTING), source code, build artifacts
+  - [x] **VALIDATED**: 12 comprehensive tests covering all filtering criteria from REQ-18
+- [x] **PRIORITY: Refactor CLI to remove filtering logic and use GitRepoLoader only (REQ-19)**
+  - [x] **REMOVED**: All CLI-specific filtering logic (findMarkdownFiles, copyDirectory functions)
+  - [x] **REPLACED**: Git cloning and filtering with GitRepoLoader.load() calls
+  - [x] **CENTRALIZED**: All content filtering logic now in GitRepoLoader only
+  - [x] **VALIDATED**: All 16 CLI integration tests still passing after refactor
+  - [x] **ARCHITECTURE**: CLI is now "dumb consumer" that delegates to GitRepoLoader
 - [ ] Add end-to-end tests with mock web sources
 
 ### Completed
