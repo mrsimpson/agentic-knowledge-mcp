@@ -10,3 +10,5 @@ node_modules
 
 # local build
 dist-local
+
+*.tgz
