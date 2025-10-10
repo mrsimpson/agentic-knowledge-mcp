@@ -10,6 +10,9 @@
     "//#format": {
       "inputs": ["!.git/**", "!node_modules/**", "!packages/**"]
     },
+    "//#format:check": {
+      "inputs": ["!.git/**", "!node_modules/**", "!packages/**"]
+    },
     "//#lint:oxlint": {
       "inputs": ["!.git/**", "!node_modules/**", "!packages/**"]
     },
@@ -33,6 +36,7 @@
     "lint:oxlint": {},
     "lint:oxlint:fix": {},
     "format": {},
+    "format:check": {},
     "format:fix": {},
     "test": {
       "dependsOn": ["build"]

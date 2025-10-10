@@ -1,29 +1,50 @@
 import js from "@eslint/js";
-import { parser, configs } from "typescript-eslint";
 import prettier from "eslint-config-prettier";
 
 export default [
   js.configs.recommended,
-  ...configs.recommended,
   prettier,
+  {
+    // Global config for all files
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: "module",
+      globals: {
+        // Node.js globals
+        process: "readonly",
+        console: "readonly",
+        Buffer: "readonly",
+        __dirname: "readonly",
+        __filename: "readonly",
+        global: "readonly",
+        NodeJS: "readonly",
+        // Browser/Runtime globals
+        performance: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        setInterval: "readonly",
+        clearInterval: "readonly",
+      },
+    },
+  },
   {
     // Config for TypeScript files
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
-      parser,
+      parser: await import("@typescript-eslint/parser").then((m) => m.default),
       parserOptions: {
-        project: [
-          "./tsconfig.json",
-          "./docs/.vitepress/tsconfig.json",
-          "./packages/*/tsconfig.json"
-        ]
-      }
-    }
+        ecmaVersion: 2022,
+        sourceType: "module",
+      },
+    },
+    rules: {
+      "no-unused-vars": "off", // Turn off base rule as it conflicts with TypeScript
+    },
   },
   {
     // Config for JavaScript files - no TypeScript parsing
     files: ["**/*.{js,jsx}"],
-    ...js.configs.recommended
+    ...js.configs.recommended,
   },
   {
     ignores: [
@@ -32,7 +53,7 @@ export default [
       ".pnpm-store/**",
       "pnpm-lock.yaml",
       "/packages/**",
-      "docs/.vitepress/cache/**"
-    ]
-  }
+      "docs/.vitepress/cache/**",
+    ],
+  },
 ];

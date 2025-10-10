@@ -24,7 +24,7 @@
     "dev": "tsc -p tsconfig.build.json --watch",
     "lint": "oxlint && eslint .",
     "lint:fix": "oxlint --fix && eslint . --fix",
-    "format": "prettier --check .",
+    "format:check": "prettier --check .",
     "format:fix": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
