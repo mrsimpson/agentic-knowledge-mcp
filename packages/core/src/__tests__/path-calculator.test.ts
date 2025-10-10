@@ -13,7 +13,6 @@ import {
   validatePathSync,
   getRelativePath,
 } from "../paths/calculator.js";
-import { KnowledgeError, ErrorType } from "../types.js";
 import type { DocsetConfig } from "../types.js";
 
 describe("Path Calculation", () => {

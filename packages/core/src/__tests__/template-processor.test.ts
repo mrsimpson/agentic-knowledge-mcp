@@ -8,7 +8,6 @@ import {
   getEffectiveTemplate,
   validateTemplate,
   extractVariables,
-  createTemplateContext,
 } from "../templates/processor.js";
 import {
   KnowledgeError,

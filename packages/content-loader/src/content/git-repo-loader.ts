@@ -110,7 +110,7 @@ export class GitRepoLoader extends ContentLoader {
         .createHash("sha256")
         .update(`${webSource.url}:${commitHash}:${paths}`)
         .digest("hex");
-    } catch (error) {
+    } catch {
       // Fallback to URL-based hash if remote access fails
       const options = webSource.options as GitRepoOptions | undefined;
       const paths = options?.paths ? options.paths.sort().join(",") : "all";
@@ -127,9 +127,9 @@ export class GitRepoLoader extends ContentLoader {
   private isValidGitUrl(url: string): boolean {
     const gitUrlPatterns = [
       /^https:\/\/github\.com\/[\w\-._]+\/[\w\-._]+(?:\.git)?$/,
-      /^https:\/\/gitlab\.com\/[\w\-._\/]+(?:\.git)?$/,
-      /^https:\/\/[\w\-._]+\/[\w\-._\/]+\.git$/,
-      /^git@[\w\-._]+:[\w\-._\/]+\.git$/,
+      /^https:\/\/gitlab\.com\/[\w\-._/]+(?:\.git)?$/,
+      /^https:\/\/[\w\-._]+\/[\w\-._/]+\.git$/,
+      /^git@[\w\-._]+:[\w\-._/]+\.git$/,
     ];
 
     return gitUrlPatterns.some((pattern) => pattern.test(url));
@@ -193,7 +193,7 @@ export class GitRepoLoader extends ContentLoader {
             cwd: process.cwd(),
           });
           return;
-        } catch (masterError) {
+        } catch {
           // If both fail, throw the original error
         }
       }

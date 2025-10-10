@@ -12,7 +12,7 @@ import {
   validateConfig,
 } from "../config/loader.js";
 import { KnowledgeError, ErrorType } from "../types.js";
-import type { KnowledgeConfig, DocsetConfig } from "../types.js";
+import type { KnowledgeConfig } from "../types.js";
 
 describe("Configuration Loading and Validation", () => {
   let tempDir: string;

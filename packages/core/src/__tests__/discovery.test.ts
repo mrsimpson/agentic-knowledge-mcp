@@ -4,7 +4,7 @@
 
 import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { promises as fs } from "node:fs";
-import { join, resolve } from "node:path";
+import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { findConfigPath, findConfigPathSync } from "../config/discovery.js";
 import { CONFIG_DIR, CONFIG_FILENAME } from "../types.js";

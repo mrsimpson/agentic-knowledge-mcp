@@ -55,7 +55,7 @@ template: "Search for '{{keywords}}' in {{local_path}}. Related: {{generalized_k
     });
 
     it("should demonstrate caching behavior improves performance", async () => {
-      const server = createAgenticKnowledgeServer();
+      const _server = createAgenticKnowledgeServer();
 
       // This test validates that our caching strategy works
       // The actual MCP protocol testing would require more complex setup

@@ -38,7 +38,14 @@ export default [
       },
     },
     rules: {
-      "no-unused-vars": "off", // Turn off base rule as it conflicts with TypeScript
+      "no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
     },
   },
   {

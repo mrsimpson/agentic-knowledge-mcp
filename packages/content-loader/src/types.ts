@@ -22,8 +22,11 @@ export interface DocsetConfig {
  * Types of web sources supported
  */
 export enum WebSourceType {
+  // eslint-disable-next-line no-unused-vars
   GIT_REPO = "git_repo",
+  // eslint-disable-next-line no-unused-vars
   DOCUMENTATION_SITE = "documentation_site",
+  // eslint-disable-next-line no-unused-vars
   API_DOCUMENTATION = "api_documentation",
 }
 
@@ -116,8 +119,11 @@ export const METADATA_FILENAME = ".agentic-metadata.json";
  * Web source specific error types
  */
 export enum WebSourceErrorType {
+  // eslint-disable-next-line no-unused-vars
   WEB_SOURCE_ERROR = "WEB_SOURCE_ERROR",
+  // eslint-disable-next-line no-unused-vars
   GIT_REPO_ERROR = "GIT_REPO_ERROR",
+  // eslint-disable-next-line no-unused-vars
   NOT_IMPLEMENTED = "NOT_IMPLEMENTED",
 }
 
@@ -126,8 +132,10 @@ export enum WebSourceErrorType {
  */
 export class WebSourceError extends Error {
   constructor(
+    // eslint-disable-next-line no-unused-vars
     public type: WebSourceErrorType,
     message: string,
+    // eslint-disable-next-line no-unused-vars
     public context?: Record<string, unknown>,
   ) {
     super(message);
