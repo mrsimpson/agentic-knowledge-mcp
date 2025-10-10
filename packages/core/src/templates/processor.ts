@@ -2,14 +2,14 @@
  * Template processing functionality
  */
 
-import type { TemplateContext, DocsetConfig } from '../types.js';
-import { 
-  KnowledgeError, 
-  ErrorType, 
-  DEFAULT_TEMPLATE, 
+import type { TemplateContext, DocsetConfig } from "../types.js";
+import {
+  KnowledgeError,
+  ErrorType,
+  DEFAULT_TEMPLATE,
   ALLOWED_TEMPLATE_VARIABLES,
-  REQUIRED_TEMPLATE_VARIABLES 
-} from '../types.js';
+  REQUIRED_TEMPLATE_VARIABLES,
+} from "../types.js";
 
 /**
  * Process a template with variable substitution
@@ -17,10 +17,13 @@ import {
  * @param context - Context data for substitution
  * @returns Processed template string
  */
-export function processTemplate(template: string, context: TemplateContext): string {
+export function processTemplate(
+  template: string,
+  context: TemplateContext,
+): string {
   try {
     let processed = template;
-    
+
     // Replace template variables using double curly brace syntax
     const variables: Record<string, string> = {
       local_path: context.local_path,
@@ -28,26 +31,26 @@ export function processTemplate(template: string, context: TemplateContext): str
       generalized_keywords: context.generalized_keywords,
       docset_id: context.docset.id,
       docset_name: context.docset.name,
-      docset_description: context.docset.description || ''
+      docset_description: context.docset.description || "",
     };
-    
+
     // Replace each variable
     for (const [key, value] of Object.entries(variables)) {
-      const regex = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
+      const regex = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, "g");
       processed = processed.replace(regex, value);
     }
-    
+
     // Check for unreplaced variables - this should never happen in production
     // because templates are validated at startup
     const unreplacedMatches = processed.match(/\{\{[^}]+\}\}/g);
     if (unreplacedMatches) {
       throw new KnowledgeError(
         ErrorType.TEMPLATE_ERROR,
-        `Template contains invalid variables: ${unreplacedMatches.join(', ')}`,
-        { template, unreplacedMatches }
+        `Template contains invalid variables: ${unreplacedMatches.join(", ")}`,
+        { template, unreplacedMatches },
       );
     }
-    
+
     return processed.trim();
   } catch (error) {
     if (error instanceof KnowledgeError) {
@@ -56,7 +59,7 @@ export function processTemplate(template: string, context: TemplateContext): str
     throw new KnowledgeError(
       ErrorType.TEMPLATE_ERROR,
       `Failed to process template: ${(error as Error).message}`,
-      { template, context, error }
+      { template, context, error },
     );
   }
 }
@@ -67,7 +70,10 @@ export function processTemplate(template: string, context: TemplateContext): str
  * @param globalTemplate - Global template from config (optional)
  * @returns Template string to use
  */
-export function getEffectiveTemplate(docset: DocsetConfig, globalTemplate?: string): string {
+export function getEffectiveTemplate(
+  docset: DocsetConfig,
+  globalTemplate?: string,
+): string {
   // Priority: docset template > global template > default template
   return docset.template || globalTemplate || DEFAULT_TEMPLATE;
 }
@@ -81,33 +87,41 @@ export function getEffectiveTemplate(docset: DocsetConfig, globalTemplate?: stri
 export function validateTemplate(template: string): boolean {
   // Extract all variables from template
   const variables = extractVariables(template);
-  
+
   // Check for invalid variables
   const invalidVariables = variables.filter(
-    variable => !ALLOWED_TEMPLATE_VARIABLES.includes(variable as any)
+    (variable) => !ALLOWED_TEMPLATE_VARIABLES.includes(variable as any),
   );
-  
+
   if (invalidVariables.length > 0) {
     throw new KnowledgeError(
       ErrorType.TEMPLATE_ERROR,
-      `Template contains invalid variables: ${invalidVariables.join(', ')}. Allowed variables: ${ALLOWED_TEMPLATE_VARIABLES.join(', ')}`,
-      { template, invalidVariables, allowedVariables: ALLOWED_TEMPLATE_VARIABLES }
+      `Template contains invalid variables: ${invalidVariables.join(", ")}. Allowed variables: ${ALLOWED_TEMPLATE_VARIABLES.join(", ")}`,
+      {
+        template,
+        invalidVariables,
+        allowedVariables: ALLOWED_TEMPLATE_VARIABLES,
+      },
     );
   }
-  
+
   // Check for required variables
   const missingRequired = REQUIRED_TEMPLATE_VARIABLES.filter(
-    required => !variables.includes(required)
+    (required) => !variables.includes(required),
   );
-  
+
   if (missingRequired.length > 0) {
     throw new KnowledgeError(
       ErrorType.TEMPLATE_ERROR,
-      `Template missing required variables: ${missingRequired.join(', ')}. Required variables: ${REQUIRED_TEMPLATE_VARIABLES.join(', ')}`,
-      { template, missingRequired, requiredVariables: REQUIRED_TEMPLATE_VARIABLES }
+      `Template missing required variables: ${missingRequired.join(", ")}. Required variables: ${REQUIRED_TEMPLATE_VARIABLES.join(", ")}`,
+      {
+        template,
+        missingRequired,
+        requiredVariables: REQUIRED_TEMPLATE_VARIABLES,
+      },
     );
   }
-  
+
   return true;
 }
 
@@ -119,9 +133,9 @@ export function validateTemplate(template: string): boolean {
 export function extractVariables(template: string): string[] {
   const matches = template.match(/\{\{\s*([^}]+)\s*\}\}/g);
   if (!matches) return [];
-  
-  return matches.map(match => {
-    const varName = match.replace(/\{\{\s*/, '').replace(/\s*\}\}/, '');
+
+  return matches.map((match) => {
+    const varName = match.replace(/\{\{\s*/, "").replace(/\s*\}\}/, "");
     return varName.trim();
   });
 }
@@ -138,12 +152,12 @@ export function createTemplateContext(
   localPath: string,
   keywords: string,
   generalizedKeywords: string,
-  docset: DocsetConfig
+  docset: DocsetConfig,
 ): TemplateContext {
   return {
     local_path: localPath,
     keywords,
     generalized_keywords: generalizedKeywords,
-    docset
+    docset,
   };
 }

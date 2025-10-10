@@ -2,23 +2,25 @@
  * Configuration discovery functionality
  */
 
-import { promises as fs } from 'node:fs';
-import * as fsSync from 'node:fs';
-import { resolve, dirname, join } from 'node:path';
-import { CONFIG_DIR, CONFIG_FILENAME } from '../types.js';
+import { promises as fs } from "node:fs";
+import * as fsSync from "node:fs";
+import { resolve, dirname, join } from "node:path";
+import { CONFIG_DIR, CONFIG_FILENAME } from "../types.js";
 
 /**
  * Find the configuration path by walking up the directory tree
  * @param startPath - Starting directory path (defaults to current working directory)
  * @returns Path to config file or null if not found
  */
-export async function findConfigPath(startPath: string = process.cwd()): Promise<string | null> {
+export async function findConfigPath(
+  startPath: string = process.cwd(),
+): Promise<string | null> {
   let currentDir = resolve(startPath);
-  
+
   while (true) {
     const configDir = join(currentDir, CONFIG_DIR);
     const configPath = join(configDir, CONFIG_FILENAME);
-    
+
     try {
       const stats = await fs.stat(configPath);
       if (stats.isFile()) {
@@ -27,7 +29,7 @@ export async function findConfigPath(startPath: string = process.cwd()): Promise
     } catch {
       // File doesn't exist, continue searching
     }
-    
+
     // Move up one directory
     const parentDir = dirname(currentDir);
     if (parentDir === currentDir) {
@@ -36,7 +38,7 @@ export async function findConfigPath(startPath: string = process.cwd()): Promise
     }
     currentDir = parentDir;
   }
-  
+
   return null;
 }
 
@@ -45,13 +47,15 @@ export async function findConfigPath(startPath: string = process.cwd()): Promise
  * @param startPath - Starting directory path (defaults to current working directory)
  * @returns Path to config file or null if not found
  */
-export function findConfigPathSync(startPath: string = process.cwd()): string | null {
+export function findConfigPathSync(
+  startPath: string = process.cwd(),
+): string | null {
   let currentDir = resolve(startPath);
-  
+
   while (true) {
     const configDir = join(currentDir, CONFIG_DIR);
     const configPath = join(configDir, CONFIG_FILENAME);
-    
+
     try {
       const stats = fsSync.statSync(configPath);
       if (stats.isFile()) {
@@ -60,7 +64,7 @@ export function findConfigPathSync(startPath: string = process.cwd()): string | 
     } catch {
       // File doesn't exist, continue searching
     }
-    
+
     // Move up one directory
     const parentDir = dirname(currentDir);
     if (parentDir === currentDir) {
@@ -69,6 +73,6 @@ export function findConfigPathSync(startPath: string = process.cwd()): string | 
     }
     currentDir = parentDir;
   }
-  
+
   return null;
 }
