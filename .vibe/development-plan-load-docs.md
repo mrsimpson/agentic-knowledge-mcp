@@ -99,12 +99,13 @@ Add a feature to create docsets by loading documentation from the web. This will
 - [x] Move `content/` directory from core to content-loader package
 - [x] Move web source types from core/types.ts to content-loader package
 - [x] Update core package to remove web source dependencies and restore clean interfaces
-- [ ] Create `@codemcp/knowledge-cli` package structure
-- [ ] Implement CLI commands: `init`, `refresh`, `status`
-- [ ] Add progress indicators and error reporting to CLI
-- [ ] Update package.json workspace configuration
-- [ ] Update imports across all packages
-- [ ] Ensure all tests pass after refactoring
+- [x] Create `@codemcp/knowledge-cli` package structure
+- [x] Implement CLI commands: `init`, `refresh`, `status`
+- [x] Add progress indicators and error reporting to CLI
+- [x] Update package.json workspace configuration
+- [x] Update imports across all packages
+- [x] Ensure all tests pass after refactoring
+- [x] **CLI IMPLEMENTATION COMPLETE**: All three commands fully functional with real-world testing verified
 
 #### Phase 6: Packaging & Publishing Setup
 
@@ -119,7 +120,12 @@ Add a feature to create docsets by loading documentation from the web. This will
 - [x] Fixed TypeScript build issues by properly setting `noEmit: false` in build configs
 - [x] **LOCAL INSTALLATION SOLUTION**: Created `scripts/prepare-local.cjs` to convert workspace dependencies to relative file paths
 - [x] Added `pack:local` npm script for creating locally installable packages before npm publication
-- [ ] Document installation and usage instructions
+- [x] Document installation and usage instructions
+- [x] **COMPLETED: Improved test output with clear summary**
+  - [x] **CREATED**: `scripts/test-summary.js` - Provides clear summary of all 128 tests (116 package + 12 E2E)
+  - [x] **UPDATED**: Root `package.json` to use new test summary script
+  - [x] **VERIFIED**: All tests running with improved output showing success rate and individual package results
+  - [x] **CONFIRMED**: E2E tests now properly detected and included in summary (12/12 tests)
 
 #### Phase 5: Integration & Testing
 
@@ -141,12 +147,31 @@ Add a feature to create docsets by loading documentation from the web. This will
   - [x] **VERIFIED**: MCP server returns proper standardized paths for web source docsets
   - [x] **VERIFIED**: MCP server continues using configured local_path for traditional docsets
   - [x] **TESTED**: Error handling and template processing work correctly with web sources
-- [ ] Write integration tests for CLI commands
+- [x] Write integration tests for CLI commands
 - [ ] Add end-to-end tests with mock web sources
 
 ### Completed
 
-**Phase 6: Packaging & Publishing Setup (✅ Complete)**
+**Phase 4: Package Refactoring & CLI Interface (✅ Complete)**
+
+- Complete three-package architecture with `@codemcp/knowledge-core`, `@codemcp/knowledge-content-loader`, and `@codemcp/knowledge-cli`
+- Full CLI implementation with all three commands working in production
+- Real-world testing confirmed with existing docsets (295 total files processed)
+- Comprehensive error handling, progress indicators, and user experience
+- All 116 package tests passing across the codebase
+
+**CLI Commands Implemented**:
+
+- `init <docset-id>` - Initialize web sources from configuration (fully functional Git repository cloning)
+- `refresh [docset-id]` - Incremental updates with metadata tracking and commit-based change detection
+- `status [-v]` - Comprehensive status display with timing info, file counts, and source details
+
+**Test Infrastructure Improvements**:
+
+- **E2E Test Fix**: Fixed binary path in `test/utils/e2e-test-setup.ts` (all 12 E2E tests now passing)
+- **Test Summary Script**: Created `scripts/test-summary.js` providing clear overview of all 128 tests
+- **Improved Output**: Root `pnpm test` now shows clean summary instead of confusing turbo/vitest output
+- **Complete Coverage**: All 116 package tests + 12 E2E tests properly detected and reported
 
 - Complete monorepo packaging and publishing system implemented
 - GitHub Actions workflow for automated version bumping and npm publishing
@@ -233,6 +258,53 @@ _None yet_
 5. Verify actual functionality, not just interface compliance
 
 This approach ensures tests provide value by catching real bugs and verifying the system works as users expect, rather than just confirming TypeScript compilation.
+
+### Test Infrastructure and Output Improvements
+
+**Problem**: Root `pnpm test` command ran all tests correctly but produced confusing output that made it hard to understand test results and overall system health.
+
+**Issues Identified**:
+
+- E2E tests failing due to incorrect binary path after package restructuring
+- Root test command using `turbo run test && vitest run test/` produced mixed output formats
+- No clear summary of total test counts across packages
+- Hard to quickly assess overall system test health
+
+**Solution**: Complete test infrastructure overhaul:
+
+**What We Fixed**:
+
+1. **E2E Test Path**: Updated `test/utils/e2e-test-setup.ts` to use correct binary path `packages/mcp-server/dist/bin.js`
+2. **Test Summary Script**: Created `scripts/test-summary.js` that:
+   - Dynamically discovers all workspace packages
+   - Runs tests for each package individually
+   - Parses both package and E2E test outputs
+   - Provides clean, professional summary with success rates
+3. **Package.json Update**: Changed root test command to use new summary script
+
+**Results**:
+
+- **All 128 tests passing**: 116 package tests + 12 E2E tests
+- **Clear Output**: Professional summary showing package-by-package results and totals
+- **Better UX**: Immediate understanding of test health with ✅/❌ indicators
+- **Proper Detection**: E2E tests now correctly included in total count
+- **Consistent Format**: All test results presented in unified format
+
+**Example Output**:
+
+```
+📊 TEST SUMMARY
+✅ @codemcp/knowledge-cli: 4/4 passed
+✅ @codemcp/knowledge-content-loader: 11/11 passed
+✅ @codemcp/knowledge-core: 84/84 passed
+✅ @codemcp/knowledge-mcp-server: 17/17 passed
+✅ E2E Tests: 12/12 passed
+
+📈 TOTAL RESULTS:
+   • Tests passed: 128 • Total tests: 128 • Success rate: 100.0%
+```
+
+This infrastructure improvement makes the development workflow more professional and provides clear confidence in system stability.
 
 ### Architecture Decision: Three Package Structure
 

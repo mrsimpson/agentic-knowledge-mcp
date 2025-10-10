@@ -6,6 +6,8 @@
 
 import { Command } from "commander";
 import { initCommand } from "./commands/init.js";
+import { refreshCommand } from "./commands/refresh.js";
+import { statusCommand } from "./commands/status.js";
 
 const program = new Command();
 
@@ -16,6 +18,8 @@ program
 
 // Add commands
 program.addCommand(initCommand);
+program.addCommand(refreshCommand);
+program.addCommand(statusCommand);
 
 // Parse command line arguments
 program.parse();
