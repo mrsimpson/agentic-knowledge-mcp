@@ -103,7 +103,7 @@ export class ContentProcessor {
    */
   shouldProcess(filePath: string): boolean {
     const extension = path.extname(filePath).toLowerCase();
-    const processableExtensions = [".md", ".mdx", ".txt", ".rst"];
+    const processableExtensions = [".md", ".mdx", ".txt", ".rst", ".adoc", ".asciidoc"];
     return processableExtensions.includes(extension);
   }
 }

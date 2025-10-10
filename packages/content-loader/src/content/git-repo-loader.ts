@@ -381,7 +381,7 @@ export class GitRepoLoader extends ContentLoader {
     }
 
     // Include documentation file extensions anywhere, regardless of directory (REQ-18)
-    const docExtensions = [".md", ".mdx", ".rst", ".txt"];
+    const docExtensions = [".md", ".mdx", ".rst", ".txt", ".adoc", ".asciidoc"];
     if (docExtensions.includes(extension)) {
       return true;
     }
