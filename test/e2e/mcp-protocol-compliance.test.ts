@@ -79,7 +79,7 @@ describe("MCP Protocol Compliance E2E Tests", () => {
 
       expect(searchDocsTool).toBeDefined();
       expect(searchDocsTool!.description).toContain(
-        "Search for documentation guidance",
+        "Search for documentation in available docsets",
       );
 
       const schema = searchDocsTool!.inputSchema;
