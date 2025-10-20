@@ -84,10 +84,14 @@ list_docsets();
 Simple `.knowledge/config.yaml` pattern:
 
 ```yaml
+version: "1.0"
 docsets:
-  react-docs:
-    local_path: "./docs/react-18.2"
+  - id: react-docs
+    name: React Documentation
     description: "React framework documentation"
+    sources:
+      - type: local_folder
+        paths: ["./docs/react-18.2"]
     template: |
       Search for '{{keywords}}' in {{local_path}}/hooks/. 
       If not found, try '{{generalized_keywords}}' in {{local_path}}/patterns/.
@@ -174,10 +178,23 @@ mkdir .knowledge
 2. **Add configuration** (`.knowledge/config.yaml`):
 
 ```yaml
+version: "1.0"
 docsets:
-  my-docs:
-    local_path: "./docs"
-    description: "My project documentation"
+  - id: my-docs
+    name: My Project Documentation
+    description: "Local project documentation"
+    sources:
+      - type: local_folder
+        paths: ["./docs"]
+        
+  - id: react-docs
+    name: React Documentation
+    description: "Official React documentation from GitHub"
+    sources:
+      - type: git_repo
+        url: "https://github.com/facebook/react.git"
+        branch: "main"
+        paths: ["docs/"]
 ```
 
 3. **Start the MCP server**:
@@ -187,6 +204,225 @@ agentic-knowledge
 ```
 
 4. **Connect your AI assistant** using MCP protocol
+
+## 📋 Configuration Guide
+
+### Local Folder Sources
+
+For documentation stored locally in your project:
+
+```yaml
+docsets:
+  - id: my-project
+    name: My Project Docs
+    sources:
+      - type: local_folder
+        paths: 
+          - "./docs"           # Single directory
+          - "./guides"         # Multiple directories
+          - "./api/README.md"  # Specific files
+```
+
+**Benefits:**
+- ✅ **No file duplication** - creates symlinks to original locations
+- ✅ **Real-time updates** - changes immediately visible
+- ✅ **Relative paths** - returns clean relative paths for LLM navigation
+
+### Git Repository Sources
+
+For documentation from remote repositories:
+
+```yaml
+docsets:
+  - id: external-docs
+    name: External Documentation
+    sources:
+      - type: git_repo
+        url: "https://github.com/owner/repo.git"
+        branch: "main"              # Optional, defaults to main
+        paths: ["docs/", "README.md"] # Optional, extracts specific paths
+```
+
+**Benefits:**
+- ✅ **Automatic downloads** - fetches latest documentation
+- ✅ **Selective extraction** - only downloads specified paths
+- ✅ **Branch selection** - target specific branches or tags
+
+### Mixed Configuration
+
+Combine local and remote sources in one configuration:
+
+```yaml
+version: "1.0"
+docsets:
+  - id: local-guides
+    name: Local User Guides
+    sources:
+      - type: local_folder
+        paths: ["./docs/guides"]
+        
+  - id: api-reference
+    name: API Reference
+    sources:
+      - type: git_repo
+        url: "https://github.com/company/api-docs.git"
+        paths: ["reference/"]
+        
+  - id: mixed-sources
+    name: Combined Documentation
+    sources:
+      - type: local_folder
+        paths: ["./internal-docs"]
+      - type: git_repo
+        url: "https://github.com/external/docs.git"
+```
+
+## 🎯 How to Use
+
+### Step 1: Set Up Your Documentation
+
+Create a `.knowledge/config.yaml` file in your project root:
+
+```yaml
+version: "1.0"
+docsets:
+  - id: my-project
+    name: My Project Documentation
+    description: "Main project documentation"
+    sources:
+      - type: local_folder
+        paths: ["./docs", "./README.md"]
+```
+
+### Step 2: Start the MCP Server
+
+```bash
+# Install globally
+npm install -g agentic-knowledge
+
+# Start the server
+agentic-knowledge
+```
+
+The server will:
+- ✅ Create symlinks for local folders in `.knowledge/docsets/`
+- ✅ Validate your configuration
+- ✅ Start listening for MCP requests
+
+### Step 3: Connect Your AI Assistant
+
+Configure your AI assistant (Claude Desktop, etc.) to use the MCP server:
+
+```json
+{
+  "mcpServers": {
+    "agentic-knowledge": {
+      "command": "agentic-knowledge"
+    }
+  }
+}
+```
+
+### Step 4: Search Your Documentation
+
+Use the `search_docs` tool in your AI assistant:
+
+```
+search_docs({
+  docset_id: "my-project",
+  keywords: "authentication setup",
+  generalized_keywords: "login, auth, security"
+})
+```
+
+**Response:**
+```
+# 📚 Search My Project Documentation
+
+**Primary terms:** authentication setup
+**Related terms:** login, auth, security  
+**Location:** docs
+
+## 🔍 Search Strategy
+
+1. **Start with Specific Terms**
+   Use your text search tools (grep, rg, ripgrep) to search for: `authentication setup`
+
+2. **Expand to Related Terms**  
+   If initial search doesn't yield results, try: `login, auth, security`
+
+3. **What to Avoid**
+   Skip these directories: `node_modules/`, `.git/`, `.knowledge/`
+```
+
+### Step 5: Follow the Guidance
+
+Your AI assistant will use the provided search strategy to:
+1. 🔍 Search your documentation with the suggested terms
+2. 📂 Navigate to the right files and directories  
+3. 🎯 Find exactly what you're looking for
+4. 🔗 Follow cross-references and related content
+
+## 💡 Pro Tips
+
+### Local Development Workflow
+
+```yaml
+# Perfect for active development
+docsets:
+  - id: current-project
+    name: Current Project
+    sources:
+      - type: local_folder
+        paths: ["./docs", "./README.md", "./CHANGELOG.md"]
+```
+
+**Benefits:**
+- Changes in your docs are immediately available
+- No copying or syncing needed
+- Works with any file type
+
+### Multi-Repository Setup
+
+```yaml
+# Combine multiple sources
+docsets:
+  - id: frontend-docs
+    name: Frontend Documentation
+    sources:
+      - type: local_folder
+        paths: ["./frontend/docs"]
+      - type: git_repo
+        url: "https://github.com/company/design-system.git"
+        paths: ["docs/"]
+        
+  - id: backend-docs  
+    name: Backend Documentation
+    sources:
+      - type: git_repo
+        url: "https://github.com/company/api-docs.git"
+        branch: "main"
+```
+
+### Advanced Search Strategies
+
+Use specific and generalized keywords for better results:
+
+```javascript
+// ✅ Good: Specific + General
+search_docs({
+  docset_id: "react-docs",
+  keywords: "useEffect cleanup function",
+  generalized_keywords: "hooks, lifecycle, memory management"
+})
+
+// ❌ Too vague
+search_docs({
+  docset_id: "react-docs", 
+  keywords: "react",
+  generalized_keywords: "javascript"
+})
+```
 
 ## 📊 Performance vs RAG
 

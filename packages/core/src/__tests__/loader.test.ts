@@ -32,11 +32,15 @@ docsets:
   - id: "test-docs"
     name: "Test Documentation"
     description: "Test description"
-    local_path: "./docs"
+    sources:
+      - type: "local_folder"
+        paths: ["./docs"]
     template: "Custom template for {{keywords}} in {{local_path}}"
   - id: "api-docs"
     name: "API Documentation"
-    local_path: "/absolute/path"
+    sources:
+      - type: "local_folder"
+        paths: ["/absolute/path"]
 template: "Global template for {{keywords}} in {{local_path}}"`;
     await fs.writeFile(validConfigPath, validConfig);
 
@@ -71,7 +75,9 @@ template: "Global only"`;
       expect(firstDocset.id).toBe("test-docs");
       expect(firstDocset.name).toBe("Test Documentation");
       expect(firstDocset.description).toBe("Test description");
-      expect(firstDocset.local_path).toBe("./docs");
+      expect(firstDocset.sources).toHaveLength(1);
+      expect(firstDocset.sources[0].type).toBe("local_folder");
+      expect(firstDocset.sources[0].paths).toEqual(["./docs"]);
       expect(firstDocset.template).toContain("Custom template for");
     });
 
@@ -124,7 +130,9 @@ template: "Global only"`;
 docsets:
   - id: "test-docs"
     name: "Test Documentation"
-    local_path: "./docs"
+    sources:
+      - type: "local_folder"
+        paths: ["./docs"]
 template: "Global template with {{keywords}} and {{invalid_variable}}"`;
       await fs.writeFile(invalidTemplateConfigPath, invalidTemplateConfig);
 
@@ -154,7 +162,9 @@ template: "Global template with {{keywords}} and {{invalid_variable}}"`;
 docsets:
   - id: "test-docs"
     name: "Test Documentation"
-    local_path: "./docs"
+    sources:
+      - type: "local_folder"
+        paths: ["./docs"]
     template: "Docset template missing {{keywords}} but has {{bad_var}}"`;
       await fs.writeFile(
         invalidDocsetTemplateConfigPath,
@@ -184,7 +194,9 @@ docsets:
 docsets:
   - id: "test-docs"
     name: "Test Documentation"
-    local_path: "./docs"
+    sources:
+      - type: "local_folder"
+        paths: ["./docs"]
     template: "Search {{keywords}} in {{local_path}}"
 template: "Global: {{keywords}} in {{local_path}}"`;
       await fs.writeFile(validTemplateConfigPath, validTemplateConfig);
@@ -228,7 +240,10 @@ template: "Global: {{keywords}} in {{local_path}}"`;
           {
             id: "test",
             name: "Test Docs",
-            local_path: "./docs",
+            sources: [{
+              type: "local_folder",
+              paths: ["./docs"]
+            }],
             description: "Test description",
             template: "Custom template",
           },
@@ -246,7 +261,10 @@ template: "Global: {{keywords}} in {{local_path}}"`;
           {
             id: "test",
             name: "Test Docs",
-            local_path: "./docs",
+            sources: [{
+              type: "local_folder",
+              paths: ["./docs"]
+            }]
           },
         ],
       };
@@ -285,7 +303,7 @@ template: "Global: {{keywords}} in {{local_path}}"`;
         docsets: [
           {
             id: "test",
-            // missing name and local_path
+            // missing name and sources
           },
         ],
       };
@@ -300,7 +318,10 @@ template: "Global: {{keywords}} in {{local_path}}"`;
           {
             id: "",
             name: "   ",
-            local_path: "./docs",
+            sources: [{
+              type: "local_folder",
+              paths: ["./docs"]
+            }]
           },
         ],
       };
@@ -323,7 +344,10 @@ template: "Global: {{keywords}} in {{local_path}}"`;
           {
             id: "test",
             name: "Test",
-            local_path: "./docs",
+            sources: [{
+              type: "local_folder",
+              paths: ["./docs"]
+            }],
             description: 123, // should be string
             template: [], // should be string
           },
@@ -340,13 +364,55 @@ template: "Global: {{keywords}} in {{local_path}}"`;
           {
             id: "test",
             name: "Test",
-            local_path: "./docs",
+            sources: [{
+              type: "local_folder",
+              paths: ["./docs"]
+            }]
           },
         ],
         template: 123, // should be string
       };
 
       expect(validateConfig(invalidConfig)).toBe(false);
+    });
+
+    test("should validate mixed source types", () => {
+      const config: KnowledgeConfig = {
+        version: "1.0",
+        docsets: [
+          {
+            id: "local",
+            name: "Local Docs",
+            sources: [{
+              type: "local_folder",
+              paths: ["./docs"]
+            }]
+          },
+          {
+            id: "remote",
+            name: "Remote Docs",
+            sources: [{
+              type: "git_repo",
+              url: "https://github.com/example/repo.git"
+            }]
+          }
+        ]
+      };
+
+      expect(validateConfig(config)).toBe(true);
+    });
+
+    test("should reject empty sources array", () => {
+      const config = {
+        version: "1.0",
+        docsets: [{
+          id: "test",
+          name: "Test",
+          sources: []
+        }]
+      };
+
+      expect(validateConfig(config)).toBe(false);
     });
   });
 });

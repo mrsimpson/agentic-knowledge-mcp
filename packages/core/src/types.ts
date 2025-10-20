@@ -3,6 +3,43 @@
  */
 
 /**
+ * Base source configuration
+ */
+export interface BaseSourceConfig {
+  /** Type of source */
+  type: string;
+  /** Optional paths to include */
+  paths?: string[];
+}
+
+/**
+ * Local folder source configuration
+ */
+export interface LocalFolderSourceConfig extends BaseSourceConfig {
+  type: 'local_folder';
+  /** Paths to local files/directories */
+  paths: string[];
+}
+
+/**
+ * Git repository source configuration
+ */
+export interface GitRepoSourceConfig extends BaseSourceConfig {
+  type: 'git_repo';
+  /** Git repository URL */
+  url: string;
+  /** Branch to clone (optional, defaults to main) */
+  branch?: string;
+  /** Specific paths to extract (optional) */
+  paths?: string[];
+}
+
+/**
+ * Union type for all source configurations
+ */
+export type SourceConfig = LocalFolderSourceConfig | GitRepoSourceConfig;
+
+/**
  * Configuration for a single docset
  */
 export interface DocsetConfig {
@@ -12,24 +49,10 @@ export interface DocsetConfig {
   name: string;
   /** Description of what this docset contains */
   description?: string;
-  /** Path to the documentation (relative to .knowledge folder or absolute) - optional for web sources */
-  local_path?: string;
+  /** Unified sources configuration */
+  sources: SourceConfig[];
   /** Optional custom instruction template for this docset */
   template?: string;
-  /** Optional web sources to load content from */
-  web_sources?: WebSourceConfig[];
-}
-
-/**
- * Basic web source configuration (for core package validation)
- */
-export interface WebSourceConfig {
-  /** URL of the web source */
-  url: string;
-  /** Type of web source */
-  type: string;
-  /** Type-specific options */
-  options?: Record<string, unknown>;
 }
 
 /**

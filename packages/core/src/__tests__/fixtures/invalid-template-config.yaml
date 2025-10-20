@@ -2,6 +2,8 @@ version: "1.0"
 docsets:
   - id: "test-docs"
     name: "Test Documentation"
-    local_path: "./docs"
+    sources:
+      - type: "local_folder"
+        paths: ["./docs"]
     template: "Search {{keywords}} in {{local_path}} using {{invalid_var}}"
 template: "Global template with {{keywords}} and {{bad_variable}}"
