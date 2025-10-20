@@ -8,6 +8,7 @@ import { Command } from "commander";
 import { initCommand } from "./commands/init.js";
 import { refreshCommand } from "./commands/refresh.js";
 import { statusCommand } from "./commands/status.js";
+import { createCommand } from "./commands/create.js";
 
 const program = new Command();
 
@@ -17,6 +18,7 @@ program
   .version("0.1.0");
 
 // Add commands
+program.addCommand(createCommand);
 program.addCommand(initCommand);
 program.addCommand(refreshCommand);
 program.addCommand(statusCommand);
