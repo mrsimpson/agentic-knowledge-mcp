@@ -125,7 +125,31 @@ export class KnowledgeError extends Error {
 /**
  * Default instruction template
  */
-export const DEFAULT_TEMPLATE = `Search for '{{keywords}}' in folder {{local_path}}. Use your normal text search tools (grep, rg, or similar) to find relevant files. Consider these broader search terms as well: {{generalized_keywords}}. Start with searching for the most specific keywords first, then expand to the generalized terms if needed.`;
+export const DEFAULT_TEMPLATE = `# 📚 Search {{docset_name}} Documentation
+
+**Primary terms:** {{keywords}}  
+**Related terms:** {{generalized_keywords}}  
+**Location:** {{local_path}}
+
+## 🔍 Search Strategy
+
+### 1. **Start with Specific Terms**
+Use your text search tools (grep, rg, ripgrep) to search for: \`{{keywords}}\`
+
+### 2. **Expand to Related Terms**
+If initial search doesn't yield results, try: \`{{generalized_keywords}}\`
+
+### 3. **What to Avoid**
+Skip these directories to save time:
+- \`node_modules/\`, \`.git/\`, \`.knowledge/\`
+- \`build/\`, \`dist/\`, \`target/\`, \`vendor/\`
+
+## 💡 Search Tips
+- Use **case-insensitive** search when possible
+- Look for **exact matches first**, then partial matches
+- Check **cross-references** and \`See also\` sections
+- If stuck, try **broader terms** or ask the user to clarify
+`;
 
 /**
  * Allowed template variables that can be used in instruction templates
