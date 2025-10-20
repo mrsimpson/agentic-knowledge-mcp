@@ -79,47 +79,113 @@ export function createAgenticKnowledgeServer() {
 
   // Register tool handlers
   server.setRequestHandler(ListToolsRequestSchema, async () => {
-    return {
-      tools: [
-        {
-          name: "search_docs",
-          description:
-            "Search for documentation guidance based on keywords and context. Returns intelligent navigation instructions to help you find relevant information in a specific docset.",
-          inputSchema: {
-            type: "object",
-            properties: {
-              docset_id: {
-                type: "string",
-                description:
-                  "The identifier of the docset to search in. Use list_docsets to see available options.",
+    try {
+      // Load configuration to get available docsets
+      const { config } = await getConfiguration();
+
+      // Build rich description with available docsets
+      const docsetInfo = config.docsets
+        .map((docset) => {
+          const description = docset.description
+            ? ` - ${docset.description}`
+            : "";
+          return `• **${docset.id}** (${docset.name})${description}`;
+        })
+        .join("\n");
+
+      const searchDocsDescription = `Search for documentation in available docsets. Returns structured search strategy.
+
+📚 **AVAILABLE DOCSETS:**
+${docsetInfo}
+
+🔍 **SEARCH STRATEGY:**
+- Use the tools you have to search in text files (grep, rg, ripgrep, find)
+- Start with specific terms, expand to generalized terms`;
+
+      return {
+        tools: [
+          {
+            name: "search_docs",
+            description: searchDocsDescription,
+            inputSchema: {
+              type: "object",
+              properties: {
+                docset_id: {
+                  type: "string",
+                  description: "Choose the docset to search in.",
+                  enum: config.docsets.map((d) => d.id),
+                },
+                keywords: {
+                  type: "string",
+                  description:
+                    'Primary search terms or concepts you\'re looking for. Be specific about what you want to find (e.g., "authentication middleware", "user validation", "API rate limiting"). Include the exact terms you expect to appear in the documentation.',
+                },
+                generalized_keywords: {
+                  type: "string",
+                  description:
+                    'Related terms, synonyms, or contextual keywords that may appear alongside your primary keywords but are not your main target. These help broaden the search context and catch relevant content that might use different terminology (e.g., for "authentication" you might include "login, signin, oauth, credentials, tokens"). Think of terms that would appear in the same sections or discussions as your main keywords.',
+                },
               },
-              keywords: {
-                type: "string",
-                description:
-                  'Primary search terms or concepts you\'re looking for. Be specific about what you want to find (e.g., "authentication middleware", "user validation", "API rate limiting"). Include the exact terms you expect to appear in the documentation.',
-              },
-              generalized_keywords: {
-                type: "string",
-                description:
-                  'Related terms, synonyms, or contextual keywords that may appear alongside your primary keywords but are not your main target. These help broaden the search context and catch relevant content that might use different terminology (e.g., for "authentication" you might include "login, signin, oauth, credentials, tokens"). Think of terms that would appear in the same sections or discussions as your main keywords.',
-              },
+              required: ["docset_id", "keywords"],
+              additionalProperties: false,
             },
-            required: ["docset_id", "keywords"],
-            additionalProperties: false,
           },
-        },
-        {
-          name: "list_docsets",
-          description:
-            "List all available documentation sets (docsets) that can be searched. Each docset represents a specific project, library, or knowledge base.",
-          inputSchema: {
-            type: "object",
-            properties: {},
-            additionalProperties: false,
+          {
+            name: "list_docsets",
+            description:
+              "List all available documentation sets (docsets) with detailed information. Note: The search_docs tool already shows available docsets in its description, so this tool is mainly for getting additional metadata.",
+            inputSchema: {
+              type: "object",
+              properties: {},
+              additionalProperties: false,
+            },
           },
-        },
-      ],
-    };
+        ],
+      };
+    } catch (error) {
+      // Fallback to basic tools if configuration fails
+      return {
+        tools: [
+          {
+            name: "search_docs",
+            description:
+              "Search for documentation guidance based on keywords and context. Returns intelligent navigation instructions to help you find relevant information in a specific docset. (Configuration error - use list_docsets to see available options)",
+            inputSchema: {
+              type: "object",
+              properties: {
+                docset_id: {
+                  type: "string",
+                  description:
+                    "The identifier of the docset to search in. Use list_docsets to see available options.",
+                },
+                keywords: {
+                  type: "string",
+                  description:
+                    'Primary search terms or concepts you\'re looking for. Be specific about what you want to find (e.g., "authentication middleware", "user validation", "API rate limiting"). Include the exact terms you expect to appear in the documentation.',
+                },
+                generalized_keywords: {
+                  type: "string",
+                  description:
+                    'Related terms, synonyms, or contextual keywords that may appear alongside your primary keywords but are not your main target. These help broaden the search context and catch relevant content that might use different terminology (e.g., for "authentication" you might include "login, signin, oauth, credentials, tokens"). Think of terms that would appear in the same sections or discussions as your main keywords.',
+                },
+              },
+              required: ["docset_id", "keywords"],
+              additionalProperties: false,
+            },
+          },
+          {
+            name: "list_docsets",
+            description:
+              "List all available documentation sets (docsets) that can be searched. Each docset represents a specific project, library, or knowledge base.",
+            inputSchema: {
+              type: "object",
+              properties: {},
+              additionalProperties: false,
+            },
+          },
+        ],
+      };
+    }
   });
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
