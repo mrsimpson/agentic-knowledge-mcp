@@ -240,10 +240,12 @@ template: "Global: {{keywords}} in {{local_path}}"`;
           {
             id: "test",
             name: "Test Docs",
-            sources: [{
-              type: "local_folder",
-              paths: ["./docs"]
-            }],
+            sources: [
+              {
+                type: "local_folder",
+                paths: ["./docs"],
+              },
+            ],
             description: "Test description",
             template: "Custom template",
           },
@@ -261,10 +263,12 @@ template: "Global: {{keywords}} in {{local_path}}"`;
           {
             id: "test",
             name: "Test Docs",
-            sources: [{
-              type: "local_folder",
-              paths: ["./docs"]
-            }]
+            sources: [
+              {
+                type: "local_folder",
+                paths: ["./docs"],
+              },
+            ],
           },
         ],
       };
@@ -318,10 +322,12 @@ template: "Global: {{keywords}} in {{local_path}}"`;
           {
             id: "",
             name: "   ",
-            sources: [{
-              type: "local_folder",
-              paths: ["./docs"]
-            }]
+            sources: [
+              {
+                type: "local_folder",
+                paths: ["./docs"],
+              },
+            ],
           },
         ],
       };
@@ -344,10 +350,12 @@ template: "Global: {{keywords}} in {{local_path}}"`;
           {
             id: "test",
             name: "Test",
-            sources: [{
-              type: "local_folder",
-              paths: ["./docs"]
-            }],
+            sources: [
+              {
+                type: "local_folder",
+                paths: ["./docs"],
+              },
+            ],
             description: 123, // should be string
             template: [], // should be string
           },
@@ -364,10 +372,12 @@ template: "Global: {{keywords}} in {{local_path}}"`;
           {
             id: "test",
             name: "Test",
-            sources: [{
-              type: "local_folder",
-              paths: ["./docs"]
-            }]
+            sources: [
+              {
+                type: "local_folder",
+                paths: ["./docs"],
+              },
+            ],
           },
         ],
         template: 123, // should be string
@@ -383,20 +393,24 @@ template: "Global: {{keywords}} in {{local_path}}"`;
           {
             id: "local",
             name: "Local Docs",
-            sources: [{
-              type: "local_folder",
-              paths: ["./docs"]
-            }]
+            sources: [
+              {
+                type: "local_folder",
+                paths: ["./docs"],
+              },
+            ],
           },
           {
             id: "remote",
             name: "Remote Docs",
-            sources: [{
-              type: "git_repo",
-              url: "https://github.com/example/repo.git"
-            }]
-          }
-        ]
+            sources: [
+              {
+                type: "git_repo",
+                url: "https://github.com/example/repo.git",
+              },
+            ],
+          },
+        ],
       };
 
       expect(validateConfig(config)).toBe(true);
@@ -405,11 +419,13 @@ template: "Global: {{keywords}} in {{local_path}}"`;
     test("should reject empty sources array", () => {
       const config = {
         version: "1.0",
-        docsets: [{
-          id: "test",
-          name: "Test",
-          sources: []
-        }]
+        docsets: [
+          {
+            id: "test",
+            name: "Test",
+            sources: [],
+          },
+        ],
       };
 
       expect(validateConfig(config)).toBe(false);

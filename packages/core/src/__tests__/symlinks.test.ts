@@ -6,7 +6,11 @@ import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { promises as fs } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { createSymlinks, validateSymlinks, removeSymlinks } from "../paths/symlinks.js";
+import {
+  createSymlinks,
+  validateSymlinks,
+  removeSymlinks,
+} from "../paths/symlinks.js";
 import { calculateLocalPathWithSymlinks } from "../paths/calculator.js";
 import type { DocsetConfig } from "../types.js";
 
@@ -27,7 +31,7 @@ describe("Symlink Management", () => {
     // Create directory structure
     await fs.mkdir(join(tempDir, ".knowledge"), { recursive: true });
     await fs.mkdir(sourceDir, { recursive: true });
-    
+
     // Create some test files
     await fs.writeFile(join(sourceDir, "README.md"), "# Test Documentation");
     await fs.writeFile(join(sourceDir, "guide.md"), "# User Guide");
@@ -40,14 +44,14 @@ describe("Symlink Management", () => {
   describe("createSymlinks", () => {
     test("should create symlinks for local paths", async () => {
       const sourcePaths = ["./docs"];
-      
+
       await createSymlinks(sourcePaths, targetDir, projectRoot);
-      
+
       // Check that symlink was created
       const symlinkPath = join(targetDir, "docs");
       const stats = await fs.lstat(symlinkPath);
       expect(stats.isSymbolicLink()).toBe(true);
-      
+
       // Check that symlink points to correct target
       const target = await fs.readlink(symlinkPath);
       expect(target).toBe(sourceDir);
@@ -58,44 +62,45 @@ describe("Symlink Management", () => {
       const sourceDir2 = join(tempDir, "guides");
       await fs.mkdir(sourceDir2);
       await fs.writeFile(join(sourceDir2, "tutorial.md"), "# Tutorial");
-      
+
       const sourcePaths = ["./docs", "./guides"];
-      
+
       await createSymlinks(sourcePaths, targetDir, projectRoot);
-      
+
       // Check both symlinks exist
       const symlink1 = join(targetDir, "docs");
       const symlink2 = join(targetDir, "guides");
-      
+
       expect((await fs.lstat(symlink1)).isSymbolicLink()).toBe(true);
       expect((await fs.lstat(symlink2)).isSymbolicLink()).toBe(true);
     });
 
     test("should handle absolute paths", async () => {
       const sourcePaths = [sourceDir];
-      
+
       await createSymlinks(sourcePaths, targetDir, projectRoot);
-      
+
       const symlinkPath = join(targetDir, "docs");
       expect((await fs.lstat(symlinkPath)).isSymbolicLink()).toBe(true);
     });
 
     test("should throw error for non-existent source", async () => {
       const sourcePaths = ["./non-existent"];
-      
-      await expect(createSymlinks(sourcePaths, targetDir, projectRoot))
-        .rejects.toThrow("Source path does not exist");
+
+      await expect(
+        createSymlinks(sourcePaths, targetDir, projectRoot),
+      ).rejects.toThrow("Source path does not exist");
     });
 
     test("should replace existing symlinks", async () => {
       const sourcePaths = ["./docs"];
-      
+
       // Create initial symlink
       await createSymlinks(sourcePaths, targetDir, projectRoot);
-      
+
       // Create again (should replace)
       await createSymlinks(sourcePaths, targetDir, projectRoot);
-      
+
       const symlinkPath = join(targetDir, "docs");
       expect((await fs.lstat(symlinkPath)).isSymbolicLink()).toBe(true);
     });
@@ -104,17 +109,17 @@ describe("Symlink Management", () => {
   describe("validateSymlinks", () => {
     test("should return true for valid symlinks", async () => {
       await createSymlinks(["./docs"], targetDir, projectRoot);
-      
+
       const isValid = await validateSymlinks(targetDir);
       expect(isValid).toBe(true);
     });
 
     test("should return false for broken symlinks", async () => {
       await createSymlinks(["./docs"], targetDir, projectRoot);
-      
+
       // Remove source directory to break symlink
       await fs.rm(sourceDir, { recursive: true });
-      
+
       const isValid = await validateSymlinks(targetDir);
       expect(isValid).toBe(false);
     });
@@ -128,21 +133,22 @@ describe("Symlink Management", () => {
   describe("removeSymlinks", () => {
     test("should remove all symlinks in directory", async () => {
       await createSymlinks(["./docs"], targetDir, projectRoot);
-      
+
       // Verify symlink exists
       const symlinkPath = join(targetDir, "docs");
       expect((await fs.lstat(symlinkPath)).isSymbolicLink()).toBe(true);
-      
+
       // Remove symlinks
       await removeSymlinks(targetDir);
-      
+
       // Verify symlink is gone
       await expect(fs.access(symlinkPath)).rejects.toThrow();
     });
 
     test("should handle non-existent directory gracefully", async () => {
-      await expect(removeSymlinks(join(tempDir, "non-existent")))
-        .resolves.not.toThrow();
+      await expect(
+        removeSymlinks(join(tempDir, "non-existent")),
+      ).resolves.not.toThrow();
     });
   });
 
@@ -151,17 +157,19 @@ describe("Symlink Management", () => {
       const docset: DocsetConfig = {
         id: "test-docs",
         name: "Test Documentation",
-        sources: [{
-          type: "local_folder",
-          paths: ["./docs"]
-        }]
+        sources: [
+          {
+            type: "local_folder",
+            paths: ["./docs"],
+          },
+        ],
       };
 
       const result = await calculateLocalPathWithSymlinks(docset, configPath);
-      
+
       // Should return relative path to symlink directory
       expect(result).toBe(".knowledge/docsets/test-docs");
-      
+
       // Verify symlink was created
       const symlinkPath = join(targetDir, "docs");
       expect((await fs.lstat(symlinkPath)).isSymbolicLink()).toBe(true);
@@ -171,14 +179,16 @@ describe("Symlink Management", () => {
       const docset: DocsetConfig = {
         id: "git-docs",
         name: "Git Documentation",
-        sources: [{
-          type: "git_repo",
-          url: "https://github.com/example/repo.git"
-        }]
+        sources: [
+          {
+            type: "git_repo",
+            url: "https://github.com/example/repo.git",
+          },
+        ],
       };
 
       const result = await calculateLocalPathWithSymlinks(docset, configPath);
-      
+
       // Should return absolute path for git repos
       const expected = join(tempDir, ".knowledge", "docsets", "git-docs");
       expect(result).toBe(expected);

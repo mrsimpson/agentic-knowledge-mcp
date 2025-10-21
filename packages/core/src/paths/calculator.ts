@@ -2,7 +2,14 @@
  * Path calculation utilities
  */
 
-import { resolve, dirname, isAbsolute, join, normalize, relative } from "node:path";
+import {
+  resolve,
+  dirname,
+  isAbsolute,
+  join,
+  normalize,
+  relative,
+} from "node:path";
 import { promises as fs } from "node:fs";
 import * as fsSync from "node:fs";
 import * as pathModule from "node:path";
@@ -31,21 +38,21 @@ export function calculateLocalPath(
     // For now, use the first source to determine the path
     const primarySource = docset.sources[0];
 
-    if (primarySource.type === 'local_folder') {
+    if (primarySource.type === "local_folder") {
       // For local folders, return relative path from project root
       const firstPath = primarySource.paths[0];
-      
+
       if (isAbsolute(firstPath)) {
         // If absolute path, return as-is
         return normalize(firstPath);
       }
-      
+
       // If relative path, resolve from project root and return relative
       const resolvedPath = resolve(projectRoot, firstPath);
-      return relative(projectRoot, resolvedPath) || '.';
+      return relative(projectRoot, resolvedPath) || ".";
     }
 
-    if (primarySource.type === 'git_repo') {
+    if (primarySource.type === "git_repo") {
       // For git repos, use standardized path: .knowledge/docsets/{id}
       return join(configDir, "docsets", docset.id);
     }
@@ -79,15 +86,15 @@ export async function calculateLocalPathWithSymlinks(
 
   const primarySource = docset.sources[0];
 
-  if (primarySource.type === 'local_folder') {
+  if (primarySource.type === "local_folder") {
     // Create symlinks in .knowledge/docsets/{id}/
     const symlinkDir = join(configDir, "docsets", docset.id);
-    
+
     try {
       await createSymlinks(primarySource.paths, symlinkDir, projectRoot);
-      
+
       // Return relative path to symlink directory
-      return relative(projectRoot, symlinkDir) || '.';
+      return relative(projectRoot, symlinkDir) || ".";
     } catch (error) {
       throw new KnowledgeError(
         ErrorType.PATH_INVALID,
@@ -97,7 +104,7 @@ export async function calculateLocalPathWithSymlinks(
     }
   }
 
-  if (primarySource.type === 'git_repo') {
+  if (primarySource.type === "git_repo") {
     // For git repos, use standardized path: .knowledge/docsets/{id}
     return join(configDir, "docsets", docset.id);
   }

@@ -16,7 +16,7 @@ export interface BaseSourceConfig {
  * Local folder source configuration
  */
 export interface LocalFolderSourceConfig extends BaseSourceConfig {
-  type: 'local_folder';
+  type: "local_folder";
   /** Paths to local files/directories */
   paths: string[];
 }
@@ -25,7 +25,7 @@ export interface LocalFolderSourceConfig extends BaseSourceConfig {
  * Git repository source configuration
  */
 export interface GitRepoSourceConfig extends BaseSourceConfig {
-  type: 'git_repo';
+  type: "git_repo";
   /** Git repository URL */
   url: string;
   /** Branch to clone (optional, defaults to main) */
