@@ -2,3 +2,5 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 npx lint-staged
+# TODO: Re-enable build check after CLI commands are updated for new config structure
+# pnpm run build

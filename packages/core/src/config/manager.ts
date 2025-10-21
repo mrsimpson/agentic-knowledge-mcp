@@ -172,15 +172,15 @@ export class ConfigManager {
       );
     }
 
-    // Update web sources with discovered paths
-    if (docset.web_sources) {
-      for (const webSource of docset.web_sources) {
-        if (webSource.type === "git_repo") {
+    // Update sources with discovered paths
+    if (docset.sources) {
+      for (const source of docset.sources) {
+        if (source.type === "git_repo") {
           // Add or update the paths in options
-          if (!webSource.options) {
-            webSource.options = {};
+          if (!source.paths) {
+            source.paths = [];
           }
-          (webSource.options as any).paths = discoveredPaths;
+          source.paths = discoveredPaths;
         }
       }
     }

@@ -253,15 +253,18 @@ ${docsetInfo}
 
         case "list_docsets": {
           // Load configuration
-          const { config } = await getConfiguration();
+          const { config, configPath } = await getConfiguration();
 
-          // Return list of available docsets
-          const docsets = config.docsets.map((docset) => ({
-            docset_id: docset.id,
-            docset_name: docset.name,
-            docset_description: docset.description || "No description provided",
-            local_path: docset.local_path,
-          }));
+          // Return list of available docsets with calculated paths
+          const docsets = await Promise.all(
+            config.docsets.map(async (docset) => ({
+              docset_id: docset.id,
+              docset_name: docset.name,
+              docset_description:
+                docset.description || "No description provided",
+              local_path: await calculateLocalPath(docset, configPath),
+            })),
+          );
 
           const summary =
             `Found ${docsets.length} available docset(s):\n\n` +
