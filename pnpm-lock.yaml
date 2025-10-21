@@ -87,6 +87,9 @@ importers:
       '@codemcp/knowledge-core':
         specifier: workspace:*
         version: link:../core
+      '@codemcp/knowledge-mcp-server':
+        specifier: workspace:*
+        version: link:../mcp-server
       chalk:
         specifier: ^5.3.0
         version: 5.6.0
