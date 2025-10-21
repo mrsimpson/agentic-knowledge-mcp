@@ -37,10 +37,12 @@ describe("Path Calculation", () => {
       const docset: DocsetConfig = {
         id: "test",
         name: "Test",
-        sources: [{
-          type: "local_folder",
-          paths: ["/absolute/path/to/docs"]
-        }]
+        sources: [
+          {
+            type: "local_folder",
+            paths: ["/absolute/path/to/docs"],
+          },
+        ],
       };
 
       const result = calculateLocalPath(docset, configPath);
@@ -52,10 +54,12 @@ describe("Path Calculation", () => {
       const docset: DocsetConfig = {
         id: "test",
         name: "Test",
-        sources: [{
-          type: "local_folder",
-          paths: ["./docs"]
-        }]
+        sources: [
+          {
+            type: "local_folder",
+            paths: ["./docs"],
+          },
+        ],
       };
 
       const result = calculateLocalPath(docset, configPath);
@@ -66,10 +70,12 @@ describe("Path Calculation", () => {
       const docset: DocsetConfig = {
         id: "test",
         name: "Test",
-        sources: [{
-          type: "local_folder",
-          paths: ["../shared-docs"]
-        }]
+        sources: [
+          {
+            type: "local_folder",
+            paths: ["../shared-docs"],
+          },
+        ],
       };
 
       const result = calculateLocalPath(docset, configPath);
@@ -80,10 +86,12 @@ describe("Path Calculation", () => {
       const docset: DocsetConfig = {
         id: "test",
         name: "Test",
-        sources: [{
-          type: "local_folder",
-          paths: ["./docs/../api/../guides"]
-        }]
+        sources: [
+          {
+            type: "local_folder",
+            paths: ["./docs/../api/../guides"],
+          },
+        ],
       };
 
       const result = calculateLocalPath(docset, configPath);
@@ -94,10 +102,12 @@ describe("Path Calculation", () => {
       const docset: DocsetConfig = {
         id: "test",
         name: "Test",
-        sources: [{
-          type: "local_folder",
-          paths: ["./docs"]
-        }]
+        sources: [
+          {
+            type: "local_folder",
+            paths: ["./docs"],
+          },
+        ],
       };
 
       const result = calculateLocalPath(docset, "");
@@ -108,10 +118,12 @@ describe("Path Calculation", () => {
       const docset: DocsetConfig = {
         id: "multi-docs",
         name: "Multiple Documentation",
-        sources: [{
-          type: "local_folder",
-          paths: ["./docs", "./guides", "./api"]
-        }]
+        sources: [
+          {
+            type: "local_folder",
+            paths: ["./docs", "./guides", "./api"],
+          },
+        ],
       };
 
       const result = calculateLocalPath(docset, configPath);
@@ -122,10 +134,12 @@ describe("Path Calculation", () => {
       const docset: DocsetConfig = {
         id: "simple-git",
         name: "Simple Git Repository",
-        sources: [{
-          type: "git_repo",
-          url: "https://github.com/example/simple.git"
-        }]
+        sources: [
+          {
+            type: "git_repo",
+            url: "https://github.com/example/simple.git",
+          },
+        ],
       };
 
       const result = calculateLocalPath(docset, configPath);
@@ -250,10 +264,12 @@ describe("Path Calculation", () => {
       const docset: DocsetConfig = {
         id: "test",
         name: "Test",
-        sources: [{
-          type: "local_folder",
-          paths: ["./docs"]
-        }]
+        sources: [
+          {
+            type: "local_folder",
+            paths: ["./docs"],
+          },
+        ],
       };
 
       // Calculate path
@@ -261,7 +277,7 @@ describe("Path Calculation", () => {
 
       // Should return relative path
       expect(calculatedPath).toBe("docs");
-      
+
       // Validate actual path exists (resolve relative to project root)
       const absolutePath = resolve(tempDir, calculatedPath);
       const pathExists = await validatePath(absolutePath);
@@ -288,17 +304,19 @@ describe("Path Calculation", () => {
       const docset: DocsetConfig = {
         id: "components",
         name: "Components",
-        sources: [{
-          type: "local_folder",
-          paths: ["./src/components"]
-        }]
+        sources: [
+          {
+            type: "local_folder",
+            paths: ["./src/components"],
+          },
+        ],
       };
 
       const result = calculateLocalPath(docset, projectConfig);
-      
+
       // Should return relative path
       expect(result).toBe("src/components");
-      
+
       // Validate actual path exists
       const projectRoot = join(tempDir, "project");
       const absolutePath = resolve(projectRoot, result);

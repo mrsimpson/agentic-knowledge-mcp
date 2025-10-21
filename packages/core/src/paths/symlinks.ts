@@ -35,7 +35,7 @@ export async function createSymlinks(
       }
 
       // Determine target symlink path
-      const sourceName = sourcePath.split('/').pop() || 'unknown';
+      const sourceName = sourcePath.split("/").pop() || "unknown";
       const symlinkPath = join(targetDir, sourceName);
 
       // Remove existing symlink if it exists
@@ -65,11 +65,11 @@ export async function createSymlinks(
 export async function validateSymlinks(targetDir: string): Promise<boolean> {
   try {
     const entries = await fs.readdir(targetDir, { withFileTypes: true });
-    
+
     for (const entry of entries) {
       if (entry.isSymbolicLink()) {
         const symlinkPath = join(targetDir, entry.name);
-        
+
         // Check if symlink target exists
         try {
           await fs.access(symlinkPath);
@@ -78,7 +78,7 @@ export async function validateSymlinks(targetDir: string): Promise<boolean> {
         }
       }
     }
-    
+
     return true;
   } catch {
     return false;
@@ -92,7 +92,7 @@ export async function validateSymlinks(targetDir: string): Promise<boolean> {
 export async function removeSymlinks(targetDir: string): Promise<void> {
   try {
     const entries = await fs.readdir(targetDir, { withFileTypes: true });
-    
+
     for (const entry of entries) {
       if (entry.isSymbolicLink()) {
         const symlinkPath = join(targetDir, entry.name);
@@ -101,7 +101,7 @@ export async function removeSymlinks(targetDir: string): Promise<void> {
     }
   } catch (error) {
     // Ignore if directory doesn't exist
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
       throw error;
     }
   }

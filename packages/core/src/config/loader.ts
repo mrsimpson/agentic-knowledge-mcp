@@ -5,11 +5,7 @@
 import { promises as fs } from "node:fs";
 import * as fsSync from "node:fs";
 import { load } from "js-yaml";
-import type {
-  KnowledgeConfig,
-  DocsetConfig,
-  SourceConfig,
-} from "../types.js";
+import type { KnowledgeConfig, DocsetConfig, SourceConfig } from "../types.js";
 import { KnowledgeError, ErrorType } from "../types.js";
 import { validateTemplate } from "../templates/processor.js";
 
@@ -250,14 +246,14 @@ function validateSource(source: unknown): source is SourceConfig {
     if (!Array.isArray(obj["paths"]) || obj["paths"].length === 0) {
       return false;
     }
-    
+
     // All paths must be strings
     for (const path of obj["paths"]) {
       if (typeof path !== "string" || path.trim() === "") {
         return false;
       }
     }
-    
+
     return true;
   }
 
@@ -277,7 +273,7 @@ function validateSource(source: unknown): source is SourceConfig {
       if (!Array.isArray(obj["paths"])) {
         return false;
       }
-      
+
       // All paths must be strings
       for (const path of obj["paths"]) {
         if (typeof path !== "string" || path.trim() === "") {
