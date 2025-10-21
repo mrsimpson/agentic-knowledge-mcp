@@ -37,10 +37,23 @@ export function calculateLocalPath(
 
     // For now, use the first source to determine the path
     const primarySource = docset.sources[0];
+    if (!primarySource) {
+      throw new Error(`Docset '${docset.id}' has no sources configured`);
+    }
 
     if (primarySource.type === "local_folder") {
       // For local folders, return relative path from project root
+      if (!primarySource.paths || primarySource.paths.length === 0) {
+        throw new Error(
+          `Local folder source for docset '${docset.id}' has no paths configured`,
+        );
+      }
       const firstPath = primarySource.paths[0];
+      if (!firstPath) {
+        throw new Error(
+          `Local folder source for docset '${docset.id}' has empty path`,
+        );
+      }
 
       if (isAbsolute(firstPath)) {
         // If absolute path, return as-is
@@ -57,7 +70,7 @@ export function calculateLocalPath(
       return join(configDir, "docsets", docset.id);
     }
 
-    throw new Error(`Unsupported source type: ${primarySource.type}`);
+    throw new Error(`Unsupported source type: ${(primarySource as any).type}`);
   } catch (error) {
     throw new KnowledgeError(
       ErrorType.PATH_INVALID,
@@ -85,10 +98,19 @@ export async function calculateLocalPathWithSymlinks(
   }
 
   const primarySource = docset.sources[0];
+  if (!primarySource) {
+    throw new Error(`Docset '${docset.id}' has no sources configured`);
+  }
 
   if (primarySource.type === "local_folder") {
     // Create symlinks in .knowledge/docsets/{id}/
     const symlinkDir = join(configDir, "docsets", docset.id);
+
+    if (!primarySource.paths || primarySource.paths.length === 0) {
+      throw new Error(
+        `Local folder source for docset '${docset.id}' has no paths configured`,
+      );
+    }
 
     try {
       await createSymlinks(primarySource.paths, symlinkDir, projectRoot);
@@ -109,7 +131,7 @@ export async function calculateLocalPathWithSymlinks(
     return join(configDir, "docsets", docset.id);
   }
 
-  throw new Error(`Unsupported source type: ${primarySource.type}`);
+  throw new Error(`Unsupported source type: ${(primarySource as any).type}`);
 }
 
 /**
