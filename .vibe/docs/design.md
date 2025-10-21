@@ -71,7 +71,7 @@ IMPORTANT: DO NOT REMOVE THIS COMMENT HOW TO USE THE TEMPLATE!
 **Package Naming:**
 - Core functionality: `@agentic-knowledge/core`
 - MCP implementation: `@agentic-knowledge/mcp-server`
-- Future CLI: `@agentic-knowledge/cli`
+- CLI with MCP server routing: `@agentic-knowledge/cli`
 
 **Module Organization:**
 - Configuration: `config/` (loading, validation, types)

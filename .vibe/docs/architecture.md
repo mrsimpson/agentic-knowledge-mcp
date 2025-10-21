@@ -167,7 +167,7 @@ Clean separation between protocol handling, business logic, and configuration en
 | **MCP Server Package**     | Handles MCP protocol, tool registration, request routing                        |
 | **Core Package**           | Configuration management (ConfigManager), path calculation, template processing |
 | **Content Loader Package** | Web source loading, smart content filtering, Git operations                     |
-| **CLI Package**            | User commands for docset management, orchestrates operations                    |
+| **CLI Package**            | Entry point router, user commands for docset management, orchestrates operations |
 
 ## Level 2 - Core Package Detail
 

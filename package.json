@@ -5,7 +5,7 @@
   "type": "module",
   "main": "packages/mcp-server/dist/index.js",
   "bin": {
-    "agentic-knowledge": "packages/cli/dist/cli.js"
+    "agentic-knowledge": "packages/cli/dist/index.js"
   },
   "engines": {
     "node": ">=18.0.0",
