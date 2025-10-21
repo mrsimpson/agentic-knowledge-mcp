@@ -3,15 +3,15 @@
   "version": "0.0.1",
   "description": "Command-line interface for agentic knowledge web content management",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/exports.js",
+  "types": "dist/exports.d.ts",
   "bin": {
-    "agentic-knowledge": "./dist/cli.js"
+    "agentic-knowledge": "./dist/index.js"
   },
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/exports.js",
+      "types": "./dist/exports.d.ts"
     }
   },
   "files": [
@@ -34,6 +34,7 @@
   "dependencies": {
     "@codemcp/knowledge-core": "workspace:*",
     "@codemcp/knowledge-content-loader": "workspace:*",
+    "@codemcp/knowledge-mcp-server": "workspace:*",
     "commander": "^12.0.0",
     "chalk": "^5.3.0",
     "ora": "^8.0.1"
