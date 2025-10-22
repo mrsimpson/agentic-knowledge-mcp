@@ -154,6 +154,7 @@ if (args.length === 0) {
 - [x] Fix remaining test failures in MCP server and E2E tests
 - [x] Update all test configurations from old format (web_sources, local_path) to new sources format
 - [x] Fix CLI routing issue - entry point was not properly awaiting imports
+- [x] Fix missing CLI dependencies in main package (commander, chalk, ora)
 
 ### Completed
 
