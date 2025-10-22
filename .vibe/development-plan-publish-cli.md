@@ -156,6 +156,8 @@ if (args.length === 0) {
 - [x] Fix CLI routing issue - entry point was not properly awaiting imports
 - [x] Fix missing CLI dependencies in main package (commander, chalk, ora)
 - [x] Fix MCP server import - call startServer() function instead of importing index.js
+- [x] Debug npx execution - added debug output to see what arguments npx passes
+- [x] **FOUND ROOT CAUSE**: Local packaging script doesn't include packages/ directory in tarball
 
 ### Completed
 
