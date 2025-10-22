@@ -128,11 +128,15 @@ docsets:
   - id: "test-docs"
     name: "Test Documentation"
     description: "Test documentation for e2e testing"
-    local_path: "./docs"
+    sources:
+      - type: "local_folder"
+        paths: ["./docs"]
   - id: "api-docs"
     name: "API Documentation"
     description: "API reference documentation"
-    local_path: "./api"
+    sources:
+      - type: "local_folder"
+        paths: ["./api"]
 template: |
   Search for '{{keywords}}' in {{docset_name}} ({{docset_description}}).
   
@@ -187,7 +191,9 @@ docsets:
   - id: "react-docs"
     name: "React Documentation"
     description: "React framework documentation"
-    local_path: "./react-docs"
+    sources:
+      - type: "local_folder"
+        paths: ["./react-docs"]
     template: |
       Looking for React information about '{{keywords}}' in {{local_path}}.
       Search for component names, props, hooks, and patterns.

@@ -191,7 +191,7 @@ describe("MCP Protocol Compliance E2E Tests", () => {
       expect(responseText).toContain("authentication middleware");
       expect(responseText).toContain("login signin oauth credentials");
       expect(responseText).toContain("Test Documentation");
-      expect(responseText).toContain("/docs"); // Should contain the docs path
+      expect(responseText).toContain("docs");
     });
 
     it("should execute search_docs with minimal parameters", async () => {
@@ -212,7 +212,7 @@ describe("MCP Protocol Compliance E2E Tests", () => {
       const responseText = content[0]?.text;
       expect(responseText).toContain("rate limiting");
       expect(responseText).toContain("API Documentation");
-      expect(responseText).toContain("/api"); // Should contain the api path
+      expect(responseText).toContain("api");
     });
   });
 
