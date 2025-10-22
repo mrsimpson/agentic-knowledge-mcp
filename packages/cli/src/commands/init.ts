@@ -43,13 +43,13 @@ export const initCommand = new Command("init")
           );
         }
 
-        if (!docset.web_sources || docset.web_sources.length === 0) {
-          throw new Error(`Docset '${docsetId}' has no web sources configured`);
+        if (!docset.sources || docset.sources.length === 0) {
+          throw new Error(`Docset '${docsetId}' has no sources configured`);
         }
 
         console.log(chalk.green(`✅ Found docset: ${docset.name}`));
         console.log(chalk.gray(`📝 Description: ${docset.description}`));
-        console.log(chalk.gray(`🔗 Web sources: ${docset.web_sources.length}`));
+        console.log(chalk.gray(`🔗 Sources: ${docset.sources.length}`));
 
         // Calculate the local path for this docset
         const localPath = calculateLocalPath(docset, configPath);
@@ -88,15 +88,15 @@ export const initCommand = new Command("init")
         let totalFiles = 0;
         const allDiscoveredPaths: string[] = [];
 
-        // Process each web source
-        for (const [index, webSource] of docset.web_sources.entries()) {
+        // Process each source
+        for (const [index, source] of docset.sources.entries()) {
           console.log(
             chalk.yellow(
-              `\n🔄 Loading source ${index + 1}/${docset.web_sources.length}: ${webSource.url}`,
+              `\n🔄 Loading source ${index + 1}/${docset.sources.length}: ${source.type === "git_repo" ? source.url : source.paths?.join(", ")}`,
             ),
           );
 
-          if (webSource.type === "git_repo") {
+          if (source.type === "git_repo") {
             // Use GitRepoLoader for all Git operations (REQ-19)
             const loader = new GitRepoLoader();
 
@@ -105,9 +105,12 @@ export const initCommand = new Command("init")
             );
 
             const webSourceConfig = {
-              url: webSource.url,
+              url: source.url,
               type: WebSourceType.GIT_REPO,
-              options: webSource.options || {},
+              options: {
+                branch: source.branch || "main",
+                paths: source.paths || [],
+              },
             };
 
             // Validate configuration
@@ -137,8 +140,8 @@ export const initCommand = new Command("init")
 
             // Create source metadata
             const metadata = {
-              source_url: webSource.url,
-              source_type: webSource.type,
+              source_url: source.url,
+              source_type: source.type,
               downloaded_at: new Date().toISOString(),
               files_count: result.files.length,
               files: result.files,
@@ -153,7 +156,7 @@ export const initCommand = new Command("init")
           } else {
             console.log(
               chalk.red(
-                `    ❌ Web source type '${webSource.type}' not yet supported`,
+                `    ❌ Source type '${source.type}' not yet supported`,
               ),
             );
           }
@@ -165,7 +168,7 @@ export const initCommand = new Command("init")
           docset_name: docset.name,
           initialized_at: new Date().toISOString(),
           total_files: totalFiles,
-          web_sources_count: docset.web_sources.length,
+          sources_count: docset.sources.length,
         };
 
         await fs.writeFile(
@@ -202,7 +205,7 @@ export const initCommand = new Command("init")
         console.log(chalk.gray(`📁 Location: ${localPath}`));
         console.log(chalk.gray(`📄 Total files: ${totalFiles}`));
         console.log(
-          chalk.gray(`🔗 Sources processed: ${docset.web_sources.length}`),
+          chalk.gray(`🔗 Sources processed: ${docset.sources.length}`),
         );
       } catch (error) {
         console.error(chalk.red("\n❌ Error:"));

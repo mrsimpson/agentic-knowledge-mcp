@@ -78,13 +78,12 @@ async function createGitRepoDocset(options: any): Promise<DocsetConfig> {
     id: options.id,
     name: options.name,
     description: options.description || `Git repository: ${options.url}`,
-    web_sources: [
+    sources: [
       {
         url: options.url,
         type: "git_repo",
-        options: {
-          branch: options.branch,
-        },
+        branch: options.branch,
+        paths: options.paths ? options.paths.split(",") : undefined,
       },
     ],
   };
@@ -110,6 +109,11 @@ async function createLocalFolderDocset(options: any): Promise<DocsetConfig> {
     id: options.id,
     name: options.name,
     description: options.description || `Local documentation: ${options.path}`,
-    local_path: options.path,
+    sources: [
+      {
+        type: "local_folder",
+        paths: [options.path],
+      },
+    ],
   };
 }

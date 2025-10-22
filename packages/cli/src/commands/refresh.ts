@@ -21,7 +21,7 @@ interface DocsetMetadata {
   initialized_at: string;
   last_refreshed?: string;
   total_files: number;
-  web_sources_count: number;
+  sources_count: number;
 }
 
 interface SourceMetadata {
@@ -66,16 +66,14 @@ export const refreshCommand = new Command("refresh")
         // Determine which docsets to refresh
         const docsetsToRefresh = docsetId
           ? config.docsets.filter((d) => d.id === docsetId)
-          : config.docsets.filter(
-              (d) => d.web_sources && d.web_sources.length > 0,
-            );
+          : config.docsets.filter((d) => d.sources && d.sources.length > 0);
 
         if (docsetsToRefresh.length === 0) {
           if (docsetId) {
             throw new Error(
-              `Docset '${docsetId}' not found or has no web sources. Available docsets with web sources: ${
+              `Docset '${docsetId}' not found or has no sources. Available docsets with sources: ${
                 config.docsets
-                  .filter((d) => d.web_sources && d.web_sources.length > 0)
+                  .filter((d) => d.sources && d.sources.length > 0)
                   .map((d) => d.id)
                   .join(", ") || "none"
               }`,
@@ -156,13 +154,13 @@ async function refreshDocset(
     let totalFiles = 0;
     const refreshedSources: SourceMetadata[] = [];
 
-    // Process each web source
-    for (const [index, webSource] of (docset.web_sources || []).entries()) {
-      spinner.text = `${docset.id}: Refreshing source ${index + 1}/${docset.web_sources.length}...`;
+    // Process each source
+    for (const [index, source] of (docset.sources || []).entries()) {
+      spinner.text = `${docset.id}: Refreshing source ${index + 1}/${docset.sources.length}...`;
 
-      if (webSource.type === "git_repo") {
+      if (source.type === "git_repo") {
         const sourceFiles = await refreshGitSource(
-          webSource,
+          source,
           localPath,
           index,
           docset.id,
@@ -173,7 +171,7 @@ async function refreshDocset(
       } else {
         console.log(
           chalk.yellow(
-            `    ⚠️  Web source type '${webSource.type}' not yet supported, skipping`,
+            `    ⚠️  Source type '${source.type}' not yet supported, skipping`,
           ),
         );
       }
@@ -190,7 +188,7 @@ async function refreshDocset(
       initialized_at: metadata.initialized_at,
       last_refreshed: new Date().toISOString(),
       total_files: totalFiles,
-      web_sources_count: docset.web_sources?.length || 0,
+      sources_count: docset.sources?.length || 0,
     };
 
     await fs.writeFile(metadataPath, JSON.stringify(updatedMetadata, null, 2));

@@ -18,7 +18,7 @@ interface DocsetMetadata {
   initialized_at: string;
   last_refreshed?: string;
   total_files: number;
-  web_sources_count: number;
+  sources_count: number;
 }
 
 interface SourceMetadata {
@@ -60,7 +60,7 @@ export const statusCommand = new Command("status")
 
       // Find docsets with web sources
       const webDocsets = config.docsets.filter(
-        (d) => d.web_sources && d.web_sources.length > 0,
+        (d) => d.sources && d.sources.length > 0,
       );
 
       if (webDocsets.length === 0) {
@@ -132,7 +132,7 @@ async function getDocsetStatus(
 
     // Load source metadata
     const sources: SourceMetadata[] = [];
-    for (let i = 0; i < (docset.web_sources?.length || 0); i++) {
+    for (let i = 0; i < (docset.sources?.length || 0); i++) {
       try {
         const sourceMetadataPath = path.join(
           localPath,
@@ -182,9 +182,7 @@ function displaySummary(statuses: DocsetStatus[]) {
         `${chalk.yellow("⚠️")} ${chalk.bold(docset.id)} - ${chalk.yellow("Not initialized")}`,
       );
       console.log(
-        chalk.gray(
-          `   ${docset.web_sources?.length || 0} web source(s) configured`,
-        ),
+        chalk.gray(`   ${docset.sources?.length || 0} source(s) configured`),
       );
       continue;
     }
@@ -225,7 +223,7 @@ function displaySummary(statuses: DocsetStatus[]) {
     );
     console.log(
       chalk.gray(
-        `   Last updated: ${timeDisplay} | ${sources.length}/${metadata.web_sources_count} sources loaded`,
+        `   Last updated: ${timeDisplay} | ${sources.length}/${metadata.sources_count} sources loaded`,
       ),
     );
   }
@@ -249,16 +247,16 @@ function displayDetailedStatus(status: DocsetStatus) {
       chalk.gray(`📝 Description: ${docset.description || "No description"}`),
     );
     console.log(
-      chalk.gray(
-        `🔗 Web sources configured: ${docset.web_sources?.length || 0}`,
-      ),
+      chalk.gray(`🔗 Sources configured: ${docset.sources?.length || 0}`),
     );
 
-    if (docset.web_sources && docset.web_sources.length > 0) {
+    if (docset.sources && docset.sources.length > 0) {
       console.log(chalk.gray("   Sources:"));
-      for (const [i, source] of docset.web_sources.entries()) {
+      for (const [i, source] of docset.sources.entries()) {
         console.log(
-          chalk.gray(`     ${i + 1}. ${source.url} (${source.type})`),
+          chalk.gray(
+            `     ${i + 1}. ${source.type === "git_repo" ? source.url : source.paths?.join(", ")} (${source.type})`,
+          ),
         );
       }
       console.log(
@@ -285,7 +283,7 @@ function displayDetailedStatus(status: DocsetStatus) {
     chalk.gray(`📝 Description: ${docset.description || "No description"}`),
   );
   console.log(chalk.gray(`📄 Total files: ${metadata.total_files}`));
-  console.log(chalk.gray(`🔗 Web sources: ${metadata.web_sources_count}`));
+  console.log(chalk.gray(`🔗 Sources: ${metadata.sources_count}`));
 
   // Display timing info
   const initTime = new Date(metadata.initialized_at);
@@ -321,7 +319,7 @@ function displayDetailedStatus(status: DocsetStatus) {
   }
 
   // Display missing sources
-  const missingSources = (docset.web_sources?.length || 0) - sources.length;
+  const missingSources = (docset.sources?.length || 0) - sources.length;
   if (missingSources > 0) {
     console.log(
       chalk.yellow(
