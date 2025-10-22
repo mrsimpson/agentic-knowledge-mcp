@@ -22,11 +22,13 @@ async function main() {
       join(__dirname, "../../mcp-server/dist/index.js"),
     );
     if (isLocal) {
-      await import("../../mcp-server/dist/index.js");
+      const { startServer } = await import("../../mcp-server/dist/cli.js");
+      await startServer();
     } else {
       // Use string literal to avoid TypeScript resolution issues
       const mcpServerModule = "@codemcp/knowledge-mcp-server";
-      await import(mcpServerModule);
+      const { startServer } = await import(mcpServerModule);
+      await startServer();
     }
   } else {
     // Any arguments, run CLI
