@@ -31,19 +31,49 @@ describe("create command", () => {
   });
 
   it("creates local-folder docset", async () => {
-    const cliPath = join(process.cwd(), "dist/cli.js");
-    const cmd = `node ${cliPath} create --preset local-folder --id test-docs --name "Test Docs" --path ./docs`;
+    // Import and run CLI function directly
+    const { runCli } = await import("../cli.js");
 
-    execSync(cmd, { cwd: testDir });
+    // Mock process.argv
+    const originalArgv = process.argv;
+    process.argv = [
+      "node",
+      "cli.js",
+      "create",
+      "--preset",
+      "local-folder",
+      "--id",
+      "test-docs",
+      "--name",
+      "Test Docs",
+      "--path",
+      "./docs",
+    ];
 
-    const config = await fs.readFile(configPath, "utf-8");
-    expect(config).toContain("id: test-docs");
-    expect(config).toContain("name: Test Docs");
-    expect(config).toContain("local_path: ./docs");
+    // Mock process.cwd to return testDir
+    const originalCwd = process.cwd;
+    process.cwd = () => testDir;
+
+    try {
+      runCli();
+
+      // Wait a bit for async operations
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const config = await fs.readFile(configPath, "utf-8");
+      expect(config).toContain("id: test-docs");
+      expect(config).toContain("name: Test Docs");
+      expect(config).toContain("sources:");
+      expect(config).toContain("type: local_folder");
+      expect(config).toContain("./docs");
+    } finally {
+      process.argv = originalArgv;
+      process.cwd = originalCwd;
+    }
   });
 
   it("creates git-repo docset", async () => {
-    const cliPath = join(process.cwd(), "dist/cli.js");
+    const cliPath = join(process.cwd(), "dist/index.js");
     const cmd = `node ${cliPath} create --preset git-repo --id react-docs --name "React Docs" --url https://github.com/facebook/react.git`;
 
     execSync(cmd, { cwd: testDir });
@@ -56,20 +86,20 @@ describe("create command", () => {
   });
 
   it("fails with invalid path", async () => {
-    const cliPath = join(process.cwd(), "dist/cli.js");
+    const cliPath = join(process.cwd(), "dist/index.js");
     const cmd = `node ${cliPath} create --preset local-folder --id test --name "Test" --path ./nonexistent`;
 
-    expect(() => execSync(cmd, { cwd: testDir })).toThrow();
+    expect(() => execSync(cmd, { cwd: testDir, stdio: "pipe" })).toThrow();
   });
 
   it("fails with duplicate ID", async () => {
-    const cliPath = join(process.cwd(), "dist/cli.js");
+    const cliPath = join(process.cwd(), "dist/index.js");
     // Create first docset
     const cmd1 = `node ${cliPath} create --preset local-folder --id test-docs --name "Test Docs" --path ./docs`;
     execSync(cmd1, { cwd: testDir });
 
     // Try to create duplicate
     const cmd2 = `node ${cliPath} create --preset local-folder --id test-docs --name "Test Docs 2" --path ./docs`;
-    expect(() => execSync(cmd2, { cwd: testDir })).toThrow();
+    expect(() => execSync(cmd2, { cwd: testDir, stdio: "pipe" })).toThrow();
   });
 });

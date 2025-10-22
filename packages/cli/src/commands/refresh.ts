@@ -34,7 +34,7 @@ interface SourceMetadata {
 }
 
 export const refreshCommand = new Command("refresh")
-  .description("Refresh web sources for docsets")
+  .description("Refresh sources for docsets")
   .argument(
     "[docset-id]",
     "ID of specific docset to refresh (refresh all if not specified)",

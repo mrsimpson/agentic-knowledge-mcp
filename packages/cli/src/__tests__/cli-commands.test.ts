@@ -10,12 +10,12 @@ import { statusCommand } from "../commands/status.js";
 describe("CLI Commands Validation", () => {
   it("should export init command with correct name", () => {
     expect(initCommand.name()).toBe("init");
-    expect(initCommand.description()).toContain("Initialize web sources");
+    expect(initCommand.description()).toContain("Initialize sources");
   });
 
   it("should export refresh command with correct name", () => {
     expect(refreshCommand.name()).toBe("refresh");
-    expect(refreshCommand.description()).toContain("Refresh web sources");
+    expect(refreshCommand.description()).toContain("Refresh sources");
   });
 
   it("should export status command with correct name", () => {

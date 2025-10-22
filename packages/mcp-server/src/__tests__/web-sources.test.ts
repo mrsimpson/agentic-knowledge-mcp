@@ -30,17 +30,18 @@ docsets:
   - id: "web-source-docs"
     name: "Web Source Documentation"
     description: "Documentation loaded from web sources"
-    web_sources:
-      - url: "https://github.com/test/repo.git"
-        type: "git_repo"
-        options:
-          paths: ["README.md", "docs/"]
-          branch: "main"
+    sources:
+      - type: "git_repo"
+        url: "https://github.com/test/repo.git"
+        branch: "main"
+        paths: ["README.md", "docs/"]
   
   - id: "local-docs"
     name: "Local Documentation"
     description: "Traditional local documentation"
-    local_path: "./docs/local"
+    sources:
+      - type: "local_folder"
+        paths: ["./docs/local"]
 
 template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{generalized_keywords}}"
 `;

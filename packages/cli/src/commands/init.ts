@@ -17,7 +17,7 @@ import {
 } from "@codemcp/knowledge-content-loader";
 
 export const initCommand = new Command("init")
-  .description("Initialize web sources for a docset from configuration")
+  .description("Initialize sources for a docset from configuration")
   .argument("<docset-id>", "ID of the docset to initialize")
   .option("-c, --config <path>", "Path to configuration file")
   .option("--force", "Force re-initialization even if already exists", false)
