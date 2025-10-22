@@ -13,20 +13,26 @@ import { existsSync } from "node:fs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const args = process.argv.slice(2);
+async function main() {
+  const args = process.argv.slice(2);
 
-if (args.length === 0) {
-  // No arguments, start MCP server
-  const isLocal = existsSync(join(__dirname, "../../mcp-server/dist/index.js"));
-  if (isLocal) {
-    import("../../mcp-server/dist/index.js");
+  if (args.length === 0) {
+    // No arguments, start MCP server
+    const isLocal = existsSync(
+      join(__dirname, "../../mcp-server/dist/index.js"),
+    );
+    if (isLocal) {
+      await import("../../mcp-server/dist/index.js");
+    } else {
+      // Use string literal to avoid TypeScript resolution issues
+      const mcpServerModule = "@codemcp/knowledge-mcp-server";
+      await import(mcpServerModule);
+    }
   } else {
-    // Use string literal to avoid TypeScript resolution issues
-    const mcpServerModule = "@codemcp/knowledge-mcp-server";
-    import(mcpServerModule);
+    // Any arguments, run CLI
+    const { runCli } = await import("./cli.js");
+    runCli();
   }
-} else {
-  // Any arguments, run CLI
-  const { runCli } = await import("./cli.js");
-  runCli();
 }
+
+main().catch(console.error);

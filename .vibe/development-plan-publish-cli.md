@@ -153,6 +153,7 @@ if (args.length === 0) {
 - [x] Resolve test timeout issues and improve test reliability
 - [x] Fix remaining test failures in MCP server and E2E tests
 - [x] Update all test configurations from old format (web_sources, local_path) to new sources format
+- [x] Fix CLI routing issue - entry point was not properly awaiting imports
 
 ### Completed
 
@@ -164,6 +165,7 @@ if (args.length === 0) {
 - [x] CLI integration tests working with new entry point architecture
 - [x] All test failures resolved - MCP server tests (21/21), E2E tests (12/12)
 - [x] Full test suite passing (178/178 tests, 100% success rate)
+- [x] CLI routing issue fixed - entry point now properly routes to CLI vs MCP server
 
 ## Key Decisions
 
