@@ -4,7 +4,7 @@
 > This project is under active development and not yet ready for production use. APIs may change without notice.
 
 <div align="center">
-  <h3>The End of RAG. The Dawn of Agentic Search.</h3>
+  <h3>The End of RAG. The Dawn of Agentic Search. Maybe.</h3>
   <p><em>Intelligent navigation instructions that guide AI assistants through documentation using filesystem-like exploration instead of traditional retrieval</em></p>
 
   <a href="https://github.com/yourusername/agentic-knowledge/blob/main/LICENSE">
