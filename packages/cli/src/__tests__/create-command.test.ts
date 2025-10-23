@@ -73,23 +73,68 @@ describe("create command", () => {
   });
 
   it("creates git-repo docset", async () => {
-    const cliPath = join(process.cwd(), "dist/index.js");
-    const cmd = `node ${cliPath} create --preset git-repo --id react-docs --name "React Docs" --url https://github.com/facebook/react.git`;
+    const { createCommand } = await import("../commands/create.js");
 
-    execSync(cmd, { cwd: testDir });
+    const originalCwd = process.cwd;
+    const originalLog = console.log;
+    process.cwd = () => testDir;
+    console.log = () => {};
 
-    const config = await fs.readFile(configPath, "utf-8");
-    expect(config).toContain("id: react-docs");
-    expect(config).toContain("name: React Docs");
-    expect(config).toContain("url: https://github.com/facebook/react.git");
-    expect(config).toContain("type: git_repo");
+    try {
+      await createCommand.parseAsync([
+        "node",
+        "create",
+        "--preset",
+        "git-repo",
+        "--id",
+        "react-docs",
+        "--name",
+        "React Docs",
+        "--url",
+        "https://github.com/facebook/react.git",
+      ]);
+
+      const config = await fs.readFile(configPath, "utf-8");
+      expect(config).toContain("id: react-docs");
+      expect(config).toContain("name: React Docs");
+      expect(config).toContain("url: https://github.com/facebook/react.git");
+      expect(config).toContain("type: git_repo");
+    } finally {
+      process.cwd = originalCwd;
+      console.log = originalLog;
+    }
   });
 
   it("fails with invalid path", async () => {
-    const cliPath = join(process.cwd(), "dist/index.js");
-    const cmd = `node ${cliPath} create --preset local-folder --id test --name "Test" --path ./nonexistent`;
+    const { createCommand } = await import("../commands/create.js");
 
-    expect(() => execSync(cmd, { cwd: testDir, stdio: "pipe" })).toThrow();
+    const originalCwd = process.cwd;
+    const originalLog = console.log;
+    const originalError = console.error;
+    process.cwd = () => testDir;
+    console.log = () => {};
+    console.error = () => {};
+
+    try {
+      await expect(
+        createCommand.parseAsync([
+          "node",
+          "create",
+          "--preset",
+          "local-folder",
+          "--id",
+          "test",
+          "--name",
+          "Test",
+          "--path",
+          "./nonexistent",
+        ]),
+      ).rejects.toThrow();
+    } finally {
+      process.cwd = originalCwd;
+      console.log = originalLog;
+      console.error = originalError;
+    }
   });
 
   it("creates config file when missing and creates symlinks for local folder", async () => {
@@ -146,13 +191,46 @@ describe("create command", () => {
   });
 
   it("fails with duplicate ID", async () => {
-    const cliPath = join(process.cwd(), "dist/index.js");
-    // Create first docset
-    const cmd1 = `node ${cliPath} create --preset local-folder --id test-docs --name "Test Docs" --path ./docs`;
-    execSync(cmd1, { cwd: testDir });
+    const { createCommand } = await import("../commands/create.js");
 
-    // Try to create duplicate
-    const cmd2 = `node ${cliPath} create --preset local-folder --id test-docs --name "Test Docs 2" --path ./docs`;
-    expect(() => execSync(cmd2, { cwd: testDir, stdio: "pipe" })).toThrow();
+    const originalCwd = process.cwd;
+    const originalLog = console.log;
+    process.cwd = () => testDir;
+    console.log = () => {};
+
+    try {
+      // Create first docset
+      await createCommand.parseAsync([
+        "node",
+        "create",
+        "--preset",
+        "local-folder",
+        "--id",
+        "test-docs",
+        "--name",
+        "Test Docs",
+        "--path",
+        "./docs",
+      ]);
+
+      // Try to create duplicate - should throw
+      await expect(
+        createCommand.parseAsync([
+          "node",
+          "create",
+          "--preset",
+          "local-folder",
+          "--id",
+          "test-docs",
+          "--name",
+          "Test Docs 2",
+          "--path",
+          "./docs",
+        ]),
+      ).rejects.toThrow();
+    } finally {
+      process.cwd = originalCwd;
+      console.log = originalLog;
+    }
   });
 });
