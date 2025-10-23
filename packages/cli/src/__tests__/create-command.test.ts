@@ -96,31 +96,53 @@ describe("create command", () => {
     // Remove the config file to test creation from scratch
     await fs.rm(join(testDir, ".knowledge"), { recursive: true, force: true });
 
-    const cliPath = join(process.cwd(), "dist/index.js");
-    const cmd = `node ${cliPath} create --preset local-folder --id test-docs --name "Test Docs" --path ./docs`;
+    // Import and run create command directly
+    const { createCommand } = await import("../commands/create.js");
 
-    execSync(cmd, { cwd: testDir });
+    // Mock process.cwd and console.log
+    const originalCwd = process.cwd;
+    const originalLog = console.log;
+    process.cwd = () => testDir;
+    console.log = () => {}; // Suppress output
 
-    // Check config was created
-    const configExists = await fs
-      .access(configPath)
-      .then(() => true)
-      .catch(() => false);
-    expect(configExists).toBe(true);
+    try {
+      await createCommand.parseAsync([
+        "node",
+        "create",
+        "--preset",
+        "local-folder",
+        "--id",
+        "test-docs",
+        "--name",
+        "Test Docs",
+        "--path",
+        "./docs",
+      ]);
 
-    const config = await fs.readFile(configPath, "utf-8");
-    expect(config).toContain("version: '1.0'");
-    expect(config).toContain("id: test-docs");
-    expect(config).toContain("name: Test Docs");
-    expect(config).toContain("type: local_folder");
+      // Check config was created
+      const configExists = await fs
+        .access(configPath)
+        .then(() => true)
+        .catch(() => false);
+      expect(configExists).toBe(true);
 
-    // Check symlinks were created
-    const symlinkDir = join(testDir, ".knowledge", "docsets", "test-docs");
-    const symlinkExists = await fs
-      .access(symlinkDir)
-      .then(() => true)
-      .catch(() => false);
-    expect(symlinkExists).toBe(true);
+      const config = await fs.readFile(configPath, "utf-8");
+      expect(config).toContain("version: '1.0'");
+      expect(config).toContain("id: test-docs");
+      expect(config).toContain("name: Test Docs");
+      expect(config).toContain("type: local_folder");
+
+      // Check symlinks were created
+      const symlinkDir = join(testDir, ".knowledge", "docsets", "test-docs");
+      const symlinkExists = await fs
+        .access(symlinkDir)
+        .then(() => true)
+        .catch(() => false);
+      expect(symlinkExists).toBe(true);
+    } finally {
+      process.cwd = originalCwd;
+      console.log = originalLog;
+    }
   });
 
   it("fails with duplicate ID", async () => {
