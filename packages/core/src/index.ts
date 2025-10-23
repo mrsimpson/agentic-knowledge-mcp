@@ -16,6 +16,7 @@ export { ConfigManager } from "./config/manager.js";
 // Export path calculation utilities
 export {
   calculateLocalPath,
+  calculateLocalPathWithSymlinks,
   formatPath,
   validatePath,
   validatePathSync,
