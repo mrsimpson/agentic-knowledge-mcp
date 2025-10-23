@@ -92,6 +92,37 @@ describe("create command", () => {
     expect(() => execSync(cmd, { cwd: testDir, stdio: "pipe" })).toThrow();
   });
 
+  it("creates config file when missing and creates symlinks for local folder", async () => {
+    // Remove the config file to test creation from scratch
+    await fs.rm(join(testDir, ".knowledge"), { recursive: true, force: true });
+
+    const cliPath = join(process.cwd(), "dist/index.js");
+    const cmd = `node ${cliPath} create --preset local-folder --id test-docs --name "Test Docs" --path ./docs`;
+
+    execSync(cmd, { cwd: testDir });
+
+    // Check config was created
+    const configExists = await fs
+      .access(configPath)
+      .then(() => true)
+      .catch(() => false);
+    expect(configExists).toBe(true);
+
+    const config = await fs.readFile(configPath, "utf-8");
+    expect(config).toContain("version: '1.0'");
+    expect(config).toContain("id: test-docs");
+    expect(config).toContain("name: Test Docs");
+    expect(config).toContain("type: local_folder");
+
+    // Check symlinks were created
+    const symlinkDir = join(testDir, ".knowledge", "docsets", "test-docs");
+    const symlinkExists = await fs
+      .access(symlinkDir)
+      .then(() => true)
+      .catch(() => false);
+    expect(symlinkExists).toBe(true);
+  });
+
   it("fails with duplicate ID", async () => {
     const cliPath = join(process.cwd(), "dist/index.js");
     // Create first docset

@@ -26,9 +26,27 @@ export const createCommand = new Command("create")
       console.log(chalk.blue("🚀 Creating new docset..."));
 
       const configManager = new ConfigManager();
-      const { config, configPath } = await configManager.loadConfig(
-        process.cwd(),
-      );
+
+      // Check if config exists, create if not
+      let config, configPath;
+      const configExists = await configManager.configExists(process.cwd());
+
+      if (!configExists) {
+        // Create initial config structure
+        configPath = path.join(process.cwd(), ".knowledge", "config.yaml");
+        config = {
+          version: "1.0",
+          docsets: [],
+        };
+
+        // Ensure .knowledge directory exists
+        await fs.mkdir(path.dirname(configPath), { recursive: true });
+        console.log(chalk.gray("📁 Created .knowledge directory"));
+      } else {
+        ({ config, configPath } = await configManager.loadConfig(
+          process.cwd(),
+        ));
+      }
 
       // Check if docset ID already exists
       if (config.docsets.find((d) => d.id === options.id)) {
@@ -50,6 +68,24 @@ export const createCommand = new Command("create")
       // Add to config
       config.docsets.push(newDocset);
       await configManager.saveConfig(config, configPath);
+
+      // For local folders, create symlinks immediately
+      if (options.preset === "local-folder") {
+        console.log(chalk.gray("🔗 Creating symlinks for local folder..."));
+        const { calculateLocalPathWithSymlinks } = await import(
+          "@codemcp/knowledge-core"
+        );
+        try {
+          await calculateLocalPathWithSymlinks(newDocset, configPath);
+          console.log(chalk.gray("   ✅ Symlinks created successfully"));
+        } catch (error) {
+          console.log(
+            chalk.yellow(
+              `   ⚠️  Warning: Could not create symlinks: ${(error as Error).message}`,
+            ),
+          );
+        }
+      }
 
       console.log(
         chalk.green(`✅ Created docset '${options.id}' successfully`),
