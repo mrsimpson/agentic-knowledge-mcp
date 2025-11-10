@@ -15,6 +15,7 @@ import {
   processTemplate,
   createTemplateContext,
   getEffectiveTemplate,
+  createStructuredResponse,
   type KnowledgeConfig,
 } from "@codemcp/knowledge-core";
 
@@ -93,14 +94,19 @@ export function createAgenticKnowledgeServer() {
         })
         .join("\n");
 
-      const searchDocsDescription = `Search for documentation in available docsets. Returns structured search strategy.
+      const searchDocsDescription = `Search for documentation in available docsets. Returns structured response with search instructions and parameters.
 
 📚 **AVAILABLE DOCSETS:**
 ${docsetInfo}
 
-🔍 **SEARCH STRATEGY:**
-- Use the tools you have to search in text files (grep, rg, ripgrep, find)
-- Start with specific terms, expand to generalized terms`;
+🔍 **STRUCTURED RESPONSE:**
+Returns JSON object with:
+- instructions: Search guidance text
+- search_terms: Primary keywords to search for
+- generalized_search_terms: Broader terms for context
+- path: Local directory path to search in
+
+Use the path and search terms with your text search tools (grep, rg, ripgrep, find).`;
 
       return {
         tools: [
@@ -241,13 +247,16 @@ ${docsetInfo}
             templateContext,
           );
 
+          // Create structured response
+          const structuredResponse = createStructuredResponse(
+            instructions,
+            keywords.trim(),
+            (generalized_keywords || "").trim(),
+            localPath,
+          );
+
           return {
-            content: [
-              {
-                type: "text",
-                text: instructions,
-              },
-            ],
+            structuredContent: structuredResponse,
           };
         }
 

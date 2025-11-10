@@ -231,7 +231,7 @@ describe("Template Processing", () => {
 
       expect(variables).toContain("keywords");
       expect(variables).toContain("local_path");
-      expect(variables).toContain("generalized_keywords");
+      // Note: generalized_keywords no longer required in template since it's provided in structured response
     });
 
     test("should ensure all variables in default template are allowed", () => {

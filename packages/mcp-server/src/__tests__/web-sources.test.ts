@@ -91,17 +91,17 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
 
       const result = await callHandler(request);
 
-      expect(result.content).toBeDefined();
-      expect(Array.isArray(result.content)).toBe(true);
-      expect(result.content[0]?.type).toBe("text");
+      expect(result.structuredContent).toBeDefined();
+      expect(typeof result.structuredContent).toBe("object");
 
-      const instructions = result.content[0]!.text;
-      expect(instructions).toContain("API documentation");
-      expect(instructions).toContain("endpoints methods");
+      const response = result.structuredContent;
+      expect(response.instructions).toContain("API documentation");
+      expect(response.search_terms).toContain("API documentation");
+      expect(response.generalized_search_terms).toContain("endpoints methods");
 
       // Most importantly: should use standardized path for web sources
-      expect(instructions).toContain("docsets/web-source-docs");
-      expect(instructions).not.toContain("./docs/"); // Should not use local path pattern
+      expect(response.path).toContain("docsets/web-source-docs");
+      expect(response.path).not.toContain("./docs/"); // Should not use local path pattern
     });
 
     it("WHEN MCP server searches local docset THEN should return configured local_path", async () => {
@@ -121,14 +121,15 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
       const callHandler = handlers.get("tools/call");
       const result = await callHandler(request);
 
-      expect(result.content).toBeDefined();
-      const instructions = result.content[0]!.text;
-      expect(instructions).toContain("configuration setup");
-      expect(instructions).toContain("install guide");
+      expect(result.structuredContent).toBeDefined();
+      const response = result.structuredContent;
+      expect(response.instructions).toContain("configuration setup");
+      expect(response.search_terms).toContain("configuration setup");
+      expect(response.generalized_search_terms).toContain("install guide");
 
       // Should use the configured local_path for traditional docsets
-      expect(instructions).toContain("docs/local");
-      expect(instructions).not.toContain("docsets/local-docs"); // Should not use docsets pattern
+      expect(response.path).toContain("docs/local");
+      expect(response.path).not.toContain("docsets/local-docs"); // Should not use docsets pattern
     });
 
     it("WHEN MCP server lists docsets THEN should include both web and local docsets with correct paths", async () => {
@@ -225,16 +226,23 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
       const callHandler = handlers.get("tools/call");
       const result = await callHandler(request);
 
-      const instructions = result.content[0]!.text;
+      const response = result.structuredContent;
 
-      // Should substitute all template variables correctly
-      expect(instructions).toContain("authentication middleware"); // {{keywords}}
-      expect(instructions).toContain("auth login security"); // {{generalized_keywords}}
-      expect(instructions).toContain("docsets/web-source-docs"); // {{local_path}} for web sources
+      // Should have structured response with correct values
+      expect(response.search_terms).toContain("authentication middleware");
+      expect(response.generalized_search_terms).toContain(
+        "auth login security",
+      );
+      expect(response.path).toContain("docsets/web-source-docs");
+
+      // Instructions should contain template substitutions
+      expect(response.instructions).toContain("authentication middleware");
+      expect(response.instructions).toContain("auth login security");
+      expect(response.instructions).toContain("docsets/web-source-docs");
 
       // Should not contain any unsubstituted template variables
-      expect(instructions).not.toContain("{{");
-      expect(instructions).not.toContain("}}");
+      expect(response.instructions).not.toContain("{{");
+      expect(response.instructions).not.toContain("}}");
     });
   });
 });
