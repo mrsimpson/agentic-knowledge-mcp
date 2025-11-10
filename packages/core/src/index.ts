@@ -32,4 +32,5 @@ export {
   validateTemplate,
   extractVariables,
   createTemplateContext,
+  createStructuredResponse,
 } from "./templates/processor.js";

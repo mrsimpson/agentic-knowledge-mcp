@@ -162,11 +162,11 @@ Clean separation between protocol handling, business logic, and configuration en
 
 **Contained Building Blocks**
 
-| Name                       | Responsibility                                                                  |
-| -------------------------- | ------------------------------------------------------------------------------- |
-| **MCP Server Package**     | Handles MCP protocol, tool registration, request routing                        |
-| **Core Package**           | Configuration management (ConfigManager), path calculation, template processing |
-| **Content Loader Package** | Web source loading, smart content filtering, Git operations                     |
+| Name                       | Responsibility                                                                   |
+| -------------------------- | -------------------------------------------------------------------------------- |
+| **MCP Server Package**     | Handles MCP protocol, tool registration, request routing                         |
+| **Core Package**           | Configuration management (ConfigManager), path calculation, template processing  |
+| **Content Loader Package** | Web source loading, smart content filtering, Git operations                      |
 | **CLI Package**            | Entry point router, user commands for docset management, orchestrates operations |
 
 ## Level 2 - Core Package Detail
@@ -215,7 +215,7 @@ generateInstructions(template: string, params: TemplateParams): string
 
 ```typescript
 // MCP Tools
-search_docs(params: SearchDocsParams): SearchDocsResponse
+search_docs(params: SearchDocsParams): { structuredContent: SearchDocsResponse }
 list_docsets(): ListDocsetsResponse
 
 // Server lifecycle
@@ -257,7 +257,7 @@ sequenceDiagram
     Template->>Template: Substitute variables:<br/>{keywords} → "useState, hook"<br/>{generalized_keywords} → "state"<br/>{local_path} → ".knowledge/docs/react-18.2/"
     Template-->>MCP: "Search for 'useState, hook' in folder .knowledge/docs/react-18.2/..."
 
-    MCP-->>AI: SearchDocsResponse with instructions
+    MCP-->>AI: Structured response with instructions, search_terms, generalized_search_terms, and path
 
     Note over AI: Agent uses its own tools (grep, ripgrep, etc.)
     AI->>FS: Use text search tools on .knowledge/docs/react-18.2/
@@ -279,10 +279,11 @@ sequenceDiagram
 
 4. **Template engine generates instructions**
    - Substitutes variables in template string
-   - Returns: "Search for 'useState', 'hook' in folder .knowledge/docs/react-18.2/..."
+   - Creates structured response with instructions, search_terms, generalized_search_terms, and path
 
-5. **Response sent to AI Assistant**
-   - Assistant uses its text search tools on the specified path
+5. **Structured response sent to AI Assistant**
+   - Response contains: instructions, search_terms ("useState, hook"), generalized_search_terms ("state"), path (".knowledge/docs/react-18.2/")
+   - Assistant uses the path and search terms with its text search tools
 
 ## Configuration Discovery Scenario
 

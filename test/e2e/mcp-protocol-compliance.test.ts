@@ -180,18 +180,17 @@ describe("MCP Protocol Compliance E2E Tests", () => {
       });
 
       expect(result).toBeDefined();
-      expect(result.content).toBeDefined();
-      expect(Array.isArray(result.content)).toBe(true);
 
-      const content = result.content as Array<{ type: string; text: string }>;
-      expect(content).toHaveLength(1);
-      expect(content[0]?.type).toBe("text");
+      expect(result.structuredContent).toBeDefined();
+      expect(typeof result.structuredContent).toBe("object");
 
-      const responseText = content[0]?.text;
-      expect(responseText).toContain("authentication middleware");
-      expect(responseText).toContain("login signin oauth credentials");
-      expect(responseText).toContain("Test Documentation");
-      expect(responseText).toContain("docs");
+      const response = result.structuredContent as any;
+      expect(response.instructions).toContain("authentication middleware");
+      expect(response.search_terms).toContain("authentication middleware");
+      expect(response.generalized_search_terms).toContain(
+        "login signin oauth credentials",
+      );
+      expect(response.path).toContain("docs");
     });
 
     it("should execute search_docs with minimal parameters", async () => {
@@ -204,15 +203,12 @@ describe("MCP Protocol Compliance E2E Tests", () => {
       });
 
       expect(result).toBeDefined();
-      expect(result.content).toBeDefined();
+      expect(result.structuredContent).toBeDefined();
 
-      const content = result.content as Array<{ type: string; text: string }>;
-      expect(content[0]?.type).toBe("text");
-
-      const responseText = content[0]?.text;
-      expect(responseText).toContain("rate limiting");
-      expect(responseText).toContain("API Documentation");
-      expect(responseText).toContain("api");
+      const response = result.structuredContent as any;
+      expect(response.instructions).toContain("rate limiting");
+      expect(response.search_terms).toContain("rate limiting");
+      expect(response.path).toContain("api");
     });
   });
 
@@ -291,12 +287,12 @@ describe("MCP Protocol Compliance E2E Tests", () => {
         },
       });
 
-      const content = result.content as Array<{ type: string; text: string }>;
-      const responseText = content[0]?.text;
-      expect(responseText).toContain("Looking for React information");
-      expect(responseText).toContain("useState hook");
-      expect(responseText).toContain("state management react hooks");
-      expect(responseText).toContain("component names, props, hooks");
+      const response = result.structuredContent as any;
+      expect(response.instructions).toContain("Looking for React information");
+      expect(response.search_terms).toContain("useState hook");
+      expect(response.generalized_search_terms).toContain(
+        "state management react hooks",
+      );
     });
   });
 

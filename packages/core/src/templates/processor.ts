@@ -161,3 +161,25 @@ export function createTemplateContext(
     docset,
   };
 }
+
+/**
+ * Create structured search response
+ * @param instructions - Processed instruction text
+ * @param keywords - Search keywords
+ * @param generalizedKeywords - Generalized keywords
+ * @param localPath - Calculated local path
+ * @returns Structured response object
+ */
+export function createStructuredResponse(
+  instructions: string,
+  keywords: string,
+  generalizedKeywords: string,
+  localPath: string,
+): import("../types.js").SearchDocsResponse {
+  return {
+    instructions,
+    search_terms: keywords,
+    generalized_search_terms: generalizedKeywords,
+    path: localPath,
+  };
+}

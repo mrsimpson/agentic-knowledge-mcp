@@ -60,17 +60,4 @@ docsets:
           - template/index.md
           - template/markdown-examples.md
 template: |
-  You are searching for documentation about '{{keywords}}' in the {{docset_name}} docset.
-
-  **Search Location**: {{local_path}}
-  **Primary Terms**: {{keywords}}
-  **Related Context**: {{generalized_keywords}}
-
-  **Search Strategy**:
-  1. Start by searching for the primary terms: {{keywords}}
-  2. Use tools like `grep`, `rg`, or `find` to locate relevant files
-  3. If initial search is too narrow, expand to related terms: {{generalized_keywords}}
-  4. Look for file types: .md, .mdx, .vue, .js, .ts files
-  5. Check common documentation patterns: README files, guides/, examples/, api/
-
-  Focus on finding the most relevant documentation that matches your search intent.
+  Use text search tools (grep, rg, ripgrep) to search for {{keywords}} in {{local_path}}. Try broader terms if needed. Skip: node_modules/, .git/, build/, dist/.

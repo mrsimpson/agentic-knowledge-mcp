@@ -85,14 +85,12 @@ export interface SearchDocsParams {
 export interface SearchDocsResponse {
   /** Instructions for the agent on how to search */
   instructions: string;
-  /** The docset that was searched */
-  docset: string;
+  /** The processed keywords for searching */
+  search_terms: string;
+  /** The processed generalized keywords for broader context */
+  generalized_search_terms: string;
   /** The calculated local path for searching */
-  local_path: string;
-  /** Keywords that were processed */
-  keywords: string;
-  /** Generalized keywords that were processed */
-  generalized_keywords: string;
+  path: string;
 }
 
 /**
@@ -148,31 +146,7 @@ export class KnowledgeError extends Error {
 /**
  * Default instruction template
  */
-export const DEFAULT_TEMPLATE = `# 📚 Search {{docset_name}} Documentation
-
-**Primary terms:** {{keywords}}  
-**Related terms:** {{generalized_keywords}}  
-**Location:** {{local_path}}
-
-## 🔍 Search Strategy
-
-### 1. **Start with Specific Terms**
-Use your text search tools (grep, rg, ripgrep) to search for: \`{{keywords}}\`
-
-### 2. **Expand to Related Terms**
-If initial search doesn't yield results, try: \`{{generalized_keywords}}\`
-
-### 3. **What to Avoid**
-Skip these directories to save time:
-- \`node_modules/\`, \`.git/\`, \`.knowledge/\`
-- \`build/\`, \`dist/\`, \`target/\`, \`vendor/\`
-
-## 💡 Search Tips
-- Use **case-insensitive** search when possible
-- Look for **exact matches first**, then partial matches
-- Check **cross-references** and \`See also\` sections
-- If stuck, try **broader terms** or ask the user to clarify
-`;
+export const DEFAULT_TEMPLATE = `Use text search tools (grep, rg, ripgrep) to search for {{keywords}} in {{local_path}}. Try broader terms if needed. Skip: node_modules/, .git/, build/, dist/.`;
 
 /**
  * Allowed template variables that can be used in instruction templates
