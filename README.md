@@ -1,8 +1,5 @@
 # 🧠 Agentic Knowledge
 
-> **⚠️ WORK IN PROGRESS ⚠️**  
-> This project is under active development and not yet ready for production use. APIs may change without notice.
-
 <div align="center">
   <h3>The End of RAG. The Dawn of Agentic Search. Maybe.</h3>
   <p><em>Intelligent navigation instructions that guide AI assistants through documentation using filesystem-like exploration instead of traditional retrieval</em></p>
@@ -186,7 +183,7 @@ docsets:
     sources:
       - type: local_folder
         paths: ["./docs"]
-        
+
   - id: react-docs
     name: React Documentation
     description: "Official React documentation from GitHub"
@@ -217,13 +214,14 @@ docsets:
     name: My Project Docs
     sources:
       - type: local_folder
-        paths: 
-          - "./docs"           # Single directory
-          - "./guides"         # Multiple directories
-          - "./api/README.md"  # Specific files
+        paths:
+          - "./docs" # Single directory
+          - "./guides" # Multiple directories
+          - "./api/README.md" # Specific files
 ```
 
 **Benefits:**
+
 - ✅ **No file duplication** - creates symlinks to original locations
 - ✅ **Real-time updates** - changes immediately visible
 - ✅ **Relative paths** - returns clean relative paths for LLM navigation
@@ -239,11 +237,12 @@ docsets:
     sources:
       - type: git_repo
         url: "https://github.com/owner/repo.git"
-        branch: "main"              # Optional, defaults to main
+        branch: "main" # Optional, defaults to main
         paths: ["docs/", "README.md"] # Optional, extracts specific paths
 ```
 
 **Benefits:**
+
 - ✅ **Automatic downloads** - fetches latest documentation
 - ✅ **Selective extraction** - only downloads specified paths
 - ✅ **Branch selection** - target specific branches or tags
@@ -260,14 +259,14 @@ docsets:
     sources:
       - type: local_folder
         paths: ["./docs/guides"]
-        
+
   - id: api-reference
     name: API Reference
     sources:
       - type: git_repo
         url: "https://github.com/company/api-docs.git"
         paths: ["reference/"]
-        
+
   - id: mixed-sources
     name: Combined Documentation
     sources:
@@ -305,6 +304,7 @@ agentic-knowledge
 ```
 
 The server will:
+
 - ✅ Create symlinks for local folders in `.knowledge/docsets/`
 - ✅ Validate your configuration
 - ✅ Start listening for MCP requests
@@ -336,11 +336,12 @@ search_docs({
 ```
 
 **Response:**
+
 ```
 # 📚 Search My Project Documentation
 
 **Primary terms:** authentication setup
-**Related terms:** login, auth, security  
+**Related terms:** login, auth, security
 **Location:** docs
 
 ## 🔍 Search Strategy
@@ -348,7 +349,7 @@ search_docs({
 1. **Start with Specific Terms**
    Use your text search tools (grep, rg, ripgrep) to search for: `authentication setup`
 
-2. **Expand to Related Terms**  
+2. **Expand to Related Terms**
    If initial search doesn't yield results, try: `login, auth, security`
 
 3. **What to Avoid**
@@ -358,8 +359,9 @@ search_docs({
 ### Step 5: Follow the Guidance
 
 Your AI assistant will use the provided search strategy to:
+
 1. 🔍 Search your documentation with the suggested terms
-2. 📂 Navigate to the right files and directories  
+2. 📂 Navigate to the right files and directories
 3. 🎯 Find exactly what you're looking for
 4. 🔗 Follow cross-references and related content
 
@@ -378,6 +380,7 @@ docsets:
 ```
 
 **Benefits:**
+
 - Changes in your docs are immediately available
 - No copying or syncing needed
 - Works with any file type
@@ -395,8 +398,8 @@ docsets:
       - type: git_repo
         url: "https://github.com/company/design-system.git"
         paths: ["docs/"]
-        
-  - id: backend-docs  
+
+  - id: backend-docs
     name: Backend Documentation
     sources:
       - type: git_repo
@@ -413,15 +416,15 @@ Use specific and generalized keywords for better results:
 search_docs({
   docset_id: "react-docs",
   keywords: "useEffect cleanup function",
-  generalized_keywords: "hooks, lifecycle, memory management"
-})
+  generalized_keywords: "hooks, lifecycle, memory management",
+});
 
 // ❌ Too vague
 search_docs({
-  docset_id: "react-docs", 
+  docset_id: "react-docs",
   keywords: "react",
-  generalized_keywords: "javascript"
-})
+  generalized_keywords: "javascript",
+});
 ```
 
 ## 📊 Performance vs RAG
