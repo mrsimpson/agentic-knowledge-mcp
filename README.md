@@ -1,5 +1,7 @@
 # 🧠 Agentic Knowledge
 
+A way to handle knowledge cut-off: Provide all sources you and your development team need to your agents.
+
 <div align="center">
   <h3>The End of RAG. The Dawn of Agentic Search. Maybe.</h3>
   <p><em>Intelligent navigation instructions that guide AI assistants through documentation using filesystem-like exploration instead of traditional retrieval</em></p>
