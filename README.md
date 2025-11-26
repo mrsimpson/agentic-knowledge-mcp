@@ -21,18 +21,35 @@ Give your AI assistant access to any documentation—yours or third-party—so i
 ### 1. Install
 
 ```bash
-npm install -g agentic-knowledge
+npm install agentic-knowledge
+# or
+npx agentic-knowledge
 ```
 
 ### 2. Configure an MCP Client
 
-Add to your Claude Desktop or other MCP client configuration:
+Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
 
 ```json
 {
   "mcpServers": {
     "agentic-knowledge": {
-      "command": "agentic-knowledge"
+      "command": "npx",
+      "args": ["-y", "agentic-knowledge"]
+    }
+  }
+}
+```
+
+Or for a local project installation:
+
+```json
+{
+  "mcpServers": {
+    "agentic-knowledge": {
+      "command": "npx",
+      "args": ["-y", "agentic-knowledge"],
+      "cwd": "/path/to/your/project"
     }
   }
 }
@@ -44,17 +61,16 @@ Add to your Claude Desktop or other MCP client configuration:
 
 ```bash
 # For a Git repository
-agentic-knowledge create \
+npx agentic-knowledge create \
   --preset git-repo \
   --id react-docs \
   --name "React Documentation" \
   --url https://github.com/facebook/react.git
 
 # Initialize (downloads the docs)
-agentic-knowledge init react-docs
+npx agentic-knowledge init react-docs
 
-# Start the MCP server
-agentic-knowledge
+# The MCP server starts automatically when Claude Desktop launches
 ```
 
 **Option B: Manual Configuration**
@@ -145,19 +161,19 @@ CREATE → INITIALIZE → USE → REFRESH
 **Commands:**
 ```bash
 # Create a docset configuration
-agentic-knowledge create --preset git-repo --id my-docs --name "My Docs" --url <url>
+npx agentic-knowledge create --preset git-repo --id my-docs --name "My Docs" --url <url>
 
 # Initialize (download docs)
-agentic-knowledge init my-docs
+npx agentic-knowledge init my-docs
 
 # Check status
-agentic-knowledge status
+npx agentic-knowledge status
 
 # Update docs
-agentic-knowledge refresh my-docs
+npx agentic-knowledge refresh my-docs
 
-# Start MCP server
-agentic-knowledge
+# MCP server runs automatically via Claude Desktop configuration
+# Or run manually: npx agentic-knowledge
 ```
 
 See the [User Guide](./USER_GUIDE.md) for complete command documentation.

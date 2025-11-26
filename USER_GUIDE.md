@@ -17,7 +17,11 @@ Complete guide to using Agentic Knowledge for managing and searching documentati
 ### From NPM (Recommended)
 
 ```bash
-npm install -g agentic-knowledge
+# Install in your project
+npm install agentic-knowledge
+
+# Or use directly with npx (no installation needed)
+npx agentic-knowledge --help
 ```
 
 ### From Source
@@ -92,7 +96,7 @@ Create docset configurations quickly using presets. Alternatively, you can manua
 
 **Git Repository Preset:**
 ```bash
-agentic-knowledge create \
+npx agentic-knowledge create \
   --preset git-repo \
   --id mcp-sdk \
   --name "MCP TypeScript SDK" \
@@ -102,7 +106,7 @@ agentic-knowledge create \
 
 **Local Folder Preset:**
 ```bash
-agentic-knowledge create \
+npx agentic-knowledge create \
   --preset local-folder \
   --id my-docs \
   --name "My Documentation" \
@@ -129,13 +133,13 @@ Initialize a configured docset by downloading and preparing documentation. Use t
 
 ```bash
 # Initialize a specific docset
-agentic-knowledge init mcp-sdk
+npx agentic-knowledge init mcp-sdk
 
 # Force re-initialization (start completely fresh)
-agentic-knowledge init mcp-sdk --force
+npx agentic-knowledge init mcp-sdk --force
 
 # Use custom config path
-agentic-knowledge init mcp-sdk --config /path/to/config.yaml
+npx agentic-knowledge init mcp-sdk --config /path/to/config.yaml
 ```
 
 **When to use:**
@@ -178,13 +182,13 @@ View the status of all docsets and their sources:
 
 ```bash
 # Basic status
-agentic-knowledge status
+npx agentic-knowledge status
 
 # Detailed status with source information
-agentic-knowledge status --verbose
+npx agentic-knowledge status --verbose
 
 # Use custom config
-agentic-knowledge status --config /path/to/config.yaml
+npx agentic-knowledge status --config /path/to/config.yaml
 ```
 
 **Example output:**
@@ -211,16 +215,16 @@ Update already-initialized docsets with latest content. This is a **smart, incre
 
 ```bash
 # Refresh all docsets
-agentic-knowledge refresh
+npx agentic-knowledge refresh
 
 # Refresh specific docset
-agentic-knowledge refresh mcp-sdk
+npx agentic-knowledge refresh mcp-sdk
 
 # Force refresh (ignore throttle)
-agentic-knowledge refresh mcp-sdk --force
+npx agentic-knowledge refresh mcp-sdk --force
 
 # Use custom config
-agentic-knowledge refresh --config /path/to/config.yaml
+npx agentic-knowledge refresh --config /path/to/config.yaml
 ```
 
 **Smart refresh logic:**
@@ -346,17 +350,17 @@ docsets:
 
 ```bash
 # 1. Create config for local docs
-agentic-knowledge create \
+npx agentic-knowledge create \
   --preset local-folder \
   --id my-project \
   --name "My Project Docs" \
   --path ./docs
 
 # 2. Check status
-agentic-knowledge status
+npx agentic-knowledge status
 
-# 3. Start MCP server
-agentic-knowledge
+# 3. Configure Claude Desktop (see MCP Integration section)
+# The server runs automatically when Claude launches
 ```
 
 No initialization needed - local folders use symlinks!
@@ -365,7 +369,7 @@ No initialization needed - local folders use symlinks!
 
 ```bash
 # 1. Create docset for a Git repository
-agentic-knowledge create \
+npx agentic-knowledge create \
   --preset git-repo \
   --id react-docs \
   --name "React Documentation" \
@@ -373,35 +377,35 @@ agentic-knowledge create \
   --branch main
 
 # 2. Initialize the docset (downloads docs)
-agentic-knowledge init react-docs
+npx agentic-knowledge init react-docs
 
 # 3. Check status
-agentic-knowledge status
+npx agentic-knowledge status
 
-# 4. Start MCP server (for AI assistant)
-agentic-knowledge
+# 4. Configure Claude Desktop (see MCP Integration section)
+# The server runs automatically when Claude launches
 
 # Later: Update documentation
-agentic-knowledge refresh react-docs
+npx agentic-knowledge refresh react-docs
 ```
 
 ### Workflow 3: Multi-Repository Setup
 
 ```bash
 # Set up multiple docsets
-agentic-knowledge create --preset git-repo --id frontend-docs --name "Frontend Docs" --url https://github.com/company/frontend.git
-agentic-knowledge create --preset git-repo --id backend-docs --name "Backend Docs" --url https://github.com/company/backend.git
-agentic-knowledge create --preset local-folder --id internal-docs --name "Internal Docs" --path ./docs
+npx agentic-knowledge create --preset git-repo --id frontend-docs --name "Frontend Docs" --url https://github.com/company/frontend.git
+npx agentic-knowledge create --preset git-repo --id backend-docs --name "Backend Docs" --url https://github.com/company/backend.git
+npx agentic-knowledge create --preset local-folder --id internal-docs --name "Internal Docs" --path ./docs
 
 # Initialize git repos
-agentic-knowledge init frontend-docs
-agentic-knowledge init backend-docs
+npx agentic-knowledge init frontend-docs
+npx agentic-knowledge init backend-docs
 
 # Check all statuses
-agentic-knowledge status --verbose
+npx agentic-knowledge status --verbose
 
-# Start server
-agentic-knowledge
+# Configure Claude Desktop (see MCP Integration section)
+# The server runs automatically when Claude launches
 ```
 
 ## MCP Integration
@@ -457,7 +461,47 @@ Found 2 available docset(s):
 
 #### Claude Desktop
 
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+**Configuration file location:**
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+- Linux: `~/.config/Claude/claude_desktop_config.json`
+
+**Option 1: Using npx (recommended)**
+
+```json
+{
+  "mcpServers": {
+    "agentic-knowledge": {
+      "command": "npx",
+      "args": ["-y", "agentic-knowledge"]
+    }
+  }
+}
+```
+
+The `-y` flag automatically confirms the installation prompt from npx.
+
+**Option 2: Project-specific installation**
+
+If you have agentic-knowledge installed in a specific project:
+
+```json
+{
+  "mcpServers": {
+    "agentic-knowledge": {
+      "command": "npx",
+      "args": ["-y", "agentic-knowledge"],
+      "cwd": "/absolute/path/to/your/project"
+    }
+  }
+}
+```
+
+This runs the server in your project directory, making it use your project's `.knowledge/config.yaml`.
+
+**Option 3: Global npm installation**
+
+If you installed globally with `npm install -g agentic-knowledge`:
 
 ```json
 {
@@ -469,9 +513,19 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 }
 ```
 
+**After configuration:**
+1. Restart Claude Desktop
+2. The server starts automatically in the background
+3. Look for the 🔌 icon in Claude Desktop to verify the connection
+
 #### Other MCP Clients
 
-Provide the command `agentic-knowledge` as the MCP server command. The server uses stdio transport.
+For other MCP clients, use:
+- **Command**: `npx`
+- **Args**: `["-y", "agentic-knowledge"]`
+- **Transport**: stdio
+
+The server will start automatically when the MCP client launches.
 
 ### Using in AI Conversations
 
