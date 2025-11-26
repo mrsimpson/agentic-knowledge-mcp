@@ -2,7 +2,7 @@
 
 **Search any documentation as if you had written it yourself**
 
-An MCP server that guides AI assistants to navigate documentation using their built-in tools (grep, file reading) instead of traditional RAG. Leverages massive context windows and agentic search patterns for precise, intelligent documentation discovery.
+An MCP server that guides AI assistants to navigate documentation using their built-in tools (grep, file reading) instead of traditional RAG. Leverages ever growing capabilities of large language models, better tool-calling and interpretation and agentic search patterns for precise, intelligent documentation discovery.
 
 ---
 
