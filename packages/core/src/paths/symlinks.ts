@@ -50,7 +50,7 @@ export async function createSymlinks(
     }
   } catch (error) {
     throw new KnowledgeError(
-      ErrorType.PATH_INVALID,
+      ErrorType._PATH_INVALID,
       `Failed to create symlinks: ${(error as Error).message}`,
       { sourcePaths, targetDir, projectRoot, error },
     );

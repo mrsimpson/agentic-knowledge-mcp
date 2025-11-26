@@ -21,7 +21,7 @@ export async function loadConfig(configPath: string): Promise<KnowledgeConfig> {
 
     if (!validateConfig(parsed)) {
       throw new KnowledgeError(
-        ErrorType.CONFIG_INVALID,
+        ErrorType._CONFIG_INVALID,
         "Configuration file contains invalid structure",
         { configPath, parsed },
       );
@@ -38,14 +38,14 @@ export async function loadConfig(configPath: string): Promise<KnowledgeConfig> {
 
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       throw new KnowledgeError(
-        ErrorType.CONFIG_NOT_FOUND,
+        ErrorType._CONFIG_NOT_FOUND,
         `Configuration file not found: ${configPath}`,
         { configPath },
       );
     }
 
     throw new KnowledgeError(
-      ErrorType.YAML_PARSE_ERROR,
+      ErrorType._YAML_PARSE_ERROR,
       `Failed to parse YAML configuration: ${(error as Error).message}`,
       { configPath, error },
     );
@@ -64,7 +64,7 @@ export function loadConfigSync(configPath: string): KnowledgeConfig {
 
     if (!validateConfig(parsed)) {
       throw new KnowledgeError(
-        ErrorType.CONFIG_INVALID,
+        ErrorType._CONFIG_INVALID,
         "Configuration file contains invalid structure",
         { configPath, parsed },
       );
@@ -81,14 +81,14 @@ export function loadConfigSync(configPath: string): KnowledgeConfig {
 
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       throw new KnowledgeError(
-        ErrorType.CONFIG_NOT_FOUND,
+        ErrorType._CONFIG_NOT_FOUND,
         `Configuration file not found: ${configPath}`,
         { configPath },
       );
     }
 
     throw new KnowledgeError(
-      ErrorType.YAML_PARSE_ERROR,
+      ErrorType._YAML_PARSE_ERROR,
       `Failed to parse YAML configuration: ${(error as Error).message}`,
       { configPath, error },
     );
@@ -110,7 +110,7 @@ function validateAllTemplates(
       validateTemplate(config.template);
     } catch (error) {
       throw new KnowledgeError(
-        ErrorType.TEMPLATE_ERROR,
+        ErrorType._TEMPLATE_ERROR,
         `Invalid global template in configuration: ${(error as Error).message}`,
         { configPath, template: config.template, originalError: error },
       );
@@ -124,7 +124,7 @@ function validateAllTemplates(
         validateTemplate(docset.template);
       } catch (error) {
         throw new KnowledgeError(
-          ErrorType.TEMPLATE_ERROR,
+          ErrorType._TEMPLATE_ERROR,
           `Invalid template for docset '${docset.id}': ${(error as Error).message}`,
           {
             configPath,

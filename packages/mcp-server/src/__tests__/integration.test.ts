@@ -91,7 +91,7 @@ docsets:
       const server = createAgenticKnowledgeServer();
 
       // Create a mock request handler to capture tool descriptions
-      let toolsResponse: any = null;
+      let _toolsResponse: any = null;
 
       // We can't easily test the actual ListToolsRequestSchema handler directly,
       // but we can verify the server creates without errors and our configuration loads

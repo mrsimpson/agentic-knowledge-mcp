@@ -45,7 +45,7 @@ export function processTemplate(
     const unreplacedMatches = processed.match(/\{\{[^}]+\}\}/g);
     if (unreplacedMatches) {
       throw new KnowledgeError(
-        ErrorType.TEMPLATE_ERROR,
+        ErrorType._TEMPLATE_ERROR,
         `Template contains invalid variables: ${unreplacedMatches.join(", ")}`,
         { template, unreplacedMatches },
       );
@@ -57,7 +57,7 @@ export function processTemplate(
       throw error;
     }
     throw new KnowledgeError(
-      ErrorType.TEMPLATE_ERROR,
+      ErrorType._TEMPLATE_ERROR,
       `Failed to process template: ${(error as Error).message}`,
       { template, context, error },
     );
@@ -95,7 +95,7 @@ export function validateTemplate(template: string): boolean {
 
   if (invalidVariables.length > 0) {
     throw new KnowledgeError(
-      ErrorType.TEMPLATE_ERROR,
+      ErrorType._TEMPLATE_ERROR,
       `Template contains invalid variables: ${invalidVariables.join(", ")}. Allowed variables: ${ALLOWED_TEMPLATE_VARIABLES.join(", ")}`,
       {
         template,
@@ -112,7 +112,7 @@ export function validateTemplate(template: string): boolean {
 
   if (missingRequired.length > 0) {
     throw new KnowledgeError(
-      ErrorType.TEMPLATE_ERROR,
+      ErrorType._TEMPLATE_ERROR,
       `Template missing required variables: ${missingRequired.join(", ")}. Required variables: ${REQUIRED_TEMPLATE_VARIABLES.join(", ")}`,
       {
         template,

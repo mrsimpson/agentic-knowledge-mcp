@@ -72,7 +72,7 @@ describe("Template Processing", () => {
         processTemplate(template, sampleContext);
       } catch (error) {
         expect(error).toBeInstanceOf(KnowledgeError);
-        expect((error as KnowledgeError).type).toBe(ErrorType.TEMPLATE_ERROR);
+        expect((error as KnowledgeError).type).toBe(ErrorType._TEMPLATE_ERROR);
         expect((error as KnowledgeError).message).toContain(
           "invalid variables",
         );
@@ -112,7 +112,7 @@ describe("Template Processing", () => {
         validateTemplate(invalidTemplate);
       } catch (error) {
         expect(error).toBeInstanceOf(KnowledgeError);
-        expect((error as KnowledgeError).type).toBe(ErrorType.TEMPLATE_ERROR);
+        expect((error as KnowledgeError).type).toBe(ErrorType._TEMPLATE_ERROR);
         expect((error as KnowledgeError).message).toContain(
           "invalid variables: invalid_variable",
         );
