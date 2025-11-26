@@ -18,57 +18,35 @@ Give your AI assistant access to any documentation—yours or third-party—so i
 
 ## 🚀 Quick Start
 
-### 1. Install
+### 1. Configure an MCP Client
 
-```bash
-npm install agentic-knowledge
-# or
-npx agentic-knowledge
-```
-
-### 2. Configure an MCP Client
-
-Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
-
+Add to your coding agent config something along the lines of 
 ```json
 {
   "mcpServers": {
     "agentic-knowledge": {
       "command": "npx",
-      "args": ["-y", "agentic-knowledge"]
+      "args": ["-y", "agentic-knowledge-mcp"]
     }
   }
 }
 ```
 
-Or for a local project installation:
 
-```json
-{
-  "mcpServers": {
-    "agentic-knowledge": {
-      "command": "npx",
-      "args": ["-y", "agentic-knowledge"],
-      "cwd": "/path/to/your/project"
-    }
-  }
-}
-```
-
-### 3. Set Up Your First Docset
+### 2. Set Up Your First Docset
 
 **Option A: Use the CLI (Recommended)**
 
 ```bash
 # For a Git repository
-npx agentic-knowledge create \
+npx agentic-knowledge-mcp create \
   --preset git-repo \
   --id react-docs \
   --name "React Documentation" \
   --url https://github.com/facebook/react.git
 
 # Initialize (downloads the docs)
-npx agentic-knowledge init react-docs
+npx agentic-knowledge-mcp init react-docs
 
 # The MCP server starts automatically when Claude Desktop launches
 ```
@@ -87,9 +65,8 @@ docsets:
         paths: ["./docs"]
 ```
 
-Then start: `agentic-knowledge`
 
-### 4. Use It
+### 3. Use It
 
 Your AI assistant now has access to `search_docs` and `list_docsets` tools. Ask questions naturally:
 
@@ -150,49 +127,6 @@ Traditional RAG (Retrieval-Augmented Generation) was built for the **context-poo
 ### Inspired By
 
 This approach is inspired by [The RAG Obituary](https://www.nicolasbustamante.com/p/the-rag-obituary-killed-by-agents) by Nicolas Bustamante and how Claude Code revolutionized code analysis by ditching RAG for direct filesystem exploration.
-
-## 🛠 Essential CLI Commands
-
-**Lifecycle:**
-```
-CREATE → INITIALIZE → USE → REFRESH
-```
-
-**Commands:**
-```bash
-# Create a docset configuration
-npx agentic-knowledge create --preset git-repo --id my-docs --name "My Docs" --url <url>
-
-# Initialize (download docs)
-npx agentic-knowledge init my-docs
-
-# Check status
-npx agentic-knowledge status
-
-# Update docs
-npx agentic-knowledge refresh my-docs
-
-# MCP server runs automatically via Claude Desktop configuration
-# Or run manually: npx agentic-knowledge
-```
-
-See the [User Guide](./USER_GUIDE.md) for complete command documentation.
-
-## 🔬 The Future of Knowledge Systems
-
-We're entering the **post-retrieval age**. The winners won't be those with the biggest vector databases, but those who design the smartest navigation systems for abundant context.
-
-**RAG was training wheels**—useful, necessary, but temporary. The future belongs to systems that read, navigate, and reason end-to-end.
-
-## 🧪 Development Status
-
-**Current Phase**: Finalization ✅
-
-- ✅ Core implementation complete (107 tests passing)
-- ✅ MCP protocol compliance verified
-- ✅ Performance validated (0.47ms response time)
-- ✅ Full documentation and examples
-- ⚠️ Ready for community feedback and real-world testing
 
 ## 🚀 Local Development
 
