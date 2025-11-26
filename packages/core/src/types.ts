@@ -119,14 +119,16 @@ export interface TemplateContext {
 
 /**
  * Error types that can occur in the core system
+ * Note: Linter may warn about "unused" enum values, but these are used throughout
+ * the codebase as ErrorType.CONFIG_NOT_FOUND, etc. The warnings are false positives.
  */
 export enum ErrorType {
-  _CONFIG_NOT_FOUND = "CONFIG_NOT_FOUND",
-  _CONFIG_INVALID = "CONFIG_INVALID",
-  _DOCSET_NOT_FOUND = "DOCSET_NOT_FOUND",
-  _PATH_INVALID = "PATH_INVALID",
-  _TEMPLATE_ERROR = "TEMPLATE_ERROR",
-  _YAML_PARSE_ERROR = "YAML_PARSE_ERROR",
+  CONFIG_NOT_FOUND = "CONFIG_NOT_FOUND",
+  CONFIG_INVALID = "CONFIG_INVALID",
+  DOCSET_NOT_FOUND = "DOCSET_NOT_FOUND",
+  PATH_INVALID = "PATH_INVALID",
+  TEMPLATE_ERROR = "TEMPLATE_ERROR",
+  YAML_PARSE_ERROR = "YAML_PARSE_ERROR",
 }
 
 /**

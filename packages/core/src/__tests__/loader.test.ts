@@ -90,9 +90,7 @@ template: "Global only"`;
         await loadConfig(nonExistentPath);
       } catch (error) {
         expect(error).toBeInstanceOf(KnowledgeError);
-        expect((error as KnowledgeError).type).toBe(
-          ErrorType._CONFIG_NOT_FOUND,
-        );
+        expect((error as KnowledgeError).type).toBe(ErrorType.CONFIG_NOT_FOUND);
         expect((error as KnowledgeError).context?.configPath).toBe(
           nonExistentPath,
         );
@@ -108,7 +106,7 @@ template: "Global only"`;
         await loadConfig(invalidConfigPath);
       } catch (error) {
         expect(error).toBeInstanceOf(KnowledgeError);
-        expect((error as KnowledgeError).type).toBe(ErrorType._CONFIG_INVALID);
+        expect((error as KnowledgeError).type).toBe(ErrorType.CONFIG_INVALID);
       }
     });
 
@@ -121,9 +119,7 @@ template: "Global only"`;
         await loadConfig(malformedConfigPath);
       } catch (error) {
         expect(error).toBeInstanceOf(KnowledgeError);
-        expect((error as KnowledgeError).type).toBe(
-          ErrorType._YAML_PARSE_ERROR,
-        );
+        expect((error as KnowledgeError).type).toBe(ErrorType.YAML_PARSE_ERROR);
       }
     });
 
@@ -148,7 +144,7 @@ template: "Global template with {{keywords}} and {{invalid_variable}}"`;
         await loadConfig(invalidTemplateConfigPath);
       } catch (error) {
         expect(error).toBeInstanceOf(KnowledgeError);
-        expect((error as KnowledgeError).type).toBe(ErrorType._TEMPLATE_ERROR);
+        expect((error as KnowledgeError).type).toBe(ErrorType.TEMPLATE_ERROR);
         expect((error as KnowledgeError).message).toContain(
           "Invalid global template",
         );
@@ -183,7 +179,7 @@ docsets:
         await loadConfig(invalidDocsetTemplateConfigPath);
       } catch (error) {
         expect(error).toBeInstanceOf(KnowledgeError);
-        expect((error as KnowledgeError).type).toBe(ErrorType._TEMPLATE_ERROR);
+        expect((error as KnowledgeError).type).toBe(ErrorType.TEMPLATE_ERROR);
         expect((error as KnowledgeError).message).toContain(
           "Invalid template for docset 'test-docs'",
         );
@@ -231,9 +227,7 @@ template: "Global: {{keywords}} in {{local_path}}"`;
         loadConfigSync(nonExistentPath);
       } catch (error) {
         expect(error).toBeInstanceOf(KnowledgeError);
-        expect((error as KnowledgeError).type).toBe(
-          ErrorType._CONFIG_NOT_FOUND,
-        );
+        expect((error as KnowledgeError).type).toBe(ErrorType.CONFIG_NOT_FOUND);
       }
     });
   });

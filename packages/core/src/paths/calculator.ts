@@ -73,7 +73,7 @@ export function calculateLocalPath(
     throw new Error(`Unsupported source type: ${(primarySource as any).type}`);
   } catch (error) {
     throw new KnowledgeError(
-      ErrorType._PATH_INVALID,
+      ErrorType.PATH_INVALID,
       `Failed to calculate local path for docset '${docset.id}': ${(error as Error).message}`,
       { docset, configPath, error },
     );
@@ -119,7 +119,7 @@ export async function calculateLocalPathWithSymlinks(
       return relative(projectRoot, symlinkDir) || ".";
     } catch (error) {
       throw new KnowledgeError(
-        ErrorType._PATH_INVALID,
+        ErrorType.PATH_INVALID,
         `Failed to create symlinks for docset '${docset.id}': ${(error as Error).message}`,
         { docset, configPath, error },
       );

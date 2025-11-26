@@ -9,13 +9,13 @@ describe("Error Handling", () => {
   describe("KnowledgeError", () => {
     test("should create error with type and message", () => {
       const error = new KnowledgeError(
-        ErrorType._CONFIG_NOT_FOUND,
+        ErrorType.CONFIG_NOT_FOUND,
         "Configuration file not found",
       );
 
       expect(error).toBeInstanceOf(Error);
       expect(error).toBeInstanceOf(KnowledgeError);
-      expect(error.type).toBe(ErrorType._CONFIG_NOT_FOUND);
+      expect(error.type).toBe(ErrorType.CONFIG_NOT_FOUND);
       expect(error.message).toBe("Configuration file not found");
       expect(error.name).toBe("KnowledgeError");
     });
@@ -23,7 +23,7 @@ describe("Error Handling", () => {
     test("should create error with context", () => {
       const context = { configPath: "/path/to/config.yaml", line: 5 };
       const error = new KnowledgeError(
-        ErrorType._YAML_PARSE_ERROR,
+        ErrorType.YAML_PARSE_ERROR,
         "Invalid YAML syntax",
         context,
       );
@@ -35,7 +35,7 @@ describe("Error Handling", () => {
 
     test("should handle error without context", () => {
       const error = new KnowledgeError(
-        ErrorType._CONFIG_INVALID,
+        ErrorType.CONFIG_INVALID,
         "Invalid configuration structure",
       );
 
@@ -44,7 +44,7 @@ describe("Error Handling", () => {
 
     test("should preserve error stack trace", () => {
       const error = new KnowledgeError(
-        ErrorType._TEMPLATE_ERROR,
+        ErrorType.TEMPLATE_ERROR,
         "Template processing failed",
       );
 
@@ -55,12 +55,12 @@ describe("Error Handling", () => {
 
   describe("ErrorType enum", () => {
     test("should have all expected error types", () => {
-      expect(ErrorType._CONFIG_NOT_FOUND).toBe("CONFIG_NOT_FOUND");
-      expect(ErrorType._CONFIG_INVALID).toBe("CONFIG_INVALID");
-      expect(ErrorType._DOCSET_NOT_FOUND).toBe("DOCSET_NOT_FOUND");
-      expect(ErrorType._PATH_INVALID).toBe("PATH_INVALID");
-      expect(ErrorType._TEMPLATE_ERROR).toBe("TEMPLATE_ERROR");
-      expect(ErrorType._YAML_PARSE_ERROR).toBe("YAML_PARSE_ERROR");
+      expect(ErrorType.CONFIG_NOT_FOUND).toBe("CONFIG_NOT_FOUND");
+      expect(ErrorType.CONFIG_INVALID).toBe("CONFIG_INVALID");
+      expect(ErrorType.DOCSET_NOT_FOUND).toBe("DOCSET_NOT_FOUND");
+      expect(ErrorType.PATH_INVALID).toBe("PATH_INVALID");
+      expect(ErrorType.TEMPLATE_ERROR).toBe("TEMPLATE_ERROR");
+      expect(ErrorType.YAML_PARSE_ERROR).toBe("YAML_PARSE_ERROR");
     });
 
     test("should have string values for all error types", () => {
@@ -92,7 +92,7 @@ describe("Error Handling", () => {
       };
 
       const error = new KnowledgeError(
-        ErrorType._CONFIG_INVALID,
+        ErrorType.CONFIG_INVALID,
         "Complex error scenario",
         complexContext,
       );
@@ -112,7 +112,7 @@ describe("Error Handling", () => {
       };
 
       const error = new KnowledgeError(
-        ErrorType._PATH_INVALID,
+        ErrorType.PATH_INVALID,
         "Error with null values",
         contextWithNulls,
       );
@@ -128,7 +128,7 @@ describe("Error Handling", () => {
   describe("error serialization", () => {
     test("should have accessible error properties", () => {
       const error = new KnowledgeError(
-        ErrorType._DOCSET_NOT_FOUND,
+        ErrorType.DOCSET_NOT_FOUND,
         "Docset not found",
         { docsetId: "missing-docs", searchPath: "/project" },
       );
@@ -136,7 +136,7 @@ describe("Error Handling", () => {
       // Test that properties are accessible (Error serialization is complex)
       expect(error.name).toBe("KnowledgeError");
       expect(error.message).toBe("Docset not found");
-      expect(error.type).toBe(ErrorType._DOCSET_NOT_FOUND);
+      expect(error.type).toBe(ErrorType.DOCSET_NOT_FOUND);
       expect(error.context).toEqual({
         docsetId: "missing-docs",
         searchPath: "/project",
@@ -152,7 +152,7 @@ describe("Error Handling", () => {
 
       expect(manualSerialized.name).toBe("KnowledgeError");
       expect(manualSerialized.message).toBe("Docset not found");
-      expect(manualSerialized.type).toBe(ErrorType._DOCSET_NOT_FOUND);
+      expect(manualSerialized.type).toBe(ErrorType.DOCSET_NOT_FOUND);
       expect(manualSerialized.context).toEqual({
         docsetId: "missing-docs",
         searchPath: "/project",
@@ -164,7 +164,7 @@ describe("Error Handling", () => {
       circularObj.self = circularObj;
 
       const error = new KnowledgeError(
-        ErrorType._TEMPLATE_ERROR,
+        ErrorType.TEMPLATE_ERROR,
         "Circular reference error",
         { circular: circularObj },
       );
@@ -179,17 +179,17 @@ describe("Error Handling", () => {
     test("should format error messages consistently", () => {
       const testCases = [
         {
-          type: ErrorType._CONFIG_NOT_FOUND,
+          type: ErrorType.CONFIG_NOT_FOUND,
           message: "Configuration file not found: /path/to/config.yaml",
           expectedPattern: /Configuration file not found:/,
         },
         {
-          type: ErrorType._YAML_PARSE_ERROR,
+          type: ErrorType.YAML_PARSE_ERROR,
           message: "Failed to parse YAML configuration: Unexpected token",
           expectedPattern: /Failed to parse YAML configuration:/,
         },
         {
-          type: ErrorType._PATH_INVALID,
+          type: ErrorType.PATH_INVALID,
           message:
             "Failed to calculate local path for docset 'react-docs': Path resolution error",
           expectedPattern: /Failed to calculate local path for docset/,

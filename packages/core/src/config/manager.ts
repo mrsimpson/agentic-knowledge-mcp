@@ -45,7 +45,7 @@ export class ConfigManager {
     const configPath = await findConfigPath(startDir);
     if (!configPath) {
       throw new KnowledgeError(
-        ErrorType._CONFIG_NOT_FOUND,
+        ErrorType.CONFIG_NOT_FOUND,
         "No configuration file found. Please ensure .knowledge/config.yaml exists in your project.",
         { searchPath: startDir || process.cwd() },
       );
@@ -75,7 +75,7 @@ export class ConfigManager {
 
       if (!validateConfig(parsed)) {
         throw new KnowledgeError(
-          ErrorType._CONFIG_INVALID,
+          ErrorType.CONFIG_INVALID,
           "Configuration file contains invalid structure",
           { configPath, parsed },
         );
@@ -89,14 +89,14 @@ export class ConfigManager {
 
       if ((error as NodeJS.ErrnoException).code === "ENOENT") {
         throw new KnowledgeError(
-          ErrorType._CONFIG_NOT_FOUND,
+          ErrorType.CONFIG_NOT_FOUND,
           `Configuration file not found: ${configPath}`,
           { configPath },
         );
       }
 
       throw new KnowledgeError(
-        ErrorType._CONFIG_INVALID,
+        ErrorType.CONFIG_INVALID,
         `Failed to parse configuration file: ${error instanceof Error ? error.message : String(error)}`,
         { configPath, originalError: error },
       );
@@ -115,7 +115,7 @@ export class ConfigManager {
     const targetPath = configPath || this.configCache?.configPath;
     if (!targetPath) {
       throw new KnowledgeError(
-        ErrorType._CONFIG_INVALID,
+        ErrorType.CONFIG_INVALID,
         "No configuration path available. Load config first or provide explicit path.",
         { configPath },
       );
@@ -124,7 +124,7 @@ export class ConfigManager {
     // Validate config before saving
     if (!validateConfig(config)) {
       throw new KnowledgeError(
-        ErrorType._CONFIG_INVALID,
+        ErrorType.CONFIG_INVALID,
         "Cannot save invalid configuration",
         { config },
       );
@@ -143,7 +143,7 @@ export class ConfigManager {
       this.configCache = null;
     } catch (error) {
       throw new KnowledgeError(
-        ErrorType._CONFIG_INVALID,
+        ErrorType.CONFIG_INVALID,
         `Failed to save configuration: ${error instanceof Error ? error.message : String(error)}`,
         { configPath: targetPath, originalError: error },
       );
@@ -166,7 +166,7 @@ export class ConfigManager {
     const docset = config.docsets.find((d) => d.id === docsetId);
     if (!docset) {
       throw new KnowledgeError(
-        ErrorType._CONFIG_INVALID,
+        ErrorType.CONFIG_INVALID,
         `Docset '${docsetId}' not found in configuration`,
         { docsetId, availableDocsets: config.docsets.map((d) => d.id) },
       );
