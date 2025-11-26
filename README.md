@@ -278,6 +278,202 @@ docsets:
         url: "https://github.com/external/docs.git"
 ```
 
+## 🛠️ CLI Commands & Docset Lifecycle
+
+The `agentic-knowledge` CLI provides commands to manage your documentation lifecycle. When you run `agentic-knowledge` without arguments, it starts the MCP server. With arguments, it executes CLI commands.
+
+### Understanding the Docset Lifecycle
+
+A docset goes through the following phases:
+
+```
+1. DEFINE    → Configure docset in .knowledge/config.yaml
+2. CREATE    → Use CLI to create configuration from presets
+3. INITIALIZE → Download and prepare documentation files
+4. USE       → Search and navigate via MCP server
+5. REFRESH   → Update documentation as needed
+```
+
+### CLI Commands
+
+#### `create` - Create New Docset Configuration
+
+Create docset configurations quickly using presets:
+
+**Git Repository Preset:**
+```bash
+agentic-knowledge create \
+  --preset git-repo \
+  --id mcp-sdk \
+  --name "MCP TypeScript SDK" \
+  --url https://github.com/modelcontextprotocol/typescript-sdk.git \
+  --branch main
+```
+
+**Local Folder Preset:**
+```bash
+agentic-knowledge create \
+  --preset local-folder \
+  --id my-docs \
+  --name "My Documentation" \
+  --path ./docs
+```
+
+**Options:**
+- `--preset <type>`: Choose preset (`git-repo` or `local-folder`)
+- `--id <id>`: Unique identifier for the docset
+- `--name <name>`: Human-readable name
+- `--url <url>`: Git repository URL (for git-repo preset)
+- `--branch <branch>`: Git branch (optional, defaults to main)
+- `--path <path>`: Local directory path (for local-folder preset)
+
+The `create` command:
+- ✅ Creates or updates `.knowledge/config.yaml`
+- ✅ Validates docset ID uniqueness
+- ✅ For local folders, creates symlinks immediately
+- ✅ For git repos, prepares configuration for initialization
+
+#### `init` - Initialize Docset Sources
+
+Initialize a configured docset by downloading and preparing documentation:
+
+```bash
+# Initialize a specific docset
+agentic-knowledge init mcp-sdk
+
+# Force re-initialization
+agentic-knowledge init mcp-sdk --force
+
+# Use custom config path
+agentic-knowledge init mcp-sdk --config /path/to/config.yaml
+```
+
+**What happens during initialization:**
+
+1. **For Git Repositories:**
+   - Clones repository to temporary directory
+   - Extracts specified paths (if configured)
+   - Applies smart filtering (excludes `node_modules/`, build artifacts, etc.)
+   - Copies documentation to `.knowledge/docsets/{id}/`
+   - Creates metadata files for change tracking
+
+2. **For Local Folders:**
+   - Creates symlinks in `.knowledge/docsets/{id}/`
+   - No file duplication
+   - Changes are immediately visible
+
+3. **Creates Metadata:**
+   - `.agentic-metadata.json` - Overall docset information
+   - `.agentic-source-{index}.json` - Per-source tracking with content hashes
+
+**Directory structure after init:**
+```
+.knowledge/
+├── config.yaml
+├── .gitignore (auto-created)
+└── docsets/
+    └── mcp-sdk/
+        ├── .agentic-metadata.json
+        ├── .agentic-source-0.json
+        └── [documentation files...]
+```
+
+#### `status` - Check Docset Status
+
+View the status of all docsets and their sources:
+
+```bash
+# Basic status
+agentic-knowledge status
+
+# Detailed status with source information
+agentic-knowledge status --verbose
+
+# Use custom config
+agentic-knowledge status --config /path/to/config.yaml
+```
+
+**Status indicators:**
+- ✅ Green: Updated within 24 hours
+- ⚠️ Yellow: Updated 1-7 days ago
+- 🔄 Red: Updated >7 days ago or not initialized
+
+**Example output:**
+```
+📊 Docset Status
+
+✅ mcp-sdk (MCP TypeScript SDK)
+   Initialized | 45 files | 2 source(s) loaded
+   Last refreshed: 2 hours ago
+
+⚠️ react-docs (React Documentation)
+   Initialized | 120 files | 1 source(s) loaded
+   Last refreshed: 3 days ago
+
+   💡 Consider running: agentic-knowledge refresh react-docs
+
+🔄 api-docs (API Documentation)
+   Not initialized | 1 source(s) configured
+
+   💡 Run: agentic-knowledge init api-docs
+```
+
+#### `refresh` - Update Documentation
+
+Refresh docset sources to get the latest content:
+
+```bash
+# Refresh all docsets
+agentic-knowledge refresh
+
+# Refresh specific docset
+agentic-knowledge refresh mcp-sdk
+
+# Force refresh (ignore cache)
+agentic-knowledge refresh mcp-sdk --force
+
+# Use custom config
+agentic-knowledge refresh --config /path/to/config.yaml
+```
+
+**Smart refresh logic:**
+- Checks Git commit hash to detect changes
+- Skips refresh if updated within 1 hour (unless `--force`)
+- Skips refresh if no changes detected
+- Creates backup before refresh
+- Updates metadata with new timestamp
+
+**When to refresh:**
+- Git repository has new commits
+- It's been several days since last update
+- You want to ensure latest content
+
+### Complete Workflow Example
+
+Here's a complete workflow from scratch:
+
+```bash
+# 1. Create docset for a Git repository
+agentic-knowledge create \
+  --preset git-repo \
+  --id react-docs \
+  --name "React Documentation" \
+  --url https://github.com/facebook/react.git \
+  --branch main
+
+# 2. Initialize the docset (downloads docs)
+agentic-knowledge init react-docs
+
+# 3. Check status
+agentic-knowledge status
+
+# 4. Start MCP server (for AI assistant)
+agentic-knowledge
+
+# Later: Update documentation
+agentic-knowledge refresh react-docs
+```
+
 ## 🎯 How to Use
 
 ### Step 1: Set Up Your Documentation

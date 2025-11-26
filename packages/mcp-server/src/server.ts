@@ -18,6 +18,8 @@ import {
   createStructuredResponse,
   type KnowledgeConfig,
 } from "@codemcp/knowledge-core";
+import { existsSync } from "node:fs";
+import { resolve, dirname } from "node:path";
 
 /**
  * Create an agentic knowledge MCP server
@@ -59,7 +61,12 @@ export function createAgenticKnowledgeServer() {
       const configPath = await findConfigPath();
       if (!configPath) {
         throw new Error(
-          "No configuration file found. Please create a .knowledge/config.yaml file in your project.",
+          "No configuration file found.\n\n" +
+            "To get started:\n" +
+            "1. Create a docset: agentic-knowledge create --preset git-repo --id my-docs --name \"My Docs\" --url <repo-url>\n" +
+            "2. Initialize it: agentic-knowledge init my-docs\n" +
+            "3. Start the server: agentic-knowledge\n\n" +
+            "Or manually create a .knowledge/config.yaml file in your project.",
         );
       }
 
@@ -222,12 +229,36 @@ Use the path and search terms with your text search tools (grep, rg, ripgrep, fi
           if (!docset) {
             const availableIds = config.docsets.map((d) => d.id).join(", ");
             throw new Error(
-              `Docset '${docset_id}' not found. Available docsets: ${availableIds}`,
+              `Docset '${docset_id}' not found.\n\n` +
+                `Available docsets: ${availableIds}\n\n` +
+                `To create a new docset:\n` +
+                `agentic-knowledge create --preset git-repo --id ${docset_id} --name "My Docs" --url <repo-url>\n` +
+                `agentic-knowledge init ${docset_id}`,
             );
           }
 
           // Calculate local path
           const localPath = calculateLocalPath(docset, configPath);
+
+          // Check if docset is initialized (for git_repo sources)
+          const primarySource = docset.sources?.[0];
+          if (primarySource?.type === "git_repo") {
+            // For git repos, the path should be absolute or relative to project root
+            const configDir = dirname(configPath);
+            const projectRoot = dirname(configDir);
+            const absolutePath = resolve(projectRoot, localPath);
+
+            if (!existsSync(absolutePath)) {
+              throw new Error(
+                `Docset '${docset_id}' is not initialized.\n\n` +
+                  `The docset is configured but hasn't been initialized yet.\n\n` +
+                  `To initialize this docset:\n` +
+                  `agentic-knowledge init ${docset_id}\n\n` +
+                  `To check status of all docsets:\n` +
+                  `agentic-knowledge status`,
+              );
+            }
+          }
 
           // Create template context with proper function signature
           const templateContext = createTemplateContext(
