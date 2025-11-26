@@ -334,18 +334,22 @@ The `create` command:
 
 #### `init` - Initialize Docset Sources
 
-Initialize a configured docset by downloading and preparing documentation:
+Initialize a configured docset by downloading and preparing documentation. Use this for **first-time setup**.
 
 ```bash
 # Initialize a specific docset
 agentic-knowledge init mcp-sdk
 
-# Force re-initialization
+# Force re-initialization (start completely fresh)
 agentic-knowledge init mcp-sdk --force
 
 # Use custom config path
 agentic-knowledge init mcp-sdk --config /path/to/config.yaml
 ```
+
+**When to use:**
+- Setting up a docset for the first time
+- With `--force`: Completely reset a docset (deletes everything and re-downloads)
 
 **What happens during initialization:**
 
@@ -392,26 +396,19 @@ agentic-knowledge status --verbose
 agentic-knowledge status --config /path/to/config.yaml
 ```
 
-**Status indicators:**
-- ✅ Green: Updated within 24 hours
-- ⚠️ Yellow: Updated 1-7 days ago
-- 🔄 Red: Updated >7 days ago or not initialized
-
 **Example output:**
 ```
 📊 Docset Status
 
-✅ mcp-sdk (MCP TypeScript SDK)
+mcp-sdk (MCP TypeScript SDK)
    Initialized | 45 files | 2 source(s) loaded
-   Last refreshed: 2 hours ago
+   Initialized: 2024-11-20
 
-⚠️ react-docs (React Documentation)
+react-docs (React Documentation)
    Initialized | 120 files | 1 source(s) loaded
-   Last refreshed: 3 days ago
+   Initialized: 2024-11-15
 
-   💡 Consider running: agentic-knowledge refresh react-docs
-
-🔄 api-docs (API Documentation)
+api-docs (API Documentation)
    Not initialized | 1 source(s) configured
 
    💡 Run: agentic-knowledge init api-docs
@@ -419,7 +416,7 @@ agentic-knowledge status --config /path/to/config.yaml
 
 #### `refresh` - Update Documentation
 
-Refresh docset sources to get the latest content:
+Update already-initialized docsets with latest content. This is a **smart, incremental update**.
 
 ```bash
 # Refresh all docsets
@@ -428,7 +425,7 @@ agentic-knowledge refresh
 # Refresh specific docset
 agentic-knowledge refresh mcp-sdk
 
-# Force refresh (ignore cache)
+# Force refresh (ignore throttle)
 agentic-knowledge refresh mcp-sdk --force
 
 # Use custom config
@@ -437,15 +434,18 @@ agentic-knowledge refresh --config /path/to/config.yaml
 
 **Smart refresh logic:**
 - Checks Git commit hash to detect changes
-- Skips refresh if updated within 1 hour (unless `--force`)
 - Skips refresh if no changes detected
-- Creates backup before refresh
-- Updates metadata with new timestamp
+- Skips refresh if updated within 1 hour (unless `--force`)
+- Updates in place (preserves metadata)
 
-**When to refresh:**
-- Git repository has new commits
-- It's been several days since last update
-- You want to ensure latest content
+**When to use:**
+- Getting latest updates from git repositories
+- Routine maintenance/updates
+- Checking for new content
+
+**Key difference from `init --force`:**
+- `init --force`: Deletes everything and starts fresh (destructive)
+- `refresh`: Checks for changes and updates incrementally (smart)
 
 ### Complete Workflow Example
 
