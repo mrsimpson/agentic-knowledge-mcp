@@ -119,6 +119,8 @@ export interface TemplateContext {
 
 /**
  * Error types that can occur in the core system
+ * Note: Linter may warn about "unused" enum values, but these are used throughout
+ * the codebase as ErrorType.CONFIG_NOT_FOUND, etc. The warnings are false positives.
  */
 export enum ErrorType {
   CONFIG_NOT_FOUND = "CONFIG_NOT_FOUND",

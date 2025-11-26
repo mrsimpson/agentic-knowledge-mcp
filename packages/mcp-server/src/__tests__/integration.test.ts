@@ -91,7 +91,7 @@ docsets:
       const server = createAgenticKnowledgeServer();
 
       // Create a mock request handler to capture tool descriptions
-      let toolsResponse: any = null;
+      let _toolsResponse: any = null;
 
       // We can't easily test the actual ListToolsRequestSchema handler directly,
       // but we can verify the server creates without errors and our configuration loads
@@ -148,6 +148,56 @@ docsets:
 
       // Server creation should succeed even if config loading will fail later
       // This tests that server initialization is robust
+    });
+
+    it("should fail when searching uninitialized docset", async () => {
+      // Create a docset with git_repo source that is NOT initialized
+      const uninitializedConfig = `
+version: "1.0"
+docsets:
+  - id: "uninitialized-docs"
+    name: "Uninitialized Documentation"
+    description: "A docset that hasn't been initialized yet"
+    sources:
+      - type: git_repo
+        url: "https://github.com/example/repo.git"
+    local_path: ".knowledge/docsets/uninitialized-docs"
+`;
+      await fs.writeFile(tempConfigPath, uninitializedConfig);
+
+      const server = createAgenticKnowledgeServer();
+
+      // Create the docset directory (simulating what the create command does)
+      // but don't create the .agentic-metadata.json file (which init command creates)
+      const docsetDir = join(
+        tempDir,
+        ".knowledge",
+        "docsets",
+        "uninitialized-docs",
+      );
+      await fs.mkdir(docsetDir, { recursive: true });
+
+      // Try to search the uninitialized docset
+      const callToolHandler = (server as any)._requestHandlers.get(
+        "tools/call",
+      );
+      expect(callToolHandler).toBeDefined();
+
+      const result = await callToolHandler({
+        method: "tools/call",
+        params: {
+          name: "search_docs",
+          arguments: {
+            docset_id: "uninitialized-docs",
+            keywords: "test",
+          },
+        },
+      });
+
+      // Should return an error
+      expect(result.isError).toBe(true);
+      expect(result.content[0].text).toContain("not initialized");
+      expect(result.content[0].text).toContain("agentic-knowledge init");
     });
   });
 });

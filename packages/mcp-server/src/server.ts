@@ -18,6 +18,8 @@ import {
   createStructuredResponse,
   type KnowledgeConfig,
 } from "@codemcp/knowledge-core";
+import { existsSync } from "node:fs";
+import { resolve, dirname } from "node:path";
 
 /**
  * Create an agentic knowledge MCP server
@@ -43,12 +45,12 @@ export function createAgenticKnowledgeServer() {
   const CONFIG_CACHE_TTL = 60000; // 1 minute cache
 
   /**
-   * Load configuration with caching
+   * Load configuration with caching (returns null if no config found)
    */
   async function getConfiguration(): Promise<{
     config: KnowledgeConfig;
     configPath: string;
-  }> {
+  } | null> {
     const now = Date.now();
     if (configCache && now - configLoadTime < CONFIG_CACHE_TTL) {
       return configCache;
@@ -58,9 +60,7 @@ export function createAgenticKnowledgeServer() {
       // Find configuration file path
       const configPath = await findConfigPath();
       if (!configPath) {
-        throw new Error(
-          "No configuration file found. Please create a .knowledge/config.yaml file in your project.",
-        );
+        return null; // No config file found - server can still start
       }
 
       // Load configuration
@@ -74,27 +74,107 @@ export function createAgenticKnowledgeServer() {
       // Clear cache on error to force retry next time
       configCache = null;
       configLoadTime = 0;
-      throw error;
+      // Return null instead of throwing - allow server to start
+      console.error("Error loading configuration:", error);
+      return null;
     }
   }
 
   // Register tool handlers
   server.setRequestHandler(ListToolsRequestSchema, async () => {
-    try {
-      // Load configuration to get available docsets
-      const { config } = await getConfiguration();
+    // Load configuration to get available docsets
+    const configData = await getConfiguration();
 
-      // Build rich description with available docsets
-      const docsetInfo = config.docsets
-        .map((docset) => {
-          const description = docset.description
-            ? ` - ${docset.description}`
-            : "";
-          return `• **${docset.id}** (${docset.name})${description}`;
-        })
-        .join("\n");
+    // If no configuration, return tools with setup instructions
+    if (!configData) {
+      return {
+        tools: [
+          {
+            name: "search_docs",
+            description: `Search for documentation in configured docsets. Returns structured response with search instructions and parameters.
 
-      const searchDocsDescription = `Search for documentation in available docsets. Returns structured response with search instructions and parameters.
+⚠️ **NO DOCSETS CONFIGURED**
+
+To configure docsets and use this tool:
+
+**Option 1: Use CLI (recommended)**
+\`\`\`bash
+# Create a docset for a Git repository
+agentic-knowledge create \\
+  --preset git-repo \\
+  --id my-docs \\
+  --name "My Documentation" \\
+  --url https://github.com/user/repo.git
+
+# Initialize it (downloads the docs)
+agentic-knowledge init my-docs
+
+# Restart the MCP server
+agentic-knowledge
+\`\`\`
+
+**Option 2: Manual configuration**
+Create \`.knowledge/config.yaml\`:
+\`\`\`yaml
+version: "1.0"
+docsets:
+  - id: my-docs
+    name: My Documentation
+    sources:
+      - type: local_folder
+        paths: ["./docs"]
+\`\`\`
+
+After configuring, the tool will show available docsets here.`,
+            inputSchema: {
+              type: "object",
+              properties: {
+                docset_id: {
+                  type: "string",
+                  description:
+                    "The identifier of the docset to search in. (No docsets configured - see tool description for setup instructions)",
+                },
+                keywords: {
+                  type: "string",
+                  description:
+                    'Primary search terms or concepts you\'re looking for. Be specific about what you want to find (e.g., "authentication middleware", "user validation", "API rate limiting").',
+                },
+                generalized_keywords: {
+                  type: "string",
+                  description:
+                    "Related terms, synonyms, or contextual keywords that may appear alongside your primary keywords but are not your main target.",
+                },
+              },
+              required: ["docset_id", "keywords"],
+              additionalProperties: false,
+            },
+          },
+          {
+            name: "list_docsets",
+            description:
+              "List all available documentation sets (docsets) with detailed information. (Currently no docsets configured - see search_docs description for setup instructions)",
+            inputSchema: {
+              type: "object",
+              properties: {},
+              additionalProperties: false,
+            },
+          },
+        ],
+      };
+    }
+
+    // Configuration exists - build rich description with available docsets
+    const { config } = configData;
+    const docsetInfo = config.docsets
+      .map((docset) => {
+        const description = docset.description
+          ? ` - ${docset.description}`
+          : "";
+        return `• **${docset.id}** (${docset.name})${description}`;
+      })
+      .join("\n");
+
+    const searchDocsDescription = `Search for documentation in available docsets. Returns structured response with search instructions and parameters.
 
 📚 **AVAILABLE DOCSETS:**
 ${docsetInfo}
@@ -108,90 +188,46 @@ Returns JSON object with:
 
 Use the path and search terms with your text search tools (grep, rg, ripgrep, find).`;
 
-      return {
-        tools: [
-          {
-            name: "search_docs",
-            description: searchDocsDescription,
-            inputSchema: {
-              type: "object",
-              properties: {
-                docset_id: {
-                  type: "string",
-                  description: "Choose the docset to search in.",
-                  enum: config.docsets.map((d) => d.id),
-                },
-                keywords: {
-                  type: "string",
-                  description:
-                    'Primary search terms or concepts you\'re looking for. Be specific about what you want to find (e.g., "authentication middleware", "user validation", "API rate limiting"). Include the exact terms you expect to appear in the documentation.',
-                },
-                generalized_keywords: {
-                  type: "string",
-                  description:
-                    'Related terms, synonyms, or contextual keywords that may appear alongside your primary keywords but are not your main target. These help broaden the search context and catch relevant content that might use different terminology (e.g., for "authentication" you might include "login, signin, oauth, credentials, tokens"). Think of terms that would appear in the same sections or discussions as your main keywords.',
-                },
+    return {
+      tools: [
+        {
+          name: "search_docs",
+          description: searchDocsDescription,
+          inputSchema: {
+            type: "object",
+            properties: {
+              docset_id: {
+                type: "string",
+                description: "Choose the docset to search in.",
+                enum: config.docsets.map((d) => d.id),
               },
-              required: ["docset_id", "keywords"],
-              additionalProperties: false,
-            },
-          },
-          {
-            name: "list_docsets",
-            description:
-              "List all available documentation sets (docsets) with detailed information. Note: The search_docs tool already shows available docsets in its description, so this tool is mainly for getting additional metadata.",
-            inputSchema: {
-              type: "object",
-              properties: {},
-              additionalProperties: false,
-            },
-          },
-        ],
-      };
-    } catch (error) {
-      // Fallback to basic tools if configuration fails
-      return {
-        tools: [
-          {
-            name: "search_docs",
-            description:
-              "Search for documentation guidance based on keywords and context. Returns intelligent navigation instructions to help you find relevant information in a specific docset. (Configuration error - use list_docsets to see available options)",
-            inputSchema: {
-              type: "object",
-              properties: {
-                docset_id: {
-                  type: "string",
-                  description:
-                    "The identifier of the docset to search in. Use list_docsets to see available options.",
-                },
-                keywords: {
-                  type: "string",
-                  description:
-                    'Primary search terms or concepts you\'re looking for. Be specific about what you want to find (e.g., "authentication middleware", "user validation", "API rate limiting"). Include the exact terms you expect to appear in the documentation.',
-                },
-                generalized_keywords: {
-                  type: "string",
-                  description:
-                    'Related terms, synonyms, or contextual keywords that may appear alongside your primary keywords but are not your main target. These help broaden the search context and catch relevant content that might use different terminology (e.g., for "authentication" you might include "login, signin, oauth, credentials, tokens"). Think of terms that would appear in the same sections or discussions as your main keywords.',
-                },
+              keywords: {
+                type: "string",
+                description:
+                  'Primary search terms or concepts you\'re looking for. Be specific about what you want to find (e.g., "authentication middleware", "user validation", "API rate limiting"). Include the exact terms you expect to appear in the documentation.',
               },
-              required: ["docset_id", "keywords"],
-              additionalProperties: false,
+              generalized_keywords: {
+                type: "string",
+                description:
+                  'Related terms, synonyms, or contextual keywords that may appear alongside your primary keywords but are not your main target. These help broaden the search context and catch relevant content that might use different terminology (e.g., for "authentication" you might include "login, signin, oauth, credentials, tokens"). Think of terms that would appear in the same sections or discussions as your main keywords.',
+              },
             },
+            required: ["docset_id", "keywords"],
+            additionalProperties: false,
           },
-          {
-            name: "list_docsets",
-            description:
-              "List all available documentation sets (docsets) that can be searched. Each docset represents a specific project, library, or knowledge base.",
-            inputSchema: {
-              type: "object",
-              properties: {},
-              additionalProperties: false,
-            },
+        },
+        {
+          name: "list_docsets",
+          description:
+            "List all available documentation sets (docsets) with detailed information. Note: The search_docs tool already shows available docsets in its description, so this tool is mainly for getting additional metadata.",
+          inputSchema: {
+            type: "object",
+            properties: {},
+            additionalProperties: false,
           },
-        ],
-      };
-    }
+        },
+      ],
+    };
   });
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
@@ -215,19 +251,61 @@ Use the path and search terms with your text search tools (grep, rg, ripgrep, fi
           }
 
           // Load configuration
-          const { config, configPath } = await getConfiguration();
+          const configData = await getConfiguration();
+          if (!configData) {
+            throw new Error(
+              "No configuration file found.\n\n" +
+                "To configure docsets:\n\n" +
+                "**Option 1: Use CLI (recommended)**\n" +
+                'agentic-knowledge create --preset git-repo --id my-docs --name "My Docs" --url <repo-url>\n' +
+                "agentic-knowledge init my-docs\n\n" +
+                "**Option 2: Manual configuration**\n" +
+                "Create .knowledge/config.yaml in your project root.\n" +
+                "See the search_docs tool description for example configuration.",
+            );
+          }
+
+          const { config, configPath } = configData;
 
           // Find the requested docset
           const docset = config.docsets.find((d) => d.id === docset_id);
           if (!docset) {
             const availableIds = config.docsets.map((d) => d.id).join(", ");
             throw new Error(
-              `Docset '${docset_id}' not found. Available docsets: ${availableIds}`,
+              `Docset '${docset_id}' not found.\n\n` +
+                `Available docsets: ${availableIds}\n\n` +
+                `To create a new docset:\n` +
+                `agentic-knowledge create --preset git-repo --id ${docset_id} --name "My Docs" --url <repo-url>\n` +
+                `agentic-knowledge init ${docset_id}`,
             );
           }
 
           // Calculate local path
           const localPath = calculateLocalPath(docset, configPath);
+
+          // Check if docset is initialized by checking for metadata file
+          const primarySource = docset.sources?.[0];
+          if (primarySource?.type === "git_repo") {
+            // For git repos, check if .agentic-metadata.json exists
+            const configDir = dirname(configPath);
+            const projectRoot = dirname(configDir);
+            const absolutePath = resolve(projectRoot, localPath);
+            const metadataPath = resolve(
+              absolutePath,
+              ".agentic-metadata.json",
+            );
+
+            if (!existsSync(metadataPath)) {
+              throw new Error(
+                `Docset '${docset_id}' is not initialized.\n\n` +
+                  `The docset is configured but hasn't been initialized yet.\n\n` +
+                  `To initialize this docset:\n` +
+                  `agentic-knowledge init ${docset_id}\n\n` +
+                  `To check status of all docsets:\n` +
+                  `agentic-knowledge status`,
+              );
+            }
+          }
 
           // Create template context with proper function signature
           const templateContext = createTemplateContext(
@@ -262,7 +340,37 @@ Use the path and search terms with your text search tools (grep, rg, ripgrep, fi
 
         case "list_docsets": {
           // Load configuration
-          const { config, configPath } = await getConfiguration();
+          const configData = await getConfiguration();
+          if (!configData) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text:
+                    "No docsets configured.\n\n" +
+                    "To configure docsets:\n\n" +
+                    "**Option 1: Use CLI (recommended)**\n" +
+                    "```bash\n" +
+                    'agentic-knowledge create --preset git-repo --id my-docs --name "My Docs" --url <repo-url>\n' +
+                    "agentic-knowledge init my-docs\n" +
+                    "```\n\n" +
+                    "**Option 2: Manual configuration**\n" +
+                    "Create `.knowledge/config.yaml`:\n" +
+                    "```yaml\n" +
+                    'version: "1.0"\n' +
+                    "docsets:\n" +
+                    "  - id: my-docs\n" +
+                    "    name: My Documentation\n" +
+                    "    sources:\n" +
+                    "      - type: local_folder\n" +
+                    '        paths: ["./docs"]\n' +
+                    "```",
+                },
+              ],
+            };
+          }
+
+          const { config, configPath } = configData;
 
           // Return list of available docsets with calculated paths
           const docsets = await Promise.all(

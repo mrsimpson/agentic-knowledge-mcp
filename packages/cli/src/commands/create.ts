@@ -137,7 +137,7 @@ async function createLocalFolderDocset(options: any): Promise<DocsetConfig> {
     if (!stat.isDirectory()) {
       throw new Error(`Path is not a directory: ${options.path}`);
     }
-  } catch (error) {
+  } catch {
     throw new Error(`Path does not exist: ${options.path}`);
   }
 

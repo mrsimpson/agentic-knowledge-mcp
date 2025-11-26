@@ -178,12 +178,14 @@ function displaySummary(statuses: DocsetStatus[]) {
     }
 
     if (!initialized) {
+      console.log(`${chalk.bold(docset.id)} (${docset.name})`);
       console.log(
-        `${chalk.yellow("⚠️")} ${chalk.bold(docset.id)} - ${chalk.yellow("Not initialized")}`,
+        chalk.gray(
+          `   Not initialized | ${docset.sources?.length || 0} source(s) configured`,
+        ),
       );
-      console.log(
-        chalk.gray(`   ${docset.sources?.length || 0} source(s) configured`),
-      );
+      console.log();
+      console.log(chalk.blue(`   💡 Run: agentic-knowledge init ${docset.id}`));
       continue;
     }
 
@@ -194,38 +196,17 @@ function displaySummary(statuses: DocsetStatus[]) {
       continue;
     }
 
-    // Calculate status
-    const lastActivity = metadata.last_refreshed || metadata.initialized_at;
-    const lastActivityTime = new Date(lastActivity);
-    const timeSince = Date.now() - lastActivityTime.getTime();
-    const hoursSince = timeSince / (1000 * 60 * 60);
-    const daysSince = timeSince / (1000 * 60 * 60 * 24);
+    // Format initialization date
+    const initDate = new Date(metadata.initialized_at);
+    const dateDisplay = initDate.toISOString().split("T")[0]; // YYYY-MM-DD format
 
-    let timeDisplay;
-    let statusIcon;
-
-    if (hoursSince < 1) {
-      timeDisplay = `${Math.round(hoursSince * 60)} minutes ago`;
-      statusIcon = chalk.green("✅");
-    } else if (hoursSince < 24) {
-      timeDisplay = `${Math.round(hoursSince)} hours ago`;
-      statusIcon = chalk.green("✅");
-    } else if (daysSince < 7) {
-      timeDisplay = `${Math.round(daysSince)} days ago`;
-      statusIcon = chalk.yellow("⚠️");
-    } else {
-      timeDisplay = `${Math.round(daysSince)} days ago`;
-      statusIcon = chalk.red("🔄");
-    }
-
-    console.log(
-      `${statusIcon} ${chalk.bold(docset.id)} - ${chalk.gray(metadata.total_files)} files`,
-    );
+    console.log(`${chalk.bold(docset.id)} (${docset.name})`);
     console.log(
       chalk.gray(
-        `   Last updated: ${timeDisplay} | ${sources.length}/${metadata.sources_count} sources loaded`,
+        `   Initialized | ${metadata.total_files} files | ${sources.length}/${metadata.sources_count} source(s) loaded`,
       ),
     );
+    console.log(chalk.gray(`   Initialized: ${dateDisplay}`));
   }
 }
 
