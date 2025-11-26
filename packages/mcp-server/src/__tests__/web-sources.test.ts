@@ -55,6 +55,19 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
       "# Test Documentation\n\nThis simulates downloaded web content.",
     );
 
+    // Create metadata file (simulating what init command creates)
+    const metadata = {
+      docset_id: "web-source-docs",
+      docset_name: "Web Source Documentation",
+      initialized_at: new Date().toISOString(),
+      total_files: 1,
+      sources_count: 1,
+    };
+    await fs.writeFile(
+      join(webSourceDir, ".agentic-metadata.json"),
+      JSON.stringify(metadata, null, 2),
+    );
+
     // Mock process.cwd to return our temp directory
     vi.spyOn(process, "cwd").mockReturnValue(tempDir);
 

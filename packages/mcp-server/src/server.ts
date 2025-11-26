@@ -283,15 +283,19 @@ Use the path and search terms with your text search tools (grep, rg, ripgrep, fi
           // Calculate local path
           const localPath = calculateLocalPath(docset, configPath);
 
-          // Check if docset is initialized (for git_repo sources)
+          // Check if docset is initialized by checking for metadata file
           const primarySource = docset.sources?.[0];
           if (primarySource?.type === "git_repo") {
-            // For git repos, the path should be absolute or relative to project root
+            // For git repos, check if .agentic-metadata.json exists
             const configDir = dirname(configPath);
             const projectRoot = dirname(configDir);
             const absolutePath = resolve(projectRoot, localPath);
+            const metadataPath = resolve(
+              absolutePath,
+              ".agentic-metadata.json",
+            );
 
-            if (!existsSync(absolutePath)) {
+            if (!existsSync(metadataPath)) {
               throw new Error(
                 `Docset '${docset_id}' is not initialized.\n\n` +
                   `The docset is configured but hasn't been initialized yet.\n\n` +
