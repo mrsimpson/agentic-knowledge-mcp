@@ -142,7 +142,7 @@ After configuring, the tool will show available docsets here.`,
                 generalized_keywords: {
                   type: "string",
                   description:
-                    'Related terms, synonyms, or contextual keywords that may appear alongside your primary keywords but are not your main target.',
+                    "Related terms, synonyms, or contextual keywords that may appear alongside your primary keywords but are not your main target.",
                 },
               },
               required: ["docset_id", "keywords"],
@@ -167,7 +167,9 @@ After configuring, the tool will show available docsets here.`,
     const { config } = configData;
     const docsetInfo = config.docsets
       .map((docset) => {
-        const description = docset.description ? ` - ${docset.description}` : "";
+        const description = docset.description
+          ? ` - ${docset.description}`
+          : "";
         return `• **${docset.id}** (${docset.name})${description}`;
       })
       .join("\n");
@@ -255,7 +257,7 @@ Use the path and search terms with your text search tools (grep, rg, ripgrep, fi
               "No configuration file found.\n\n" +
                 "To configure docsets:\n\n" +
                 "**Option 1: Use CLI (recommended)**\n" +
-                "agentic-knowledge create --preset git-repo --id my-docs --name \"My Docs\" --url <repo-url>\n" +
+                'agentic-knowledge create --preset git-repo --id my-docs --name "My Docs" --url <repo-url>\n' +
                 "agentic-knowledge init my-docs\n\n" +
                 "**Option 2: Manual configuration**\n" +
                 "Create .knowledge/config.yaml in your project root.\n" +
@@ -345,19 +347,19 @@ Use the path and search terms with your text search tools (grep, rg, ripgrep, fi
                     "To configure docsets:\n\n" +
                     "**Option 1: Use CLI (recommended)**\n" +
                     "```bash\n" +
-                    "agentic-knowledge create --preset git-repo --id my-docs --name \"My Docs\" --url <repo-url>\n" +
+                    'agentic-knowledge create --preset git-repo --id my-docs --name "My Docs" --url <repo-url>\n' +
                     "agentic-knowledge init my-docs\n" +
                     "```\n\n" +
                     "**Option 2: Manual configuration**\n" +
                     "Create `.knowledge/config.yaml`:\n" +
                     "```yaml\n" +
-                    "version: \"1.0\"\n" +
+                    'version: "1.0"\n' +
                     "docsets:\n" +
                     "  - id: my-docs\n" +
                     "    name: My Documentation\n" +
                     "    sources:\n" +
                     "      - type: local_folder\n" +
-                    "        paths: [\"./docs\"]\n" +
+                    '        paths: ["./docs"]\n' +
                     "```",
                 },
               ],

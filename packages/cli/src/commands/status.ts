@@ -178,16 +178,14 @@ function displaySummary(statuses: DocsetStatus[]) {
     }
 
     if (!initialized) {
+      console.log(`${chalk.bold(docset.id)} (${docset.name})`);
       console.log(
-        `${chalk.bold(docset.id)} (${docset.name})`,
-      );
-      console.log(
-        chalk.gray(`   Not initialized | ${docset.sources?.length || 0} source(s) configured`),
+        chalk.gray(
+          `   Not initialized | ${docset.sources?.length || 0} source(s) configured`,
+        ),
       );
       console.log();
-      console.log(
-        chalk.blue(`   💡 Run: agentic-knowledge init ${docset.id}`),
-      );
+      console.log(chalk.blue(`   💡 Run: agentic-knowledge init ${docset.id}`));
       continue;
     }
 
@@ -202,17 +200,13 @@ function displaySummary(statuses: DocsetStatus[]) {
     const initDate = new Date(metadata.initialized_at);
     const dateDisplay = initDate.toISOString().split("T")[0]; // YYYY-MM-DD format
 
-    console.log(
-      `${chalk.bold(docset.id)} (${docset.name})`,
-    );
+    console.log(`${chalk.bold(docset.id)} (${docset.name})`);
     console.log(
       chalk.gray(
         `   Initialized | ${metadata.total_files} files | ${sources.length}/${metadata.sources_count} source(s) loaded`,
       ),
     );
-    console.log(
-      chalk.gray(`   Initialized: ${dateDisplay}`),
-    );
+    console.log(chalk.gray(`   Initialized: ${dateDisplay}`));
   }
 }
 
