@@ -287,18 +287,17 @@ The `agentic-knowledge` CLI provides commands to manage your documentation lifec
 A docset goes through the following phases:
 
 ```
-1. DEFINE    → Configure docset in .knowledge/config.yaml
-2. CREATE    → Use CLI to create configuration from presets
-3. INITIALIZE → Download and prepare documentation files
-4. USE       → Search and navigate via MCP server
-5. REFRESH   → Update documentation as needed
+1. CREATE     → Configure docset (manually edit config.yaml or use CLI presets)
+2. INITIALIZE → Download and prepare documentation files
+3. USE        → Search and navigate via MCP server
+4. REFRESH    → Update documentation as needed
 ```
 
 ### CLI Commands
 
 #### `create` - Create New Docset Configuration
 
-Create docset configurations quickly using presets:
+Create docset configurations quickly using presets. Alternatively, you can manually edit `.knowledge/config.yaml` - this command is just a convenience tool that does it for you.
 
 **Git Repository Preset:**
 ```bash
