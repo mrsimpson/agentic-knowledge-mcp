@@ -27,7 +27,7 @@
     "build": "turbo run build",
     "pack:local": "node scripts/prepare-local.cjs",
     "inspector": "npx @modelcontextprotocol/inspector",
-    "dev": "turbo run dev --filter=@codemcp/knowledge-core --filter=@codemcp/knowledge-mcp-server",
+    "dev": "turbo run dev --filter=@codemcp/knowledge-core --filter=@codemcp/knowledge",
     "clean": "turbo run clean:build",
     "prepublishOnly": "npm run build",
     "lint-staged": "npx lint-staged",
@@ -47,7 +47,7 @@
   "dependencies": {
     "@codemcp/knowledge-core": "workspace:*",
     "@codemcp/knowledge-content-loader": "workspace:*",
-    "@codemcp/knowledge-mcp-server": "workspace:*",
+    "@codemcp/knowledge": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.19.1",
     "@types/js-yaml": "4.0.9",
     "js-yaml": "4.1.0",

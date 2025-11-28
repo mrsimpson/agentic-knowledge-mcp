@@ -26,7 +26,7 @@ async function main() {
       await startServer();
     } else {
       // Use string literal to avoid TypeScript resolution issues
-      const mcpServerModule = "@codemcp/knowledge-mcp-server";
+      const mcpServerModule = "@codemcp/knowledge";
       const { startServer } = await import(mcpServerModule);
       await startServer();
     }

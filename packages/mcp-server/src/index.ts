@@ -1,5 +1,5 @@
 /**
- * @codemcp/knowledge-mcp-server
+ * @codemcp/knowledge
  *
  * MCP server implementation for the agentic knowledge guidance system.
  * Provides search_docs and list_docsets tools via the Model Context Protocol.

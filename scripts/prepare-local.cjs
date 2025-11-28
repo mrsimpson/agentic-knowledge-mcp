@@ -23,7 +23,7 @@ function replaceWorkspaceDependencies(packageJsonPath, outputPath) {
   const workspaceMap = {
     "@codemcp/knowledge-core": "file:./packages/core",
     "@codemcp/knowledge-content-loader": "file:./packages/content-loader",
-    "@codemcp/knowledge-mcp-server": "file:./packages/mcp-server",
+    "@codemcp/knowledge": "file:./packages/mcp-server",
     "@codemcp/knowledge-cli": "file:./packages/cli",
   };
 
