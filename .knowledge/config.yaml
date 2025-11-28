@@ -20,44 +20,5 @@ docsets:
         branch: main
         paths:
           - README.md
-          - docs/en/guide/asset-handling.md
-          - docs/en/guide/cms.md
-          - docs/en/guide/custom-theme.md
-          - docs/en/guide/data-loading.md
-          - docs/en/guide/deploy.md
-          - docs/en/guide/extending-default-theme.md
-          - docs/en/guide/frontmatter.md
-          - docs/en/guide/getting-started.md
-          - docs/en/guide/i18n.md
-          - docs/en/guide/markdown.md
-          - docs/en/guide/migration-from-vitepress-0.md
-          - docs/en/guide/migration-from-vuepress.md
-          - docs/en/guide/mpa-mode.md
-          - docs/en/guide/routing.md
-          - docs/en/guide/sitemap-generation.md
-          - docs/en/guide/ssr-compat.md
-          - docs/en/guide/using-vue.md
-          - docs/en/guide/what-is-vitepress.md
-          - docs/en/index.md
-          - docs/en/reference/cli.md
-          - docs/en/reference/default-theme-badge.md
-          - docs/en/reference/default-theme-carbon-ads.md
-          - docs/en/reference/default-theme-config.md
-          - docs/en/reference/default-theme-edit-link.md
-          - docs/en/reference/default-theme-footer.md
-          - docs/en/reference/default-theme-home-page.md
-          - docs/en/reference/default-theme-last-updated.md
-          - docs/en/reference/default-theme-layout.md
-          - docs/en/reference/default-theme-nav.md
-          - docs/en/reference/default-theme-prev-next-links.md
-          - docs/en/reference/default-theme-search.md
-          - docs/en/reference/default-theme-sidebar.md
-          - docs/en/reference/default-theme-team-page.md
-          - docs/en/reference/frontmatter-config.md
-          - docs/en/reference/runtime-api.md
-          - docs/en/reference/site-config.md
-          - template/api-examples.md
-          - template/index.md
-          - template/markdown-examples.md
-template: |
-  Use text search tools (grep, rg, ripgrep) to search for {{keywords}} in {{local_path}}. Try broader terms if needed. Skip: node_modules/, .git/, build/, dist/.
+          - docs/en
+          - template/
