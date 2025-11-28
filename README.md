@@ -11,6 +11,7 @@ An MCP server that guides AI assistants to navigate documentation using their bu
 Give your AI assistant access to any documentation—yours or third-party—so it can find answers as naturally as you would. No embeddings, no vector databases, no complex infrastructure.
 
 **Perfect for:**
+
 - 📚 **Project documentation** - Your team's internal docs, APIs, guides
 - 🔧 **Framework references** - React, TypeScript, MCP SDK, any library
 - 🏢 **Enterprise knowledge** - Company wikis, architecture docs, runbooks
@@ -20,18 +21,18 @@ Give your AI assistant access to any documentation—yours or third-party—so i
 
 ### 1. Configure an MCP Client
 
-Add to your coding agent config something along the lines of 
+Add to your coding agent config something along the lines of
+
 ```json
 {
   "mcpServers": {
     "agentic-knowledge": {
       "command": "npx",
-      "args": ["-y", "agentic-knowledge-mcp"]
+      "args": ["-y", "@codemcp/knowledge@latest"]
     }
   }
 }
 ```
-
 
 ### 2. Set Up Your First Docset
 
@@ -65,7 +66,6 @@ docsets:
         paths: ["./docs"]
 ```
 
-
 ### 3. Use It
 
 Your AI assistant now has access to `search_docs` and `list_docsets` tools. Ask questions naturally:
@@ -89,12 +89,14 @@ The assistant will receive intelligent navigation instructions and use grep/file
 ### The Paradigm Shift
 
 Traditional RAG (Retrieval-Augmented Generation) was built for the **context-poor era** when models had 8K token limits. It:
+
 - Chunks documents (losing relationships)
 - Computes embeddings (missing precise terminology)
 - Retrieves fragments (losing context)
 - Requires massive infrastructure (vector DBs, rerankers)
 
 **Agentic Knowledge** leverages modern AI capabilities:
+
 - ✅ **200K+ token context windows** - Can read entire documentation sets
 - ✅ **Powerful filesystem tools** - grep, ripgrep, file reading built-in
 - ✅ **Intelligent navigation** - Provides search strategies, not fragments
@@ -103,10 +105,10 @@ Traditional RAG (Retrieval-Augmented Generation) was built for the **context-poo
 ### From Retrieval to Navigation
 
 **Traditional RAG says:**
-*"Here are 50 fragments that mention your keywords"*
+_"Here are 50 fragments that mention your keywords"_
 
 **Agentic Knowledge says:**
-*"Search for 'useState' in `./docs/react-18.2/hooks/`. If that doesn't help, try 'state management' in `./docs/patterns/`. Follow any 'See also' references you find."*
+_"Search for 'useState' in `./docs/react-18.2/hooks/`. If that doesn't help, try 'state management' in `./docs/patterns/`. Follow any 'See also' references you find."_
 
 **The difference?** Guidance over fragments. Investigation over retrieval.
 
@@ -119,6 +121,7 @@ Traditional RAG (Retrieval-Augmented Generation) was built for the **context-poo
 5. **Finds answers** - Reads complete documents with full context
 
 **Performance:**
+
 - **Setup**: Seconds (vs hours for RAG indexing)
 - **Response**: <10ms (vs 300-2000ms for RAG)
 - **Infrastructure**: None (vs Elasticsearch + Vector DB)

@@ -88,7 +88,7 @@ Update already-initialized docsets with the latest content from their sources.
 
 ## CLI Commands
 
-The `agentic-knowledge` CLI provides commands to manage your documentation lifecycle. When you run `agentic-knowledge` without arguments, it starts the MCP server. With arguments, it executes CLI commands.
+The `agentic-knowledge-mcp` CLI provides commands to manage your documentation lifecycle. When you run `agentic-knowledge-mcp` without arguments, it starts the MCP server. With arguments, it executes CLI commands.
 
 ### `create` - Create New Docset Configuration
 
@@ -128,8 +128,7 @@ The `create` command:
 
 - ✅ Creates or updates `.knowledge/config.yaml`
 - ✅ Validates docset ID uniqueness
-- ✅ For local folders, creates symlinks immediately
-- ✅ For git repos, prepares configuration for initialization
+- ✅ Prepares configuration for initialization
 
 ### `init` - Initialize Docset Sources
 
@@ -239,7 +238,6 @@ When using `--force` with local folder sources:
 
 - Only symlinks in `.knowledge/docsets/{id}/` are removed
 - Your original source files are **never deleted**
-- Node.js does not follow symlinks when removing directories
 - You'll see a confirmation message: "Symlinks will be removed, but source files are preserved"
 
 ### `status` - Check Docset Status
@@ -585,7 +583,7 @@ npx agentic-knowledge status my-docset --verbose
 
 ### MCP Server
 
-When you run `agentic-knowledge` without arguments, it starts an MCP server that exposes two tools:
+When you run `agentic-knowledge-mcp` without arguments, it starts an MCP server that exposes two tools:
 
 #### `search_docs` Tool
 
