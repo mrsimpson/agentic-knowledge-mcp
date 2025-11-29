@@ -181,7 +181,7 @@ describe("Git Repository Loading - User Workflows", () => {
         "docs/getting-started.md",
         "docs/api/authentication.md",
         "guides/tutorial.rst",
-        "src/index.js", // Should be excluded
+        "src/index.js", // Should be excluded (source file)
         "package.json", // Should be excluded
         "CHANGELOG.md", // Should be excluded (project metadata)
         "LICENSE", // Should be excluded (project metadata)
@@ -249,6 +249,7 @@ describe("Git Repository Loading - User Workflows", () => {
         // Source code - should be excluded
         { file: "src/index.js", expected: false, reason: "source code" },
         { file: "lib/utils.ts", expected: false, reason: "library code" },
+        { file: "src/helpers.ts", expected: false, reason: "utility code" },
         {
           file: "components/Button.tsx",
           expected: false,
@@ -295,7 +296,7 @@ describe("Git Repository Loading - User Workflows", () => {
       const testFiles = [
         "README.md", // Should be included
         "docs/guide.md", // Should be included
-        "src/index.js", // Should be excluded
+        "src/index.js", // Should be excluded (source file)
         "package.json", // Should be excluded
         "examples/demo.js", // Should be included
       ];
@@ -337,7 +338,7 @@ describe("Git Repository Loading - User Workflows", () => {
       const mockFiles = [
         "README.md", // Should be included
         "docs/getting-started.md", // Should be included
-        "src/index.js", // Should be excluded
+        "src/index.js", // Should be excluded (source file)
         "package.json", // Should be excluded
         "examples/demo.js", // Should be included
         "node_modules/lib.js", // Should be excluded

@@ -44,11 +44,17 @@ describe("Smart Content Filtering - REQ-18", () => {
   });
 
   test("should exclude config and source files", () => {
+    // Config files should be excluded
     expect((loader as any).isDocumentationFile("package.json")).toBe(false);
     expect((loader as any).isDocumentationFile(".postcssrc.json")).toBe(false);
     expect((loader as any).isDocumentationFile("config.ts")).toBe(false);
     expect((loader as any).isDocumentationFile("styles.css")).toBe(false);
+
+    // Source files should be excluded
     expect((loader as any).isDocumentationFile("index.ts")).toBe(false);
+    expect((loader as any).isDocumentationFile("src/index.ts")).toBe(false);
+    expect((loader as any).isDocumentationFile("src/utils.ts")).toBe(false);
+    expect((loader as any).isDocumentationFile("src/helpers.ts")).toBe(false);
   });
 
   test("should include files in examples directory", () => {
@@ -79,5 +85,85 @@ describe("Smart Content Filtering - REQ-18", () => {
     const filtered = (loader as any).filterDocumentationFiles(mixedFiles);
 
     expect(filtered).toEqual(["README.md", "docs/api.md", "examples/demo.js"]);
+  });
+
+  test("should include comprehensive documentation using generic approach - Issue #12", () => {
+    // Generic approach: Include markdown/text/asciidoc files + ALL files from examples/samples
+    const repositoryFiles = [
+      // Documentation files (markdown, text, asciidoc) - always included
+      "README.md",
+      "docs/getting-started.md",
+      "docs/api.md",
+      "guides/tutorial.rst",
+      "notes.txt",
+      "architecture.adoc",
+
+      // Files in examples/samples directories - all included (Issue #12)
+      "examples/basic-map.html",
+      "examples/markers.js",
+      "examples/demo.py",
+      "examples/config.json",
+      "samples/advanced-usage.ts",
+      "samples/quickstart.java",
+
+      // Source files - should be excluded
+      "src/index.ts",
+      "src/utils/helpers.ts",
+      "lib/core.js",
+
+      // Build artifacts and dependencies - should be excluded
+      "node_modules/some-lib/index.js",
+      "dist/bundle.js",
+      "build/output.js",
+
+      // Project metadata - should be excluded
+      "CHANGELOG.md",
+      "LICENSE",
+      "CONTRIBUTING.md",
+
+      // Config files - should be excluded
+      "package.json",
+      "tsconfig.json",
+      ".github/workflows/ci.yml",
+    ];
+
+    const filtered = (loader as any).filterDocumentationFiles(repositoryFiles);
+
+    // Expected: Documentation files + all files from examples/samples
+    const expectedIncludes = [
+      "README.md",
+      "docs/getting-started.md",
+      "docs/api.md",
+      "guides/tutorial.rst",
+      "notes.txt",
+      "architecture.adoc",
+      "examples/basic-map.html",
+      "examples/markers.js",
+      "examples/demo.py",
+      "examples/config.json",
+      "samples/advanced-usage.ts",
+      "samples/quickstart.java",
+    ];
+
+    // The filtered result should include all expected files
+    for (const expectedFile of expectedIncludes) {
+      expect(filtered).toContain(expectedFile);
+    }
+
+    // Should exclude source files
+    expect(filtered).not.toContain("src/index.ts");
+    expect(filtered).not.toContain("src/utils/helpers.ts");
+    expect(filtered).not.toContain("lib/core.js");
+
+    // Should exclude build artifacts and config files
+    expect(filtered).not.toContain("node_modules/some-lib/index.js");
+    expect(filtered).not.toContain("dist/bundle.js");
+    expect(filtered).not.toContain("CHANGELOG.md");
+    expect(filtered).not.toContain("package.json");
+    expect(filtered).not.toContain("tsconfig.json");
+    expect(filtered).not.toContain(".github/workflows/ci.yml");
+
+    // Verify we get comprehensive coverage
+    expect(filtered.length).toBeGreaterThanOrEqual(expectedIncludes.length);
   });
 });

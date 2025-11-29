@@ -351,8 +351,13 @@ export class GitRepoLoader extends ContentLoader {
       return false;
     }
 
-    // Exclude source code, build, and development directories (REQ-18)
-    const excludedDirPatterns = [
+    // Normalize directory path for consistent matching (use forward slashes)
+    const normalizedDir = directory.split(path.sep).join("/");
+    const pathParts = normalizedDir.split("/");
+
+    // Exclude build, dependency, and development directories (REQ-18)
+    // Use exact directory name matching, not substring matching
+    const excludedDirs = [
       "node_modules",
       "vendor",
       ".git",
@@ -360,17 +365,17 @@ export class GitRepoLoader extends ContentLoader {
       "dist",
       "target",
       ".cache",
-      "src",
-      "lib",
-      "components",
       "__tests__",
+      "test",
+      "tests",
       ".github",
       ".vscode",
       ".idea",
     ];
 
-    for (const pattern of excludedDirPatterns) {
-      if (directory.includes(pattern)) {
+    // Check if any path segment matches excluded directories
+    for (const excludedDir of excludedDirs) {
+      if (pathParts.includes(excludedDir)) {
         return false;
       }
     }
@@ -386,10 +391,11 @@ export class GitRepoLoader extends ContentLoader {
       return true;
     }
 
-    // Special case: examples directory - include other file types as they're often documentation (REQ-18)
-    const isInExamples = /\b(examples?)\b/i.test(directory);
+    // Special case: examples/samples directory - include ALL file types (Issue #12)
+    // These directories contain code that demonstrates usage patterns
+    const isInExamples = /\b(examples?|samples?)\b/i.test(directory);
     if (isInExamples) {
-      // In examples, exclude only binary files
+      // In examples/samples, exclude only binary files
       const excludedInExamples = [
         ".exe",
         ".bin",
