@@ -351,8 +351,13 @@ export class GitRepoLoader extends ContentLoader {
       return false;
     }
 
-    // Exclude source code, build, and development directories (REQ-18)
-    const excludedDirPatterns = [
+    // Normalize directory path for consistent matching (use forward slashes)
+    const normalizedDir = directory.split(path.sep).join("/");
+    const pathParts = normalizedDir.split("/");
+
+    // Exclude build, dependency, and development directories (REQ-18)
+    // Use exact directory name matching, not substring matching
+    const excludedDirs = [
       "node_modules",
       "vendor",
       ".git",
@@ -360,17 +365,17 @@ export class GitRepoLoader extends ContentLoader {
       "dist",
       "target",
       ".cache",
-      "src",
-      "lib",
-      "components",
       "__tests__",
+      "test",
+      "tests",
       ".github",
       ".vscode",
       ".idea",
     ];
 
-    for (const pattern of excludedDirPatterns) {
-      if (directory.includes(pattern)) {
+    // Check if any path segment matches excluded directories
+    for (const excludedDir of excludedDirs) {
+      if (pathParts.includes(excludedDir)) {
         return false;
       }
     }
@@ -401,6 +406,26 @@ export class GitRepoLoader extends ContentLoader {
         ".obj",
       ];
       return !excludedInExamples.includes(extension);
+    }
+
+    // Include TypeScript definition files - they contain valuable type information (Issue #12)
+    if (extension === ".d.ts" || filename.endsWith(".d.ts")) {
+      return true;
+    }
+
+    // Include entry point files that define the API surface (Issue #12)
+    if (
+      filename === "index.ts" ||
+      filename === "index.js" ||
+      filename === "index.mjs"
+    ) {
+      return true;
+    }
+
+    // Include component files that often contain valuable documentation (Issue #12)
+    const componentExtensions = [".vue", ".tsx", ".jsx"];
+    if (componentExtensions.includes(extension)) {
+      return true;
     }
 
     return false;
