@@ -43,19 +43,16 @@ describe("Smart Content Filtering - REQ-18", () => {
     );
   });
 
-  test("should exclude config files but include entry points", () => {
+  test("should exclude config and source files", () => {
     // Config files should be excluded
     expect((loader as any).isDocumentationFile("package.json")).toBe(false);
     expect((loader as any).isDocumentationFile(".postcssrc.json")).toBe(false);
     expect((loader as any).isDocumentationFile("config.ts")).toBe(false);
     expect((loader as any).isDocumentationFile("styles.css")).toBe(false);
 
-    // Entry point files should be included (Issue #12)
-    expect((loader as any).isDocumentationFile("index.ts")).toBe(true);
-    expect((loader as any).isDocumentationFile("src/index.ts")).toBe(true);
-    expect((loader as any).isDocumentationFile("index.js")).toBe(true);
-
-    // Regular source files should still be excluded
+    // Source files should be excluded
+    expect((loader as any).isDocumentationFile("index.ts")).toBe(false);
+    expect((loader as any).isDocumentationFile("src/index.ts")).toBe(false);
     expect((loader as any).isDocumentationFile("src/utils.ts")).toBe(false);
     expect((loader as any).isDocumentationFile("src/helpers.ts")).toBe(false);
   });
@@ -90,70 +87,62 @@ describe("Smart Content Filtering - REQ-18", () => {
     expect(filtered).toEqual(["README.md", "docs/api.md", "examples/demo.js"]);
   });
 
-  test("should include comprehensive documentation for component libraries - Issue #12", () => {
-    // Simulate a component library structure like vue3-openlayers
-    // These libraries have documentation spread across source files, not just in docs/
-    const componentLibraryFiles = [
-      // Basic docs (currently included)
+  test("should include comprehensive documentation using generic approach - Issue #12", () => {
+    // Generic approach: Include markdown/text/asciidoc files + ALL files from examples/samples
+    const repositoryFiles = [
+      // Documentation files (markdown, text, asciidoc) - always included
       "README.md",
       "docs/getting-started.md",
       "docs/api.md",
+      "guides/tutorial.rst",
+      "notes.txt",
+      "architecture.adoc",
+
+      // Files in examples/samples directories - all included (Issue #12)
       "examples/basic-map.html",
       "examples/markers.js",
+      "examples/demo.py",
+      "examples/config.json",
+      "samples/advanced-usage.ts",
+      "samples/quickstart.java",
 
-      // TypeScript definitions with valuable type information (currently excluded)
-      "src/index.d.ts",
-      "src/types.d.ts",
-      "src/components/Map.d.ts",
-
-      // Source files with JSDoc documentation (currently excluded)
+      // Source files - should be excluded
       "src/index.ts",
-      "src/components/OlMap.vue",
-      "src/components/OlMarker.vue",
       "src/utils/helpers.ts",
+      "lib/core.js",
 
-      // Component files that demonstrate API usage (currently excluded)
-      "src/components/layers/OlVectorLayer.vue",
-      "src/components/layers/OlTileLayer.vue",
-
-      // Example files in src (currently excluded due to src/ exclusion)
-      "src/examples/basic.ts",
-      "src/examples/advanced.ts",
-
-      // These should still be excluded
+      // Build artifacts and dependencies - should be excluded
       "node_modules/some-lib/index.js",
       "dist/bundle.js",
+      "build/output.js",
+
+      // Project metadata - should be excluded
       "CHANGELOG.md",
       "LICENSE",
-      ".github/workflows/ci.yml",
+      "CONTRIBUTING.md",
+
+      // Config files - should be excluded
       "package.json",
       "tsconfig.json",
+      ".github/workflows/ci.yml",
     ];
 
-    const filtered = (loader as any).filterDocumentationFiles(
-      componentLibraryFiles,
-    );
+    const filtered = (loader as any).filterDocumentationFiles(repositoryFiles);
 
-    // Expected: More than just the 5 basic doc files
-    // Should include TypeScript definitions, source files with documentation value,
-    // and example files to provide comprehensive knowledge about the library
+    // Expected: Documentation files + all files from examples/samples
     const expectedIncludes = [
       "README.md",
       "docs/getting-started.md",
       "docs/api.md",
+      "guides/tutorial.rst",
+      "notes.txt",
+      "architecture.adoc",
       "examples/basic-map.html",
       "examples/markers.js",
-      // These TypeScript definition files should be included for type information
-      "src/index.d.ts",
-      "src/types.d.ts",
-      "src/components/Map.d.ts",
-      // Main entry points and component files should be included
-      "src/index.ts",
-      "src/components/OlMap.vue",
-      "src/components/OlMarker.vue",
-      // Example files provide valuable usage documentation
-      "src/examples/basic.ts",
-      "src/examples/advanced.ts",
+      "examples/demo.py",
+      "examples/config.json",
+      "samples/advanced-usage.ts",
+      "samples/quickstart.java",
     ];
 
     // The filtered result should include all expected files
@@ -161,7 +150,12 @@ describe("Smart Content Filtering - REQ-18", () => {
       expect(filtered).toContain(expectedFile);
     }
 
-    // Should still exclude build artifacts and config files
+    // Should exclude source files
+    expect(filtered).not.toContain("src/index.ts");
+    expect(filtered).not.toContain("src/utils/helpers.ts");
+    expect(filtered).not.toContain("lib/core.js");
+
+    // Should exclude build artifacts and config files
     expect(filtered).not.toContain("node_modules/some-lib/index.js");
     expect(filtered).not.toContain("dist/bundle.js");
     expect(filtered).not.toContain("CHANGELOG.md");
@@ -169,7 +163,7 @@ describe("Smart Content Filtering - REQ-18", () => {
     expect(filtered).not.toContain("tsconfig.json");
     expect(filtered).not.toContain(".github/workflows/ci.yml");
 
-    // Verify we get comprehensive coverage (more than just 9 files)
+    // Verify we get comprehensive coverage
     expect(filtered.length).toBeGreaterThanOrEqual(expectedIncludes.length);
   });
 });

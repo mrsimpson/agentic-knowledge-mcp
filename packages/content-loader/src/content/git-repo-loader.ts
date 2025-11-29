@@ -391,10 +391,11 @@ export class GitRepoLoader extends ContentLoader {
       return true;
     }
 
-    // Special case: examples directory - include other file types as they're often documentation (REQ-18)
-    const isInExamples = /\b(examples?)\b/i.test(directory);
+    // Special case: examples/samples directory - include ALL file types (Issue #12)
+    // These directories contain code that demonstrates usage patterns
+    const isInExamples = /\b(examples?|samples?)\b/i.test(directory);
     if (isInExamples) {
-      // In examples, exclude only binary files
+      // In examples/samples, exclude only binary files
       const excludedInExamples = [
         ".exe",
         ".bin",
@@ -406,26 +407,6 @@ export class GitRepoLoader extends ContentLoader {
         ".obj",
       ];
       return !excludedInExamples.includes(extension);
-    }
-
-    // Include TypeScript definition files - they contain valuable type information (Issue #12)
-    if (extension === ".d.ts" || filename.endsWith(".d.ts")) {
-      return true;
-    }
-
-    // Include entry point files that define the API surface (Issue #12)
-    if (
-      filename === "index.ts" ||
-      filename === "index.js" ||
-      filename === "index.mjs"
-    ) {
-      return true;
-    }
-
-    // Include component files that often contain valuable documentation (Issue #12)
-    const componentExtensions = [".vue", ".tsx", ".jsx"];
-    if (componentExtensions.includes(extension)) {
-      return true;
     }
 
     return false;

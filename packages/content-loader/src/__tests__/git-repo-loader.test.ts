@@ -181,7 +181,7 @@ describe("Git Repository Loading - User Workflows", () => {
         "docs/getting-started.md",
         "docs/api/authentication.md",
         "guides/tutorial.rst",
-        "src/index.js", // Should be included (Issue #12 - entry point files)
+        "src/index.js", // Should be excluded (source file)
         "package.json", // Should be excluded
         "CHANGELOG.md", // Should be excluded (project metadata)
         "LICENSE", // Should be excluded (project metadata)
@@ -198,7 +198,6 @@ describe("Git Repository Loading - User Workflows", () => {
         "docs/getting-started.md",
         "docs/api/authentication.md",
         "guides/tutorial.rst",
-        "src/index.js", // Now included (Issue #12 fix)
       ]);
     });
 
@@ -247,17 +246,15 @@ describe("Git Repository Loading - User Workflows", () => {
         },
         { file: "AUTHORS.txt", expected: false, reason: "authors metadata" },
 
-        // Entry point and component files - now included (Issue #12)
-        { file: "src/index.js", expected: true, reason: "entry point file" },
-        {
-          file: "components/Button.tsx",
-          expected: true,
-          reason: "component file",
-        },
-
-        // Regular source code - should still be excluded
+        // Source code - should be excluded
+        { file: "src/index.js", expected: false, reason: "source code" },
         { file: "lib/utils.ts", expected: false, reason: "library code" },
         { file: "src/helpers.ts", expected: false, reason: "utility code" },
+        {
+          file: "components/Button.tsx",
+          expected: false,
+          reason: "component code",
+        },
 
         // Build artifacts - should be excluded
         {
@@ -299,7 +296,7 @@ describe("Git Repository Loading - User Workflows", () => {
       const testFiles = [
         "README.md", // Should be included
         "docs/guide.md", // Should be included
-        "src/index.js", // Should be included (Issue #12 - entry point)
+        "src/index.js", // Should be excluded (source file)
         "package.json", // Should be excluded
         "examples/demo.js", // Should be included
       ];
@@ -310,7 +307,7 @@ describe("Git Repository Loading - User Workflows", () => {
       expect(filtered).toContain("README.md");
       expect(filtered).toContain("docs/guide.md");
       expect(filtered).toContain("examples/demo.js");
-      expect(filtered).toContain("src/index.js"); // Now included (Issue #12)
+      expect(filtered).not.toContain("src/index.js");
       expect(filtered).not.toContain("package.json");
 
       // Verify the architecture supports smart filtering as default
@@ -341,7 +338,7 @@ describe("Git Repository Loading - User Workflows", () => {
       const mockFiles = [
         "README.md", // Should be included
         "docs/getting-started.md", // Should be included
-        "src/index.js", // Should be included (Issue #12 - entry point)
+        "src/index.js", // Should be excluded (source file)
         "package.json", // Should be excluded
         "examples/demo.js", // Should be included
         "node_modules/lib.js", // Should be excluded
@@ -354,9 +351,9 @@ describe("Git Repository Loading - User Workflows", () => {
       expect(filtered).toEqual([
         "README.md",
         "docs/getting-started.md",
-        "src/index.js", // Now included (Issue #12 fix)
         "examples/demo.js",
       ]);
+      expect(filtered).not.toContain("src/index.js");
       expect(filtered).not.toContain("package.json");
       expect(filtered).not.toContain("node_modules/lib.js");
       expect(filtered).not.toContain(".github/template.md");
