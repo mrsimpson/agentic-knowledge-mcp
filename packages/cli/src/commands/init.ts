@@ -10,6 +10,8 @@ import {
   ConfigManager,
   calculateLocalPath,
   ensureKnowledgeGitignoreSync,
+  discoverDirectoryPatterns,
+  removeSymlinks,
 } from "@codemcp/knowledge-core";
 import {
   GitRepoLoader,
@@ -21,8 +23,16 @@ export const initCommand = new Command("init")
   .argument("<docset-id>", "ID of the docset to initialize")
   .option("-c, --config <path>", "Path to configuration file")
   .option("--force", "Force re-initialization even if already exists", false)
+  .option(
+    "--discover-paths",
+    "Discover and update config with directory patterns from extracted files",
+    false,
+  )
   .action(
-    async (docsetId: string, options: { config?: string; force: boolean }) => {
+    async (
+      docsetId: string,
+      options: { config?: string; force: boolean; discoverPaths: boolean },
+    ) => {
       console.log(chalk.blue("🚀 Agentic Knowledge Integration Test"));
 
       try {
@@ -80,6 +90,12 @@ export const initCommand = new Command("init")
             ),
           );
           return;
+        }
+
+        // Clear directory for force re-initialization
+        if (existsAlready && options.force) {
+          console.log(chalk.yellow("🗑️  Clearing existing directory..."));
+          await fs.rm(localPath, { recursive: true, force: true });
         }
 
         // Create target directory
@@ -163,6 +179,9 @@ export const initCommand = new Command("init")
 
             // Import symlink utilities
             const { createSymlinks } = await import("@codemcp/knowledge-core");
+
+            // Note: directory is already cleared above if --force is used,
+            // so no need to call removeSymlinks here
 
             const configDir = path.dirname(configPath);
             const projectRoot = path.dirname(configDir);
@@ -251,18 +270,29 @@ export const initCommand = new Command("init")
           JSON.stringify(overallMetadata, null, 2),
         );
 
-        // Update configuration with discovered paths (only if paths were discovered and force flag used)
-        if (allDiscoveredPaths.length > 0 && options.force) {
+        // Update configuration with discovered paths (only if --discover-paths flag used)
+        if (allDiscoveredPaths.length > 0 && options.discoverPaths) {
           console.log(
             chalk.yellow(
-              `\n📝 Updating configuration with discovered paths...`,
+              `\n📝 Discovering directory patterns from extracted files...`,
             ),
           );
+
+          // Convert file list to directory patterns
+          const directoryPatterns =
+            discoverDirectoryPatterns(allDiscoveredPaths);
+
+          console.log(
+            chalk.gray(
+              `    Found ${allDiscoveredPaths.length} files → ${directoryPatterns.length} patterns`,
+            ),
+          );
+
           try {
-            await configManager.updateDocsetPaths(docsetId, allDiscoveredPaths);
+            await configManager.updateDocsetPaths(docsetId, directoryPatterns);
             console.log(
               chalk.green(
-                `    ✅ Updated config with ${allDiscoveredPaths.length} discovered paths`,
+                `    ✅ Updated config with discovered patterns: ${directoryPatterns.slice(0, 5).join(", ")}${directoryPatterns.length > 5 ? "..." : ""}`,
               ),
             );
           } catch (configError) {
