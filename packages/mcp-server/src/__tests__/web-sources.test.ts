@@ -55,8 +55,8 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
       "# Test Documentation\n\nThis simulates downloaded web content.",
     );
 
-    // Create metadata file (simulating what init command creates)
-    const metadata = {
+    // Create metadata file for web source (simulating what init command creates)
+    const webMetadata = {
       docset_id: "web-source-docs",
       docset_name: "Web Source Documentation",
       initialized_at: new Date().toISOString(),
@@ -65,7 +65,35 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
     };
     await fs.writeFile(
       join(webSourceDir, ".agentic-metadata.json"),
-      JSON.stringify(metadata, null, 2),
+      JSON.stringify(webMetadata, null, 2),
+    );
+
+    // Create mock initialized local folder docset (simulating init command for local folders)
+    const localSourceDir = join(knowledgeDir, "docsets", "local-docs");
+    await fs.mkdir(localSourceDir, { recursive: true });
+
+    // Create actual source directory to symlink to
+    const actualLocalDocs = join(tempDir, "docs", "local");
+    await fs.mkdir(actualLocalDocs, { recursive: true });
+    await fs.writeFile(
+      join(actualLocalDocs, "guide.md"),
+      "# Local Guide\n\nThis is local documentation.",
+    );
+
+    // Create symlink (simulating what init does for local folders)
+    await fs.symlink(actualLocalDocs, join(localSourceDir, "local"), "dir");
+
+    // Create metadata file for local folder
+    const localMetadata = {
+      docset_id: "local-docs",
+      docset_name: "Local Documentation",
+      initialized_at: new Date().toISOString(),
+      total_files: 1,
+      sources_count: 1,
+    };
+    await fs.writeFile(
+      join(localSourceDir, ".agentic-metadata.json"),
+      JSON.stringify(localMetadata, null, 2),
     );
 
     // Mock process.cwd to return our temp directory
@@ -117,7 +145,7 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
       expect(response.path).not.toContain("./docs/"); // Should not use local path pattern
     });
 
-    it("WHEN MCP server searches local docset THEN should return configured local_path", async () => {
+    it("WHEN MCP server searches local docset THEN should return symlinked path (consistent with git repos)", async () => {
       const request = {
         method: "tools/call",
         params: {
@@ -140,9 +168,9 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
       expect(response.search_terms).toContain("configuration setup");
       expect(response.generalized_search_terms).toContain("install guide");
 
-      // Should use the configured local_path for traditional docsets
-      expect(response.path).toContain("docs/local");
-      expect(response.path).not.toContain("docsets/local-docs"); // Should not use docsets pattern
+      // Local folders now use symlinked path (consistent with git repos)
+      expect(response.path).toContain("docsets/local-docs");
+      expect(response.path).not.toContain("docs/local"); // Should not use direct source path
     });
 
     it("WHEN MCP server lists docsets THEN should include both web and local docsets with correct paths", async () => {
