@@ -11,7 +11,8 @@ import {
   calculateLocalPath,
   ensureKnowledgeGitignoreSync,
   discoverDirectoryPatterns,
-  removeSymlinks,
+  safelyClearDirectory,
+  getDirectoryInfo,
 } from "@codemcp/knowledge-core";
 import {
   GitRepoLoader,
@@ -94,8 +95,26 @@ export const initCommand = new Command("init")
 
         // Clear directory for force re-initialization
         if (existsAlready && options.force) {
+          // Get info about what we're clearing (for logging)
+          const dirInfo = await getDirectoryInfo(localPath);
+
           console.log(chalk.yellow("🗑️  Clearing existing directory..."));
-          await fs.rm(localPath, { recursive: true, force: true });
+          console.log(
+            chalk.gray(
+              `    Removing: ${dirInfo.files} files, ${dirInfo.directories} dirs, ${dirInfo.symlinks} symlinks`,
+            ),
+          );
+
+          if (dirInfo.symlinks > 0) {
+            console.log(
+              chalk.gray(
+                "    ⚠️  Note: Symlinks will be removed, but source files are preserved",
+              ),
+            );
+          }
+
+          // Safely clear directory (preserves source files for symlinked folders)
+          await safelyClearDirectory(localPath);
         }
 
         // Create target directory

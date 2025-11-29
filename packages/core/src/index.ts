@@ -34,6 +34,13 @@ export {
   discoverMinimalPatterns,
 } from "./paths/discovery.js";
 
+// Export directory cleanup utilities
+export {
+  safelyClearDirectory,
+  containsSymlinks,
+  getDirectoryInfo,
+} from "./paths/cleanup.js";
+
 // Export template processing
 export {
   processTemplate,
