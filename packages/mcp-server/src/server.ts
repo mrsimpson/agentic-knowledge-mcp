@@ -12,6 +12,7 @@ import {
   loadConfig,
   findConfigPath,
   calculateLocalPath,
+  calculateLocalPathWithSymlinks,
   processTemplate,
   createTemplateContext,
   getEffectiveTemplate,
@@ -280,13 +281,43 @@ Use the path and search terms with your text search tools (grep, rg, ripgrep, fi
             );
           }
 
-          // Calculate local path
-          const localPath = calculateLocalPath(docset, configPath);
-
-          // Check if docset is initialized by checking for metadata file
+          // Determine path calculation method and validate initialization
           const primarySource = docset.sources?.[0];
-          if (primarySource?.type === "git_repo") {
-            // For git repos, check if .agentic-metadata.json exists
+          let localPath: string;
+
+          if (primarySource?.type === "local_folder") {
+            // For local folders, use symlinked path
+            localPath = calculateLocalPath(docset, configPath);
+
+            // Check if initialized by verifying .agentic-metadata.json exists
+            const configDir = dirname(configPath);
+            const projectRoot = dirname(configDir);
+            const symlinkDir = resolve(configDir, "docsets", docset.id);
+            const metadataPath = resolve(symlinkDir, ".agentic-metadata.json");
+
+            if (!existsSync(metadataPath)) {
+              throw new Error(
+                `Docset '${docset_id}' is not initialized.\n\n` +
+                  `The docset is configured but hasn't been initialized yet.\n\n` +
+                  `To initialize this docset:\n` +
+                  `agentic-knowledge init ${docset_id}\n\n` +
+                  `To check status of all docsets:\n` +
+                  `agentic-knowledge status`,
+              );
+            }
+
+            // Return the symlinked path for consistency
+            localPath = resolve(configDir, "docsets", docset.id);
+            const projectRoot2 = dirname(configDir);
+            localPath = resolve(projectRoot2, localPath).replace(
+              projectRoot2 + "/",
+              "",
+            );
+          } else if (primarySource?.type === "git_repo") {
+            // For git repos, use standard path calculation
+            localPath = calculateLocalPath(docset, configPath);
+
+            // Check if .agentic-metadata.json exists
             const configDir = dirname(configPath);
             const projectRoot = dirname(configDir);
             const absolutePath = resolve(projectRoot, localPath);
@@ -305,6 +336,9 @@ Use the path and search terms with your text search tools (grep, rg, ripgrep, fi
                   `agentic-knowledge status`,
               );
             }
+          } else {
+            // Fallback to standard calculation for unknown types
+            localPath = calculateLocalPath(docset, configPath);
           }
 
           // Create template context with proper function signature
@@ -374,13 +408,32 @@ Use the path and search terms with your text search tools (grep, rg, ripgrep, fi
 
           // Return list of available docsets with calculated paths
           const docsets = await Promise.all(
-            config.docsets.map(async (docset) => ({
-              docset_id: docset.id,
-              docset_name: docset.name,
-              docset_description:
-                docset.description || "No description provided",
-              local_path: await calculateLocalPath(docset, configPath),
-            })),
+            config.docsets.map(async (docset) => {
+              const primarySource = docset.sources?.[0];
+              let localPath: string;
+
+              if (primarySource?.type === "local_folder") {
+                // Use symlinked path for local folders
+                const configDir = dirname(configPath);
+                localPath = resolve(configDir, "docsets", docset.id);
+                const projectRoot = dirname(configDir);
+                localPath = resolve(projectRoot, localPath).replace(
+                  projectRoot + "/",
+                  "",
+                );
+              } else {
+                // Use standard calculation for other types
+                localPath = calculateLocalPath(docset, configPath);
+              }
+
+              return {
+                docset_id: docset.id,
+                docset_name: docset.name,
+                docset_description:
+                  docset.description || "No description provided",
+                local_path: localPath,
+              };
+            }),
           );
 
           const summary =

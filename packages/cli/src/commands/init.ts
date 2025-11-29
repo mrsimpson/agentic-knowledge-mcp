@@ -153,10 +153,85 @@ export const initCommand = new Command("init")
               path.join(localPath, `.agentic-source-${index}.json`),
               JSON.stringify(metadata, null, 2),
             );
+          } else if (source.type === "local_folder") {
+            // Handle local folder initialization
+            console.log(chalk.gray(`  Creating symlinks for local folder`));
+
+            if (!source.paths || source.paths.length === 0) {
+              throw new Error(`Local folder source has no paths configured`);
+            }
+
+            // Import symlink utilities
+            const { createSymlinks } = await import("@codemcp/knowledge-core");
+
+            const configDir = path.dirname(configPath);
+            const projectRoot = path.dirname(configDir);
+
+            // Verify source paths exist
+            const validatedPaths: string[] = [];
+            for (const sourcePath of source.paths) {
+              const absolutePath = path.isAbsolute(sourcePath)
+                ? sourcePath
+                : path.resolve(projectRoot, sourcePath);
+
+              try {
+                const stat = await fs.stat(absolutePath);
+                if (!stat.isDirectory()) {
+                  throw new Error(`Path is not a directory: ${sourcePath}`);
+                }
+                validatedPaths.push(sourcePath);
+              } catch (error) {
+                throw new Error(
+                  `Local folder path does not exist: ${sourcePath}`,
+                );
+              }
+            }
+
+            // Create symlinks
+            await createSymlinks(validatedPaths, localPath, projectRoot);
+
+            console.log(
+              chalk.green(`    ✅ Created ${validatedPaths.length} symlink(s)`),
+            );
+
+            // Count files in symlinked directories for metadata
+            let fileCount = 0;
+            const files: string[] = [];
+
+            async function countFilesRecursive(dir: string): Promise<void> {
+              const entries = await fs.readdir(dir, { withFileTypes: true });
+              for (const entry of entries) {
+                const fullPath = path.join(dir, entry.name);
+                if (entry.isDirectory()) {
+                  await countFilesRecursive(fullPath);
+                } else if (entry.isFile()) {
+                  fileCount++;
+                  files.push(path.relative(localPath, fullPath));
+                }
+              }
+            }
+
+            await countFilesRecursive(localPath);
+            totalFiles += fileCount;
+
+            // Create source metadata
+            const metadata = {
+              source_paths: validatedPaths,
+              source_type: source.type,
+              initialized_at: new Date().toISOString(),
+              files_count: fileCount,
+              files: files,
+              docset_id: docsetId,
+            };
+
+            await fs.writeFile(
+              path.join(localPath, `.agentic-source-${index}.json`),
+              JSON.stringify(metadata, null, 2),
+            );
           } else {
             console.log(
               chalk.red(
-                `    ❌ Source type '${source.type}' not yet supported`,
+                `    ❌ Source type '${(source as any).type}' not yet supported`,
               ),
             );
           }

@@ -25,6 +25,9 @@ export {
   ensureKnowledgeGitignoreSync,
 } from "./paths/calculator.js";
 
+// Export symlink utilities
+export { createSymlinks } from "./paths/symlinks.js";
+
 // Export template processing
 export {
   processTemplate,

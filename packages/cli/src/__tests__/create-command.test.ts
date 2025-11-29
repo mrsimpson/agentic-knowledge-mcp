@@ -136,7 +136,7 @@ describe("create command", () => {
     }
   });
 
-  it("creates config file when missing and creates symlinks for local folder", async () => {
+  it("creates config file when missing (symlinks created later via init)", async () => {
     // Remove the config file to test creation from scratch
     await fs.rm(join(testDir, ".knowledge"), { recursive: true, force: true });
 
@@ -176,13 +176,13 @@ describe("create command", () => {
       expect(config).toContain("name: Test Docs");
       expect(config).toContain("type: local_folder");
 
-      // Check symlinks were created
+      // Symlinks should NOT be created during create (only during init)
       const symlinkDir = join(testDir, ".knowledge", "docsets", "test-docs");
       const symlinkExists = await fs
         .access(symlinkDir)
         .then(() => true)
         .catch(() => false);
-      expect(symlinkExists).toBe(true);
+      expect(symlinkExists).toBe(false);
     } finally {
       process.cwd = originalCwd;
       console.log = originalLog;

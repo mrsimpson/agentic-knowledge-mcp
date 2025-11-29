@@ -55,6 +55,29 @@ export async function createTestProject(
         const docFile = join(docsetPath, "README.md");
         await fs.writeFile(docFile, docset.content);
       }
+
+      // Initialize the docset (create symlinks and metadata for local folders)
+      // This simulates running 'agentic-knowledge init {docset-id}'
+      const symlinkDir = join(knowledgeDir, "docsets", docset.id);
+      await fs.mkdir(symlinkDir, { recursive: true });
+
+      // Create symlink to the actual source directory
+      const sourceName = docset.localPath.split("/").pop() || docset.id;
+      const symlinkPath = join(symlinkDir, sourceName);
+      await fs.symlink(docsetPath, symlinkPath, "dir");
+
+      // Create metadata file
+      const metadata = {
+        docset_id: docset.id,
+        docset_name: docset.name,
+        initialized_at: new Date().toISOString(),
+        total_files: 1,
+        sources_count: 1,
+      };
+      await fs.writeFile(
+        join(symlinkDir, ".agentic-metadata.json"),
+        JSON.stringify(metadata, null, 2),
+      );
     }
   }
 

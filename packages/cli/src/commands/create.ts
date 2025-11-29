@@ -69,28 +69,15 @@ export const createCommand = new Command("create")
       config.docsets.push(newDocset);
       await configManager.saveConfig(config, configPath);
 
-      // For local folders, create symlinks immediately
-      if (options.preset === "local-folder") {
-        console.log(chalk.gray("🔗 Creating symlinks for local folder..."));
-        const { calculateLocalPathWithSymlinks } = await import(
-          "@codemcp/knowledge-core"
-        );
-        try {
-          await calculateLocalPathWithSymlinks(newDocset, configPath);
-          console.log(chalk.gray("   ✅ Symlinks created successfully"));
-        } catch (error) {
-          console.log(
-            chalk.yellow(
-              `   ⚠️  Warning: Could not create symlinks: ${(error as Error).message}`,
-            ),
-          );
-        }
-      }
-
       console.log(
         chalk.green(`✅ Created docset '${options.id}' successfully`),
       );
       console.log(chalk.gray(`   Config saved to: ${configPath}`));
+      console.log(
+        chalk.yellow(
+          `\n💡 Next step: Initialize the docset with 'agentic-knowledge init ${options.id}'`,
+        ),
+      );
     } catch (error) {
       console.error(
         chalk.red("❌ Error creating docset:"),
