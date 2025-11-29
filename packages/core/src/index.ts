@@ -26,7 +26,20 @@ export {
 } from "./paths/calculator.js";
 
 // Export symlink utilities
-export { createSymlinks } from "./paths/symlinks.js";
+export { createSymlinks, removeSymlinks } from "./paths/symlinks.js";
+
+// Export path discovery utilities
+export {
+  discoverDirectoryPatterns,
+  discoverMinimalPatterns,
+} from "./paths/discovery.js";
+
+// Export directory cleanup utilities
+export {
+  safelyClearDirectory,
+  containsSymlinks,
+  getDirectoryInfo,
+} from "./paths/cleanup.js";
 
 // Export template processing
 export {

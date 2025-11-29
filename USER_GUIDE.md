@@ -95,6 +95,7 @@ The `agentic-knowledge` CLI provides commands to manage your documentation lifec
 Create docset configurations quickly using presets. Alternatively, you can manually edit `.knowledge/config.yaml` - this command is just a convenience tool that does it for you.
 
 **Git Repository Preset:**
+
 ```bash
 npx agentic-knowledge create \
   --preset git-repo \
@@ -105,6 +106,7 @@ npx agentic-knowledge create \
 ```
 
 **Local Folder Preset:**
+
 ```bash
 npx agentic-knowledge create \
   --preset local-folder \
@@ -114,6 +116,7 @@ npx agentic-knowledge create \
 ```
 
 **Options:**
+
 - `--preset <type>`: Choose preset (`git-repo` or `local-folder`)
 - `--id <id>`: Unique identifier for the docset
 - `--name <name>`: Human-readable name
@@ -122,6 +125,7 @@ npx agentic-knowledge create \
 - `--path <path>`: Local directory path (for local-folder preset)
 
 The `create` command:
+
 - ✅ Creates or updates `.knowledge/config.yaml`
 - ✅ Validates docset ID uniqueness
 - ✅ For local folders, creates symlinks immediately
@@ -135,36 +139,89 @@ Initialize a configured docset by downloading and preparing documentation. Use t
 # Initialize a specific docset
 npx agentic-knowledge init mcp-sdk
 
-# Force re-initialization (start completely fresh)
+# Force re-initialization (clears directory and re-extracts)
 npx agentic-knowledge init mcp-sdk --force
+
+# Discover and update path patterns in config
+npx agentic-knowledge init mcp-sdk --discover-paths
+
+# Both together (clear, re-extract, and update config)
+npx agentic-knowledge init mcp-sdk --force --discover-paths
 
 # Use custom config path
 npx agentic-knowledge init mcp-sdk --config /path/to/config.yaml
 ```
 
+**Options:**
+
+- **`--force`**: Clears the docset directory completely before re-initialization
+  - ✅ Removes all files, directories, and symlinks
+  - ✅ **Safe for local folders**: Only removes symlinks, never deletes source files
+  - ✅ Starts with a clean slate based on current configuration
+  - Use when: You've changed paths configuration and want a fresh start
+
+- **`--discover-paths`**: Automatically discovers and updates path patterns in config
+  - ✅ Scans extracted files and identifies directory patterns
+  - ✅ Converts individual file paths to directory patterns (e.g., `docs/`)
+  - ✅ Updates `.knowledge/config.yaml` with discovered patterns
+  - ✅ Keeps config clean by avoiding hundreds of individual file paths
+  - Use when: You want to auto-generate optimal path configuration
+
 **When to use:**
+
 - Setting up a docset for the first time
-- With `--force`: Completely reset a docset (deletes everything and re-downloads)
+- With `--force`: Completely reset after changing path configuration
+- With `--discover-paths`: Auto-discover optimal path patterns
+- With both: Fresh start and auto-configure paths
 
 **What happens during initialization:**
 
 1. **For Git Repositories:**
    - Clones repository to temporary directory
-   - Extracts specified paths (if configured)
-   - Applies smart filtering (excludes `node_modules/`, build artifacts, etc.)
+   - Extracts files based on `paths` configuration:
+     - If `paths` specified: Extracts only those paths
+     - If no `paths`: Uses smart filtering (documentation files only)
+   - Applies intelligent filtering (excludes `node_modules/`, build artifacts, tests, etc.)
    - Copies documentation to `.knowledge/docsets/{id}/`
    - Creates metadata files for change tracking
+   - With `--discover-paths`: Analyzes extracted files and updates config with directory patterns
 
 2. **For Local Folders:**
    - Creates symlinks in `.knowledge/docsets/{id}/`
+   - **Safety guarantee**: Source files are NEVER deleted, only symlinks
    - No file duplication
-   - Changes are immediately visible
+   - Changes to source files are immediately visible
+   - With `--force`: Safely removes old symlinks before creating new ones
 
 3. **Creates Metadata:**
    - `.agentic-metadata.json` - Overall docset information
    - `.agentic-source-{index}.json` - Per-source tracking with content hashes
 
+**Path Configuration vs Discovery:**
+
+**Manual path configuration (recommended for control):**
+
+```yaml
+sources:
+  - type: git_repo
+    url: https://github.com/example/repo.git
+    paths:
+      - README.md
+      - docs/ # Directory pattern
+      - examples/ # Another directory pattern
+```
+
+**Auto-discovered paths (good for initial setup):**
+
+```bash
+# Start without paths, discover what files exist
+npx agentic-knowledge init my-docset --discover-paths
+```
+
+This analyzes the extracted files and updates your config with optimal directory patterns instead of listing hundreds of individual files.
+
 **Directory structure after init:**
+
 ```
 .knowledge/
 ├── config.yaml
@@ -175,6 +232,15 @@ npx agentic-knowledge init mcp-sdk --config /path/to/config.yaml
         ├── .agentic-source-0.json
         └── [documentation files...]
 ```
+
+**Safety Notes:**
+
+When using `--force` with local folder sources:
+
+- Only symlinks in `.knowledge/docsets/{id}/` are removed
+- Your original source files are **never deleted**
+- Node.js does not follow symlinks when removing directories
+- You'll see a confirmation message: "Symlinks will be removed, but source files are preserved"
 
 ### `status` - Check Docset Status
 
@@ -192,6 +258,7 @@ npx agentic-knowledge status --config /path/to/config.yaml
 ```
 
 **Example output:**
+
 ```
 📊 Docset Status
 
@@ -228,19 +295,35 @@ npx agentic-knowledge refresh --config /path/to/config.yaml
 ```
 
 **Smart refresh logic:**
+
 - Checks Git commit hash to detect changes
 - Skips refresh if no changes detected
 - Skips refresh if updated within 1 hour (unless `--force`)
 - Updates in place (preserves metadata)
 
 **When to use:**
+
 - Getting latest updates from git repositories
 - Routine maintenance/updates
 - Checking for new content
 
-**Key difference from `init --force`:**
-- `init --force`: Deletes everything and starts fresh (destructive)
-- `refresh`: Checks for changes and updates incrementally (smart)
+**Key differences between commands:**
+
+| Command                         | When to Use                  | Behavior                            | Config Changes |
+| ------------------------------- | ---------------------------- | ----------------------------------- | -------------- |
+| `init`                          | First-time setup             | Downloads/creates fresh             | No             |
+| `init --force`                  | Reset after config changes   | Clears directory, re-extracts       | No             |
+| `init --discover-paths`         | Auto-configure paths         | Normal init + updates config        | Yes            |
+| `init --force --discover-paths` | Complete reset + auto-config | Clears, re-extracts, updates config | Yes            |
+| `refresh`                       | Routine updates              | Smart incremental update            | No             |
+| `refresh --force`               | Force update check           | Ignores time throttle               | No             |
+
+**Choosing the right command:**
+
+- Changed `paths` in config? → `init --force`
+- Want to auto-discover optimal paths? → `init --discover-paths`
+- Regular update from git repo? → `refresh`
+- Something seems broken? → `init --force` to start fresh
 
 ## Configuration Guide
 
@@ -285,11 +368,35 @@ docsets:
         paths: ["docs/", "README.md"] # Optional, extracts specific paths
 ```
 
+**Path configuration strategies:**
+
+1. **Explicit paths (recommended)**: Specify exactly what to extract
+
+   ```yaml
+   paths:
+     - README.md
+     - docs/
+     - examples/
+   ```
+
+2. **Auto-discovery**: Use `--discover-paths` flag during init to automatically detect optimal paths
+
+   ```bash
+   npx agentic-knowledge init my-docset --discover-paths
+   ```
+
+   This analyzes extracted files and updates config with directory patterns instead of individual files.
+
+3. **Smart filtering (no paths specified)**: Automatically extracts documentation files
+   - Includes: `*.md`, `*.mdx`, `*.rst`, README files, `docs/`, `examples/`
+   - Excludes: `node_modules/`, `build/`, `dist/`, tests, `.git/`
+
 **Benefits:**
 
 - ✅ **Automatic downloads** - fetches latest documentation
 - ✅ **Selective extraction** - only downloads specified paths
 - ✅ **Branch selection** - target specific branches or tags
+- ✅ **Path discovery** - automatically find optimal directory patterns
 
 ### Mixed Configuration
 
@@ -340,6 +447,7 @@ docsets:
 ```
 
 **Template variables:**
+
 - `{{keywords}}` - Primary search terms
 - `{{generalized_keywords}}` - Broader context terms
 - `{{local_path}}` - Path to the docset
@@ -408,6 +516,71 @@ npx agentic-knowledge status --verbose
 # The server runs automatically when Claude launches
 ```
 
+### Workflow 4: Auto-Discovering Optimal Paths
+
+When you're not sure which paths to extract from a large repository:
+
+```bash
+# 1. Create docset without specifying paths
+npx agentic-knowledge create \
+  --preset git-repo \
+  --id large-repo \
+  --name "Large Repository Docs" \
+  --url https://github.com/large/repository.git
+
+# 2. Initialize with path discovery
+# This will:
+# - Use smart filtering to extract documentation
+# - Analyze the extracted files
+# - Update config with optimal directory patterns (e.g., "docs/", "examples/")
+npx agentic-knowledge init large-repo --discover-paths
+
+# 3. Check what was discovered
+npx agentic-knowledge status large-repo --verbose
+
+# 4. Review and adjust the auto-generated paths in .knowledge/config.yaml
+# The discovered paths will look like:
+# paths:
+#   - README.md
+#   - docs/
+#   - examples/
+# Instead of 100+ individual file paths!
+
+# 5. If you want to adjust and re-init with different paths:
+# Edit .knowledge/config.yaml, then:
+npx agentic-knowledge init large-repo --force
+```
+
+### Workflow 5: Managing Path Configuration Changes
+
+When you need to change which paths are extracted from a git repository:
+
+```bash
+# Scenario: You initially had paths: ["docs/"]
+# Now you want: ["docs/", "examples/", "README.md"]
+
+# 1. Edit .knowledge/config.yaml and update the paths:
+#    sources:
+#      - type: git_repo
+#        paths:
+#          - README.md
+#          - docs/
+#          - examples/
+
+# 2. Force re-initialization to apply new configuration
+# This completely clears the old content and re-extracts based on new paths
+npx agentic-knowledge init my-docset --force
+
+# Output you'll see:
+# 🗑️  Clearing existing directory...
+#     Removing: 50 files, 3 dirs, 0 symlinks
+# 🔄 Loading source 1/1: https://github.com/...
+#     ✅ Copied 75 files using smart filtering
+
+# 3. Verify the changes
+npx agentic-knowledge status my-docset --verbose
+```
+
 ## MCP Integration
 
 ### MCP Server
@@ -427,6 +600,7 @@ search_docs({
 ```
 
 **Returns:**
+
 ```json
 {
   "instructions": "Search for 'useEffect cleanup' in .knowledge/docsets/react-docs/hooks/...",
@@ -445,6 +619,7 @@ list_docsets();
 ```
 
 **Returns:**
+
 ```
 Found 2 available docset(s):
 
@@ -462,6 +637,7 @@ Found 2 available docset(s):
 #### Claude Desktop
 
 **Configuration file location:**
+
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 - Linux: `~/.config/Claude/claude_desktop_config.json`
@@ -514,6 +690,7 @@ If you installed globally with `npm install -g agentic-knowledge`:
 ```
 
 **After configuration:**
+
 1. Restart Claude Desktop
 2. The server starts automatically in the background
 3. Look for the 🔌 icon in Claude Desktop to verify the connection
@@ -521,6 +698,7 @@ If you installed globally with `npm install -g agentic-knowledge`:
 #### Other MCP Clients
 
 For other MCP clients, use:
+
 - **Command**: `npx`
 - **Args**: `["-y", "agentic-knowledge"]`
 - **Transport**: stdio
@@ -538,6 +716,7 @@ Once configured, simply ask questions:
 ```
 
 The AI assistant will:
+
 1. Call `search_docs` with appropriate keywords
 2. Receive navigation instructions
 3. Use grep/ripgrep to search the documentation
@@ -563,6 +742,7 @@ The AI assistant will:
 **Error**: "Failed to clone repository"
 
 **Solutions:**
+
 - Check internet connection
 - Verify repository URL is correct
 - Ensure you have access to private repositories
@@ -577,6 +757,7 @@ The AI assistant will:
 **Issue**: Local folder changes not reflected
 
 **Solutions:**
+
 - Verify the source paths exist
 - Check file permissions
 - Re-run `agentic-knowledge create` with the local folder preset
@@ -584,10 +765,82 @@ The AI assistant will:
 ### Search Not Finding Results
 
 **Tips:**
+
 - Try broader keywords with `generalized_keywords`
 - Check the docset is initialized: `agentic-knowledge status`
 - Verify the documentation actually contains the terms
 - Use verbose status to see which files are included
+
+### Changed Paths But Still Seeing Old Files
+
+**Issue**: Modified `paths` configuration but old files remain after re-init
+
+**Solution**: Use `init --force` to completely clear and re-extract:
+
+```bash
+npx agentic-knowledge init my-docset --force
+```
+
+This ensures:
+
+- Old files are removed
+- Only files matching current `paths` configuration are extracted
+- For local folders: Old symlinks are removed, new ones created
+
+### Too Many Individual File Paths in Config
+
+**Issue**: Config has hundreds of individual file paths instead of directory patterns
+
+**Solution**: Use `init --discover-paths` to auto-optimize:
+
+```bash
+npx agentic-knowledge init my-docset --force --discover-paths
+```
+
+This will convert something like:
+
+```yaml
+paths:
+  - docs/guide/intro.md
+  - docs/guide/advanced.md
+  - docs/api/reference.md
+  # ... 50+ more files
+```
+
+Into clean directory patterns:
+
+```yaml
+paths:
+  - README.md
+  - docs/
+  - examples/
+```
+
+### Worried About Deleting Source Files
+
+**Concern**: Using `--force` with local folder sources
+
+**Guarantee**: Source files are **NEVER deleted**
+
+- Only symlinks in `.knowledge/docsets/{id}/` are removed
+- Your original files in the source directories remain untouched
+- Node.js does not follow symlinks when removing directories
+- You'll see a safety message confirming this during the operation
+
+**Example safe operation:**
+
+```bash
+# Your source files in ./docs/ will NOT be deleted
+npx agentic-knowledge init my-local-docs --force
+```
+
+Output shows:
+
+```
+🗑️  Clearing existing directory...
+    Removing: 0 files, 0 dirs, 3 symlinks
+    ⚠️  Note: Symlinks will be removed, but source files are preserved
+```
 
 ---
 
