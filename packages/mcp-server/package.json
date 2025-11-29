@@ -1,6 +1,6 @@
 {
   "name": "@codemcp/knowledge",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "MCP server implementation for agentic knowledge guidance system",
   "type": "module",
   "main": "dist/index.js",
