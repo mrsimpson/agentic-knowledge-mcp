@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * Binary entry point for the agentic-knowledge MCP server
  */
