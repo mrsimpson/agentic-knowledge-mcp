@@ -2,11 +2,10 @@
  * Init Command - Behavior tests for force re-init and path discovery
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import { tmpdir } from "node:os";
-import { initCommand } from "../commands/init.js";
 
 describe("Init Command - Force Re-initialization", () => {
   let testDir: string;
@@ -82,9 +81,6 @@ docsets:
     it("should NOT update config paths when using only --force", async () => {
       // The --force flag should only clear and re-initialize
       // It should NOT modify the config file
-
-      const configBefore = await fs.readFile(configPath, "utf-8");
-
       // After running with --force, config should be unchanged
       // (This test documents that --force and path discovery are separate)
     });
@@ -165,7 +161,7 @@ describe("Path Pattern Discovery Function", () => {
   // Unit tests for the function that converts file lists to directory patterns
 
   it("should convert file list to directory patterns", () => {
-    const files = [
+    const _files = [
       "README.md",
       "docs/guide/intro.md",
       "docs/guide/advanced.md",
@@ -177,7 +173,7 @@ describe("Path Pattern Discovery Function", () => {
     ];
 
     // Expected output: directory patterns
-    const expected = [
+    const _expected = [
       "README.md", // Single file at root
       "docs/", // Multiple files in docs tree
       "examples/", // Multiple files in examples
@@ -190,7 +186,7 @@ describe("Path Pattern Discovery Function", () => {
   });
 
   it("should handle nested directories efficiently", () => {
-    const files = [
+    const _files = [
       "docs/en/guide/intro.md",
       "docs/en/guide/advanced.md",
       "docs/en/api/reference.md",
@@ -198,21 +194,21 @@ describe("Path Pattern Discovery Function", () => {
     ];
 
     // Should identify "docs/" as the common pattern
-    const expected = ["docs/"];
+    const _expected = ["docs/"];
 
     // const result = discoverDirectoryPatterns(files);
     // expect(result).toEqual(expected);
   });
 
   it("should keep single files as-is", () => {
-    const files = [
+    const _files = [
       "README.md",
       "LICENSE",
       "docs/guide/intro.md",
       "docs/guide/advanced.md",
     ];
 
-    const expected = [
+    const _expected = [
       "README.md",
       "LICENSE",
       "docs/", // Multiple files
@@ -223,10 +219,10 @@ describe("Path Pattern Discovery Function", () => {
   });
 
   it("should handle files in root directory", () => {
-    const files = ["README.md", "CONTRIBUTING.md", "LICENSE"];
+    const _files = ["README.md", "CONTRIBUTING.md", "LICENSE"];
 
     // All single files in root - keep as individual files
-    const expected = ["README.md", "CONTRIBUTING.md", "LICENSE"];
+    const _expected = ["README.md", "CONTRIBUTING.md", "LICENSE"];
 
     // const result = discoverDirectoryPatterns(files);
     // expect(result).toEqual(expected);

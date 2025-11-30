@@ -218,7 +218,7 @@ export const initCommand = new Command("init")
                   throw new Error(`Path is not a directory: ${sourcePath}`);
                 }
                 validatedPaths.push(sourcePath);
-              } catch (error) {
+              } catch {
                 throw new Error(
                   `Local folder path does not exist: ${sourcePath}`,
                 );
