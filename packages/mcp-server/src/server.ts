@@ -12,7 +12,6 @@ import {
   loadConfig,
   findConfigPath,
   calculateLocalPath,
-  calculateLocalPathWithSymlinks,
   processTemplate,
   createTemplateContext,
   getEffectiveTemplate,
@@ -291,7 +290,6 @@ Use the path and search terms with your text search tools (grep, rg, ripgrep, fi
 
             // Check if initialized by verifying .agentic-metadata.json exists
             const configDir = dirname(configPath);
-            const projectRoot = dirname(configDir);
             const symlinkDir = resolve(configDir, "docsets", docset.id);
             const metadataPath = resolve(symlinkDir, ".agentic-metadata.json");
 
