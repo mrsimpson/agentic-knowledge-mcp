@@ -66,15 +66,37 @@ _None yet_
 
 ### Tasks
 
-- [ ] _To be added when this phase becomes active_
+- [x] Review code changes and validate objectives met
+- [x] Identify skeleton tests in init-command.test.ts that need implementation
+- [x] Implement skeleton tests for --force flag behavior
+- [x] Implement skeleton tests for --discover-paths flag behavior
+- [x] Implement unit tests for discoverDirectoryPatterns function
+- [x] Run all tests to verify implementations - All 220/220 passing!
+- [x] Clean up any debug code - No debug code found, all changes are clean
+- [ ] Update documentation if needed
+- [ ] Review final diff and prepare for commit
 
 ### Completed
 
-_None yet_
+- Code review completed - all objectives met, 220/220 tests passing
+- Found skeleton tests in init-command.test.ts that document expected behavior but lack assertions
+- Implemented all skeleton tests:
+  - ✅ --force flag tests: directory clearing behavior
+  - ✅ --discover-paths flag tests: config update and pattern discovery
+  - ✅ Unit tests for discoverDirectoryPatterns function
+- Fixed test expectation for safelyClearDirectory (removes directory entirely, not just contents)
+- All 220 tests passing (100% success rate)
+- Code cleanup verified - no debug code or commented-out test code remaining
 
 ## Key Decisions
 
-_Important decisions will be documented here as they are made_
+1. **TypeScript Module Configuration**: Changed from `module: "ESNext", moduleResolution: "bundler"` to `module: "NodeNext", moduleResolution: "NodeNext"` - this is the correct configuration for Node.js ES modules projects with `"type": "module"` in package.json.
+
+2. **Vitest Resolve Aliases**: Added resolve aliases in `vitest.config.ts` to point to source TypeScript files instead of compiled dist files. This is standard practice for monorepo testing and allows running tests without building first.
+
+3. **Test Implementation Strategy**: Implemented skeleton tests by calling the actual underlying functions (`safelyClearDirectory`, `discoverDirectoryPatterns`, `ConfigManager.updateDocsetPaths`) rather than testing the full CLI command execution. This provides good unit-level test coverage while documenting the integration behavior.
+
+4. **safelyClearDirectory Behavior**: Confirmed that `safelyClearDirectory` removes the entire directory (not just contents), which matches the --force flag behavior where the directory is recreated afterward.
 
 ## Notes
 
