@@ -45,9 +45,9 @@
     "clean:build": "turbo run clean:build"
   },
   "dependencies": {
-    "@codemcp/knowledge-core": "workspace:*",
-    "@codemcp/knowledge-content-loader": "workspace:*",
-    "@codemcp/knowledge": "workspace:*",
+    "@codemcp/knowledge-core": "1.0.15",
+    "@codemcp/knowledge-content-loader": "1.0.15",
+    "@codemcp/knowledge": "1.0.15",
     "@modelcontextprotocol/sdk": "^1.19.1",
     "@types/js-yaml": "4.0.9",
     "js-yaml": "4.1.0",
