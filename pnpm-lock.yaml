@@ -8,14 +8,14 @@ importers:
   .:
     dependencies:
       "@codemcp/knowledge":
-        specifier: 1.0.15
-        version: 1.0.15
+        specifier: workspace:*
+        version: link:packages/mcp-server
       "@codemcp/knowledge-content-loader":
-        specifier: 1.0.15
-        version: 1.0.15
+        specifier: workspace:*
+        version: link:packages/content-loader
       "@codemcp/knowledge-core":
-        specifier: 1.0.15
-        version: 1.0.15
+        specifier: workspace:*
+        version: link:packages/core
       "@modelcontextprotocol/sdk":
         specifier: ^1.19.1
         version: 1.19.1
@@ -227,25 +227,6 @@ packages:
         integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==,
       }
     engines: { node: ">=18" }
-
-  "@codemcp/knowledge-content-loader@1.0.15":
-    resolution:
-      {
-        integrity: sha512-OCH81gTmafaTkFD+Bzb66ParP7EITn0Pf8zWEQjR7sMaCi2lFXzxIdOqBHyRL7P3MjTv7tL/AQPTsUBqJ3KaMQ==,
-      }
-
-  "@codemcp/knowledge-core@1.0.15":
-    resolution:
-      {
-        integrity: sha512-NynAou+PBMBpZAfMFJQQbOxxHmY84msd14XUKVRDykVzzy+5O2FnXRRlLG5M1D7efSJxuUMV9V1RTIxTd9hR7g==,
-      }
-
-  "@codemcp/knowledge@1.0.15":
-    resolution:
-      {
-        integrity: sha512-E2N1s7be39lTKFe0V+GEJxSnZgmb8pwD95Xn64lfDgiptvjtMEzvKVmed/FJ6VImdPHPGp/3/Iy/Hn+K4wXEgQ==,
-      }
-    hasBin: true
 
   "@cspotcode/source-map-support@0.8.1":
     resolution:
@@ -4398,23 +4379,6 @@ snapshots:
       "@babel/helper-validator-identifier": 7.27.1
 
   "@bcoe/v8-coverage@1.0.2": {}
-
-  "@codemcp/knowledge-content-loader@1.0.15":
-    dependencies:
-      simple-git: 3.28.0
-    transitivePeerDependencies:
-      - supports-color
-
-  "@codemcp/knowledge-core@1.0.15":
-    dependencies:
-      js-yaml: 4.1.0
-
-  "@codemcp/knowledge@1.0.15":
-    dependencies:
-      "@codemcp/knowledge-core": 1.0.15
-      "@modelcontextprotocol/sdk": 1.19.1
-    transitivePeerDependencies:
-      - supports-color
 
   "@cspotcode/source-map-support@0.8.1":
     dependencies:
