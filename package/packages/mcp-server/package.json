@@ -30,7 +30,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@codemcp/knowledge-core": "workspace:*",
+    "@codemcp/knowledge-core": "1.0.15",
     "@modelcontextprotocol/sdk": "^1.19.1"
   },
   "devDependencies": {
