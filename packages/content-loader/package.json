@@ -32,7 +32,9 @@
     "simple-git": "^3.22.0"
   },
   "devDependencies": {
+    "@eslint/js": "10.0.1",
     "@types/node": "^24.3.0",
+    "eslint": "^9.34.0",
     "rimraf": "^6.0.1",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"

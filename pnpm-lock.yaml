@@ -35,6 +35,9 @@ importers:
         specifier: ^8.0.1
         version: 8.2.0
     devDependencies:
+      "@eslint/js":
+        specifier: 10.0.1
+        version: 10.0.1(eslint@9.34.0)
       "@modelcontextprotocol/inspector":
         specifier: 0.16.8
         version: 0.16.8(@swc/core@1.13.5)(@types/node@24.3.0)(typescript@5.9.2)
@@ -108,9 +111,15 @@ importers:
         specifier: ^8.0.1
         version: 8.2.0
     devDependencies:
+      "@eslint/js":
+        specifier: 10.0.1
+        version: 10.0.1(eslint@9.34.0)
       "@types/node":
         specifier: ^24.3.0
         version: 24.3.0
+      eslint:
+        specifier: ^9.34.0
+        version: 9.34.0
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1
@@ -127,9 +136,15 @@ importers:
         specifier: ^3.22.0
         version: 3.28.0
     devDependencies:
+      "@eslint/js":
+        specifier: 10.0.1
+        version: 10.0.1(eslint@9.34.0)
       "@types/node":
         specifier: ^24.3.0
         version: 24.3.0
+      eslint:
+        specifier: ^9.34.0
+        version: 9.34.0
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1
@@ -146,12 +161,18 @@ importers:
         specifier: ^4.1.0
         version: 4.1.0
     devDependencies:
+      "@eslint/js":
+        specifier: 10.0.1
+        version: 10.0.1(eslint@9.34.0)
       "@types/js-yaml":
         specifier: ^4.0.9
         version: 4.0.9
       "@types/node":
         specifier: ^24.3.0
         version: 24.3.0
+      eslint:
+        specifier: ^9.34.0
+        version: 9.34.0
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1
@@ -171,9 +192,15 @@ importers:
         specifier: ^1.19.1
         version: 1.19.1
     devDependencies:
+      "@eslint/js":
+        specifier: 10.0.1
+        version: 10.0.1(eslint@9.34.0)
       "@types/node":
         specifier: ^24.3.0
         version: 24.3.0
+      eslint:
+        specifier: ^9.34.0
+        version: 9.34.0
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1
@@ -512,6 +539,18 @@ packages:
         integrity: sha512-gtF186CXhIl1p4pJNGZw8Yc6RlshoePRvE0X91oPGb3vZ8pM3qOS9W9NGPat9LziaBV7XrJWGylNQXkGcnM3IQ==,
       }
     engines: { node: ^18.18.0 || ^20.9.0 || >=21.1.0 }
+
+  "@eslint/js@10.0.1":
+    resolution:
+      {
+        integrity: sha512-zeR9k5pd4gxjZ0abRoIaxdc7I3nDktoXZk2qOv9gCNWx3mVwEn32VRhyLaRsDiJjTs0xq/T8mfPtyuXu7GWBcA==,
+      }
+    engines: { node: ^20.19.0 || ^22.13.0 || >=24 }
+    peerDependencies:
+      eslint: ^10.0.0
+    peerDependenciesMeta:
+      eslint:
+        optional: true
 
   "@eslint/js@9.34.0":
     resolution:
@@ -4496,6 +4535,10 @@ snapshots:
       strip-json-comments: 3.1.1
     transitivePeerDependencies:
       - supports-color
+
+  "@eslint/js@10.0.1(eslint@9.34.0)":
+    optionalDependencies:
+      eslint: 9.34.0
 
   "@eslint/js@9.34.0": {}
 
