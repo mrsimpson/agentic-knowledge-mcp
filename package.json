@@ -11,7 +11,7 @@
     "node": ">=18.0.0",
     "pnpm": ">=9.0.0"
   },
-  "packageManager": "pnpm@9.14.2",
+  "packageManager": "pnpm@10.29.3",
   "files": [
     "packages/*/dist/**/*",
     "packages/*/package.json",
@@ -45,9 +45,9 @@
     "clean:build": "turbo run clean:build"
   },
   "dependencies": {
-    "@codemcp/knowledge-core": "1.0.15",
-    "@codemcp/knowledge-content-loader": "1.0.15",
-    "@codemcp/knowledge": "1.0.15",
+    "@codemcp/knowledge-core": "workspace:*",
+    "@codemcp/knowledge-content-loader": "workspace:*",
+    "@codemcp/knowledge": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.19.1",
     "@types/js-yaml": "4.0.9",
     "js-yaml": "4.1.0",
