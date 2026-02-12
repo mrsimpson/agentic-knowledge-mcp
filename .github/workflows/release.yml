@@ -148,11 +148,13 @@ jobs:
           pnpm publish --access public --no-git-checks
           cd ../..
 
-          # Convert workspace dependencies to actual versions for publishing
-          NEW_VERSION=${{ steps.version.outputs.new_version }}
-          find packages -name "package.json" -exec sed -i 's/"workspace:\*"/"^'$NEW_VERSION'"/g' {} \;
+           # Convert workspace dependencies to actual versions for publishing
+           # NOTE: pnpm 10+ now handles this automatically during pack/publish
+           # Keeping this line for reference, but it's no longer needed with pnpm 10.29.3+
+           # NEW_VERSION=${{ steps.version.outputs.new_version }}
+           # find packages -name "package.json" -exec sed -i 's/"workspace:\*"/"^'$NEW_VERSION'"/g' {} \;
 
-          # Publish main package
+           # Publish main package
           pnpm publish --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
