@@ -5,6 +5,8 @@
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import * as crypto from "node:crypto";
+import https from "node:https";
+import http from "node:http";
 import AdmZip from "adm-zip";
 import { ContentLoader, type LoadResult } from "./loader.js";
 import {
@@ -101,9 +103,9 @@ export class ZipLoader extends ContentLoader {
     try {
       if (this.isRemoteUrl(webSource.url)) {
         // For remote URLs, try HEAD request for ETag/Last-Modified
-        const response = await fetch(webSource.url, { method: "HEAD" });
-        const etag = response.headers.get("etag") || "";
-        const lastModified = response.headers.get("last-modified") || "";
+        const headers = await this.getRemoteHeaders(webSource.url);
+        const etag = headers["etag"] || "";
+        const lastModified = headers["last-modified"] || "";
         const identifier = etag || lastModified || webSource.url;
 
         return crypto
@@ -119,6 +121,31 @@ export class ZipLoader extends ContentLoader {
       // Fallback to URL-based hash
       return crypto.createHash("sha256").update(webSource.url).digest("hex");
     }
+  }
+
+  /**
+   * Get headers from remote URL using HEAD request
+   */
+  private getRemoteHeaders(url: string): Promise<Record<string, string>> {
+    return new Promise((resolve, reject) => {
+      const protocol = url.startsWith("https") ? https : http;
+      const request = protocol.request(url, { method: "HEAD" }, (response) => {
+        const headers: Record<string, string> = {};
+        if (response.headers) {
+          for (const [key, value] of Object.entries(response.headers)) {
+            if (typeof value === "string") {
+              headers[key] = value;
+            } else if (Array.isArray(value) && value.length > 0 && value[0]) {
+              headers[key] = value[0];
+            }
+          }
+        }
+        resolve(headers);
+      });
+
+      request.on("error", reject);
+      request.end();
+    });
   }
 
   /**
@@ -155,22 +182,46 @@ export class ZipLoader extends ContentLoader {
   private async downloadZip(url: string, tempDir: string): Promise<string> {
     const zipPath = path.join(tempDir, "download.zip");
 
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
+    return new Promise((resolve, reject) => {
+      const protocol = url.startsWith("https") ? https : http;
+      const request = protocol.get(url, async (response) => {
+        if (response.statusCode === undefined || response.statusCode >= 400) {
+          reject(
+            new Error(`HTTP ${response.statusCode}: ${response.statusMessage}`),
+          );
+          return;
+        }
 
-      const buffer = Buffer.from(await response.arrayBuffer());
-      await fs.writeFile(zipPath, buffer);
-      return zipPath;
-    } catch (error) {
-      throw new WebSourceError(
-        WebSourceErrorType.ZIP_ERROR,
-        `Failed to download zip from ${url}: ${error instanceof Error ? error.message : String(error)}`,
-        { url },
-      );
-    }
+        try {
+          const chunks: Buffer[] = [];
+          response.on("data", (chunk: Buffer) => {
+            chunks.push(chunk);
+          });
+
+          response.on("end", async () => {
+            try {
+              const buffer = Buffer.concat(chunks);
+              await fs.writeFile(zipPath, buffer);
+              resolve(zipPath);
+            } catch (error) {
+              reject(error);
+            }
+          });
+        } catch (error) {
+          reject(error);
+        }
+      });
+
+      request.on("error", (error) => {
+        reject(
+          new WebSourceError(
+            WebSourceErrorType.ZIP_ERROR,
+            `Failed to download zip from ${url}: ${error instanceof Error ? error.message : String(error)}`,
+            { url },
+          ),
+        );
+      });
+    });
   }
 
   /**
