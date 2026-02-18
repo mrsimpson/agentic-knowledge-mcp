@@ -14,10 +14,7 @@ import {
   WebSourceErrorType,
 } from "../types.js";
 import * as crypto from "node:crypto";
-import {
-  isDocumentationFile,
-  filterDocumentationFiles,
-} from "./file-filter.js";
+import { filterDocumentationFiles } from "./file-filter.js";
 
 /**
  * Content loader for Git repositories (GitHub, GitLab, any Git repo)
