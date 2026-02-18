@@ -2,74 +2,57 @@
  * Smart Filtering Tests - Test the key filtering behaviors for REQ-18
  */
 
-import { describe, test, expect, beforeEach } from "vitest";
-import { GitRepoLoader } from "../content/git-repo-loader.js";
+import { describe, test, expect } from "vitest";
+import {
+  isDocumentationFile,
+  filterDocumentationFiles,
+} from "../content/file-filter.js";
 
 describe("Smart Content Filtering - REQ-18", () => {
-  let loader: GitRepoLoader;
-
-  beforeEach(() => {
-    loader = new GitRepoLoader();
-  });
-
   test("should include markdown files anywhere in repository", () => {
-    expect((loader as any).isDocumentationFile("README.md")).toBe(true);
-    expect((loader as any).isDocumentationFile("docs/guide.md")).toBe(true);
-    expect((loader as any).isDocumentationFile("deep/nested/api.mdx")).toBe(
-      true,
-    );
-    expect((loader as any).isDocumentationFile("tutorial.rst")).toBe(true);
-    expect((loader as any).isDocumentationFile("notes.txt")).toBe(true);
+    expect(isDocumentationFile("README.md")).toBe(true);
+    expect(isDocumentationFile("docs/guide.md")).toBe(true);
+    expect(isDocumentationFile("deep/nested/api.mdx")).toBe(true);
+    expect(isDocumentationFile("tutorial.rst")).toBe(true);
+    expect(isDocumentationFile("notes.txt")).toBe(true);
   });
 
   test("should exclude .github directory files even if they are markdown", () => {
-    expect(
-      (loader as any).isDocumentationFile(".github/issue_template.md"),
-    ).toBe(false);
-    expect(
-      (loader as any).isDocumentationFile(".github/pull_request_template.md"),
-    ).toBe(false);
-    expect(
-      (loader as any).isDocumentationFile(".github/workflows/ci.yml"),
-    ).toBe(false);
+    expect(isDocumentationFile(".github/issue_template.md")).toBe(false);
+    expect(isDocumentationFile(".github/pull_request_template.md")).toBe(false);
+    expect(isDocumentationFile(".github/workflows/ci.yml")).toBe(false);
   });
 
   test("should exclude project metadata files", () => {
-    expect((loader as any).isDocumentationFile("CHANGELOG.md")).toBe(false);
-    expect((loader as any).isDocumentationFile("LICENSE.md")).toBe(false);
-    expect((loader as any).isDocumentationFile("CONTRIBUTING.md")).toBe(false);
-    expect((loader as any).isDocumentationFile("CODE_OF_CONDUCT.md")).toBe(
-      false,
-    );
+    expect(isDocumentationFile("CHANGELOG.md")).toBe(false);
+    expect(isDocumentationFile("LICENSE.md")).toBe(false);
+    expect(isDocumentationFile("CONTRIBUTING.md")).toBe(false);
+    expect(isDocumentationFile("CODE_OF_CONDUCT.md")).toBe(false);
   });
 
   test("should exclude config and source files", () => {
     // Config files should be excluded
-    expect((loader as any).isDocumentationFile("package.json")).toBe(false);
-    expect((loader as any).isDocumentationFile(".postcssrc.json")).toBe(false);
-    expect((loader as any).isDocumentationFile("config.ts")).toBe(false);
-    expect((loader as any).isDocumentationFile("styles.css")).toBe(false);
+    expect(isDocumentationFile("package.json")).toBe(false);
+    expect(isDocumentationFile(".postcssrc.json")).toBe(false);
+    expect(isDocumentationFile("config.ts")).toBe(false);
+    expect(isDocumentationFile("styles.css")).toBe(false);
 
     // Source files should be excluded
-    expect((loader as any).isDocumentationFile("index.ts")).toBe(false);
-    expect((loader as any).isDocumentationFile("src/index.ts")).toBe(false);
-    expect((loader as any).isDocumentationFile("src/utils.ts")).toBe(false);
-    expect((loader as any).isDocumentationFile("src/helpers.ts")).toBe(false);
+    expect(isDocumentationFile("index.ts")).toBe(false);
+    expect(isDocumentationFile("src/index.ts")).toBe(false);
+    expect(isDocumentationFile("src/utils.ts")).toBe(false);
+    expect(isDocumentationFile("src/helpers.ts")).toBe(false);
   });
 
   test("should include files in examples directory", () => {
-    expect((loader as any).isDocumentationFile("examples/config.json")).toBe(
-      true,
-    );
-    expect((loader as any).isDocumentationFile("examples/demo.js")).toBe(true);
-    expect((loader as any).isDocumentationFile("examples/style.css")).toBe(
-      true,
-    );
+    expect(isDocumentationFile("examples/config.json")).toBe(true);
+    expect(isDocumentationFile("examples/demo.js")).toBe(true);
+    expect(isDocumentationFile("examples/style.css")).toBe(true);
   });
 
   test("should exclude binary files even in examples", () => {
-    expect((loader as any).isDocumentationFile("examples/app.exe")).toBe(false);
-    expect((loader as any).isDocumentationFile("examples/lib.so")).toBe(false);
+    expect(isDocumentationFile("examples/app.exe")).toBe(false);
+    expect(isDocumentationFile("examples/lib.so")).toBe(false);
   });
 
   test("should filter mixed file list correctly", () => {
@@ -82,7 +65,7 @@ describe("Smart Content Filtering - REQ-18", () => {
       "examples/demo.js", // Include
     ];
 
-    const filtered = (loader as any).filterDocumentationFiles(mixedFiles);
+    const filtered = filterDocumentationFiles(mixedFiles);
 
     expect(filtered).toEqual(["README.md", "docs/api.md", "examples/demo.js"]);
   });
@@ -127,7 +110,7 @@ describe("Smart Content Filtering - REQ-18", () => {
       ".github/workflows/ci.yml",
     ];
 
-    const filtered = (loader as any).filterDocumentationFiles(repositoryFiles);
+    const filtered = filterDocumentationFiles(repositoryFiles);
 
     // Expected: Documentation files + all files from examples/samples
     const expectedIncludes = [

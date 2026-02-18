@@ -132,6 +132,9 @@ importers:
 
   packages/content-loader:
     dependencies:
+      adm-zip:
+        specifier: 0.5.16
+        version: 0.5.16
       simple-git:
         specifier: ^3.22.0
         version: 3.28.0
@@ -139,6 +142,9 @@ importers:
       "@eslint/js":
         specifier: ^9.34.0
         version: 9.39.2
+      "@types/adm-zip":
+        specifier: 0.5.7
+        version: 0.5.7
       "@types/node":
         specifier: ^24.3.0
         version: 24.3.0
@@ -746,7 +752,6 @@ packages:
       }
     cpu: [arm64]
     os: [linux]
-    libc: [glibc]
 
   "@oxlint/linux-arm64-musl@1.14.0":
     resolution:
@@ -755,7 +760,6 @@ packages:
       }
     cpu: [arm64]
     os: [linux]
-    libc: [musl]
 
   "@oxlint/linux-x64-gnu@1.14.0":
     resolution:
@@ -764,7 +768,6 @@ packages:
       }
     cpu: [x64]
     os: [linux]
-    libc: [glibc]
 
   "@oxlint/linux-x64-musl@1.14.0":
     resolution:
@@ -773,7 +776,6 @@ packages:
       }
     cpu: [x64]
     os: [linux]
-    libc: [musl]
 
   "@oxlint/win32-arm64@1.14.0":
     resolution:
@@ -1351,7 +1353,6 @@ packages:
       }
     cpu: [arm]
     os: [linux]
-    libc: [glibc]
 
   "@rollup/rollup-linux-arm-musleabihf@4.50.0":
     resolution:
@@ -1360,7 +1361,6 @@ packages:
       }
     cpu: [arm]
     os: [linux]
-    libc: [musl]
 
   "@rollup/rollup-linux-arm64-gnu@4.50.0":
     resolution:
@@ -1369,7 +1369,6 @@ packages:
       }
     cpu: [arm64]
     os: [linux]
-    libc: [glibc]
 
   "@rollup/rollup-linux-arm64-musl@4.50.0":
     resolution:
@@ -1378,7 +1377,6 @@ packages:
       }
     cpu: [arm64]
     os: [linux]
-    libc: [musl]
 
   "@rollup/rollup-linux-loongarch64-gnu@4.50.0":
     resolution:
@@ -1387,7 +1385,6 @@ packages:
       }
     cpu: [loong64]
     os: [linux]
-    libc: [glibc]
 
   "@rollup/rollup-linux-ppc64-gnu@4.50.0":
     resolution:
@@ -1396,7 +1393,6 @@ packages:
       }
     cpu: [ppc64]
     os: [linux]
-    libc: [glibc]
 
   "@rollup/rollup-linux-riscv64-gnu@4.50.0":
     resolution:
@@ -1405,7 +1401,6 @@ packages:
       }
     cpu: [riscv64]
     os: [linux]
-    libc: [glibc]
 
   "@rollup/rollup-linux-riscv64-musl@4.50.0":
     resolution:
@@ -1414,7 +1409,6 @@ packages:
       }
     cpu: [riscv64]
     os: [linux]
-    libc: [musl]
 
   "@rollup/rollup-linux-s390x-gnu@4.50.0":
     resolution:
@@ -1423,7 +1417,6 @@ packages:
       }
     cpu: [s390x]
     os: [linux]
-    libc: [glibc]
 
   "@rollup/rollup-linux-x64-gnu@4.50.0":
     resolution:
@@ -1432,7 +1425,6 @@ packages:
       }
     cpu: [x64]
     os: [linux]
-    libc: [glibc]
 
   "@rollup/rollup-linux-x64-musl@4.50.0":
     resolution:
@@ -1441,7 +1433,6 @@ packages:
       }
     cpu: [x64]
     os: [linux]
-    libc: [musl]
 
   "@rollup/rollup-openharmony-arm64@4.50.0":
     resolution:
@@ -1510,7 +1501,6 @@ packages:
     engines: { node: ">=10" }
     cpu: [arm64]
     os: [linux]
-    libc: [glibc]
 
   "@swc/core-linux-arm64-musl@1.13.5":
     resolution:
@@ -1520,7 +1510,6 @@ packages:
     engines: { node: ">=10" }
     cpu: [arm64]
     os: [linux]
-    libc: [musl]
 
   "@swc/core-linux-x64-gnu@1.13.5":
     resolution:
@@ -1530,7 +1519,6 @@ packages:
     engines: { node: ">=10" }
     cpu: [x64]
     os: [linux]
-    libc: [glibc]
 
   "@swc/core-linux-x64-musl@1.13.5":
     resolution:
@@ -1540,7 +1528,6 @@ packages:
     engines: { node: ">=10" }
     cpu: [x64]
     os: [linux]
-    libc: [musl]
 
   "@swc/core-win32-arm64-msvc@1.13.5":
     resolution:
@@ -1627,6 +1614,12 @@ packages:
     resolution:
       {
         integrity: sha512-ec4tjL2Rr0pkZ5hww65c+EEPYwxOi4Ryv+0MtjeaSQRJyq322Q27eOQiFbuNgw2hpL4hB1/W/HBGk3VKS43osg==,
+      }
+
+  "@types/adm-zip@0.5.7":
+    resolution:
+      {
+        integrity: sha512-DNEs/QvmyRLurdQPChqq0Md4zGvPwHerAJYWk9l2jCbD1VPpnzRJorOdiq4zsw09NFbYnhfsoEhWtxIzXpn2yw==,
       }
 
   "@types/chai@5.2.2":
@@ -1845,6 +1838,13 @@ packages:
       }
     engines: { node: ">=0.4.0" }
     hasBin: true
+
+  adm-zip@0.5.16:
+    resolution:
+      {
+        integrity: sha512-TGw5yVi4saajsSEgz25grObGHEUaDrniwvA2qwSC060KfqGPdglhvPMA2lPIoxs3PQIItj2iag35fONcQqgUaQ==,
+      }
+    engines: { node: ">=12.0" }
 
   ajv@6.12.6:
     resolution:
@@ -5144,6 +5144,10 @@ snapshots:
 
   "@tsconfig/strictest@2.0.5": {}
 
+  "@types/adm-zip@0.5.7":
+    dependencies:
+      "@types/node": 24.3.0
+
   "@types/chai@5.2.2":
     dependencies:
       "@types/deep-eql": 4.0.2
@@ -5326,6 +5330,8 @@ snapshots:
       acorn: 8.15.0
 
   acorn@8.15.0: {}
+
+  adm-zip@0.5.16: {}
 
   ajv@6.12.6:
     dependencies:

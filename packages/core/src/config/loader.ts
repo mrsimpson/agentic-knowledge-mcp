@@ -285,6 +285,37 @@ function validateSource(source: unknown): source is SourceConfig {
     return true;
   }
 
+  if (type === "zip") {
+    const hasPath =
+      obj["path"] !== undefined &&
+      typeof obj["path"] === "string" &&
+      obj["path"].trim() !== "";
+    const hasUrl =
+      obj["url"] !== undefined &&
+      typeof obj["url"] === "string" &&
+      obj["url"].trim() !== "";
+
+    // Must have exactly one of path or url
+    if (hasPath === hasUrl) {
+      return false;
+    }
+
+    // Optional paths field
+    if (obj["paths"] !== undefined) {
+      if (!Array.isArray(obj["paths"])) {
+        return false;
+      }
+
+      for (const path of obj["paths"]) {
+        if (typeof path !== "string" || path.trim() === "") {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
   // Unknown source type
   return false;
 }

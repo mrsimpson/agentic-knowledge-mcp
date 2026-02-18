@@ -430,5 +430,106 @@ template: "Global: {{keywords}} in {{local_path}}"`;
 
       expect(validateConfig(config)).toBe(false);
     });
+
+    test("should accept zip source with url", () => {
+      const config = {
+        version: "1.0",
+        docsets: [
+          {
+            id: "zip-docs",
+            name: "Zip Docs",
+            sources: [
+              {
+                type: "zip",
+                url: "https://example.com/docs.zip",
+              },
+            ],
+          },
+        ],
+      };
+
+      expect(validateConfig(config)).toBe(true);
+    });
+
+    test("should accept zip source with path", () => {
+      const config = {
+        version: "1.0",
+        docsets: [
+          {
+            id: "zip-docs",
+            name: "Zip Docs",
+            sources: [
+              {
+                type: "zip",
+                path: "./archives/docs.zip",
+              },
+            ],
+          },
+        ],
+      };
+
+      expect(validateConfig(config)).toBe(true);
+    });
+
+    test("should reject zip source with both url and path", () => {
+      const config = {
+        version: "1.0",
+        docsets: [
+          {
+            id: "zip-docs",
+            name: "Zip Docs",
+            sources: [
+              {
+                type: "zip",
+                url: "https://example.com/docs.zip",
+                path: "./docs.zip",
+              },
+            ],
+          },
+        ],
+      };
+
+      expect(validateConfig(config)).toBe(false);
+    });
+
+    test("should reject zip source with neither url nor path", () => {
+      const config = {
+        version: "1.0",
+        docsets: [
+          {
+            id: "zip-docs",
+            name: "Zip Docs",
+            sources: [
+              {
+                type: "zip",
+              },
+            ],
+          },
+        ],
+      };
+
+      expect(validateConfig(config)).toBe(false);
+    });
+
+    test("should accept zip source with optional paths filter", () => {
+      const config = {
+        version: "1.0",
+        docsets: [
+          {
+            id: "zip-docs",
+            name: "Zip Docs",
+            sources: [
+              {
+                type: "zip",
+                url: "https://example.com/docs.zip",
+                paths: ["docs/", "README.md"],
+              },
+            ],
+          },
+        ],
+      };
+
+      expect(validateConfig(config)).toBe(true);
+    });
   });
 });
