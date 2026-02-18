@@ -70,6 +70,11 @@ export function calculateLocalPath(
       return join(configDir, "docsets", docset.id);
     }
 
+    if (primarySource.type === "zip") {
+      // For zip sources, use standardized path: .knowledge/docsets/{id}
+      return join(configDir, "docsets", docset.id);
+    }
+
     throw new Error(`Unsupported source type: ${(primarySource as any).type}`);
   } catch (error) {
     throw new KnowledgeError(
@@ -128,6 +133,11 @@ export async function calculateLocalPathWithSymlinks(
 
   if (primarySource.type === "git_repo") {
     // For git repos, use standardized path: .knowledge/docsets/{id}
+    return join(configDir, "docsets", docset.id);
+  }
+
+  if (primarySource.type === "zip") {
+    // For zip sources, use standardized path: .knowledge/docsets/{id}
     return join(configDir, "docsets", docset.id);
   }
 

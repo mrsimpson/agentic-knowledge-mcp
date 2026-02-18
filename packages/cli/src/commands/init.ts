@@ -16,6 +16,7 @@ import {
 } from "@codemcp/knowledge-core";
 import {
   GitRepoLoader,
+  ZipLoader,
   WebSourceType,
 } from "@codemcp/knowledge-content-loader";
 
@@ -260,6 +261,61 @@ export const initCommand = new Command("init")
               files_count: fileCount,
               files: files,
               docset_id: docsetId,
+            };
+
+            await fs.writeFile(
+              path.join(localPath, `.agentic-source-${index}.json`),
+              JSON.stringify(metadata, null, 2),
+            );
+          } else if (source.type === "zip") {
+            // Handle zip file initialization
+            const loader = new ZipLoader();
+            const sourceUrl = source.url || source.path || "";
+
+            console.log(chalk.gray(`  Using ZipLoader for zip extraction`));
+
+            const webSourceConfig = {
+              url: sourceUrl,
+              type: WebSourceType.ZIP,
+              options: {
+                paths: source.paths || [],
+              },
+            };
+
+            // Validate configuration
+            const validation = loader.validateConfig(webSourceConfig);
+            if (validation !== true) {
+              throw new Error(
+                `Invalid zip source configuration: ${validation}`,
+              );
+            }
+
+            // Load content using ZipLoader
+            const result = await loader.load(webSourceConfig, localPath);
+
+            if (!result.success) {
+              throw new Error(`Zip loading failed: ${result.error}`);
+            }
+
+            // Collect discovered paths for config update
+            allDiscoveredPaths.push(...result.files);
+
+            totalFiles += result.files.length;
+            console.log(
+              chalk.green(
+                `    ✅ Extracted ${result.files.length} files from zip`,
+              ),
+            );
+
+            // Create source metadata
+            const metadata = {
+              source_url: sourceUrl,
+              source_type: source.type,
+              downloaded_at: new Date().toISOString(),
+              files_count: result.files.length,
+              files: result.files,
+              docset_id: docsetId,
+              content_hash: result.contentHash,
             };
 
             await fs.writeFile(

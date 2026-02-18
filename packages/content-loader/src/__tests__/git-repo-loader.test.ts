@@ -11,6 +11,10 @@ import { join } from "path";
 import { tmpdir } from "os";
 import { GitRepoLoader } from "../content/git-repo-loader.js";
 import { WebSourceType } from "../types.js";
+import {
+  isDocumentationFile,
+  filterDocumentationFiles,
+} from "../content/file-filter.js";
 
 describe("Git Repository Loading - User Workflows", () => {
   let tempDir: string;
@@ -191,7 +195,7 @@ describe("Git Repository Loading - User Workflows", () => {
       ];
 
       // Test the filtering method directly
-      const filtered = (loader as any).filterDocumentationFiles(mockFiles);
+      const filtered = filterDocumentationFiles(mockFiles);
 
       expect(filtered).toEqual([
         "README.md",
@@ -274,7 +278,7 @@ describe("Git Repository Loading - User Workflows", () => {
 
       // Test each case
       for (const testCase of testCases) {
-        const result = (loader as any).isDocumentationFile(testCase.file);
+        const result = isDocumentationFile(testCase.file);
         expect(result).toBe(testCase.expected);
       }
     });
@@ -301,7 +305,7 @@ describe("Git Repository Loading - User Workflows", () => {
         "examples/demo.js", // Should be included
       ];
 
-      const filtered = (loader as any).filterDocumentationFiles(testFiles);
+      const filtered = filterDocumentationFiles(testFiles);
 
       // Verify smart filtering is working correctly
       expect(filtered).toContain("README.md");
@@ -346,7 +350,7 @@ describe("Git Repository Loading - User Workflows", () => {
       ];
 
       // Test direct filtering method
-      const filtered = (loader as any).filterDocumentationFiles(mockFiles);
+      const filtered = filterDocumentationFiles(mockFiles);
 
       expect(filtered).toEqual([
         "README.md",
@@ -423,8 +427,9 @@ describe("Git Repository Loading - User Workflows", () => {
       // but we can test it indirectly through the architecture
       expect(typeof (loader as any).scanAllFiles).toBe("function");
       expect(typeof (loader as any).extractDocumentationFiles).toBe("function");
-      expect(typeof (loader as any).filterDocumentationFiles).toBe("function");
-      expect(typeof (loader as any).isDocumentationFile).toBe("function");
+      // filterDocumentationFiles and isDocumentationFile are shared utilities in file-filter.ts
+      expect(typeof filterDocumentationFiles).toBe("function");
+      expect(typeof isDocumentationFile).toBe("function");
 
       // These methods form the centralized architecture for content filtering
     });

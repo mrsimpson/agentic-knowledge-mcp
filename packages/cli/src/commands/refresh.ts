@@ -14,6 +14,7 @@ import {
   calculateLocalPath,
   ensureKnowledgeGitignoreSync,
 } from "@codemcp/knowledge-core";
+import { ZipLoader, WebSourceType } from "@codemcp/knowledge-content-loader";
 
 interface DocsetMetadata {
   docset_id: string;
@@ -160,6 +161,16 @@ async function refreshDocset(
 
       if (source.type === "git_repo") {
         const sourceFiles = await refreshGitSource(
+          source,
+          localPath,
+          index,
+          docset.id,
+          force,
+        );
+        totalFiles += sourceFiles.files_count;
+        refreshedSources.push(sourceFiles);
+      } else if (source.type === "zip") {
+        const sourceFiles = await refreshZipSource(
           source,
           localPath,
           index,
@@ -359,6 +370,99 @@ async function refreshGitSource(
     // Cleanup temp directory
     await fs.rm(tempDir, { recursive: true, force: true });
   }
+}
+
+async function refreshZipSource(
+  source: any,
+  localPath: string,
+  index: number,
+  docsetId: string,
+  force: boolean,
+): Promise<SourceMetadata> {
+  const sourceMetadataPath = path.join(
+    localPath,
+    `.agentic-source-${index}.json`,
+  );
+  let existingSourceMetadata: SourceMetadata | null = null;
+
+  try {
+    const content = await fs.readFile(sourceMetadataPath, "utf8");
+    existingSourceMetadata = JSON.parse(content);
+  } catch {
+    // No existing metadata, will do full refresh
+  }
+
+  const sourceUrl = source.url || source.path || "";
+  const loader = new ZipLoader();
+  const webSourceConfig = {
+    url: sourceUrl,
+    type: WebSourceType.ZIP,
+    options: {
+      paths: source.paths || [],
+    },
+  };
+
+  // Check if content has changed
+  if (!force && existingSourceMetadata) {
+    try {
+      const currentId = await loader.getContentId(webSourceConfig);
+      const lastHash = (existingSourceMetadata as any).content_hash;
+      if (lastHash === currentId) {
+        const updatedMetadata: SourceMetadata = {
+          ...existingSourceMetadata,
+          downloaded_at: new Date().toISOString(),
+        };
+        await fs.writeFile(
+          sourceMetadataPath,
+          JSON.stringify(updatedMetadata, null, 2),
+        );
+        return updatedMetadata;
+      }
+    } catch {
+      // Could not check, proceed with full refresh
+    }
+  }
+
+  // Remove old files from this source (if we have metadata)
+  if (existingSourceMetadata) {
+    for (const file of existingSourceMetadata.files) {
+      const filePath = path.join(localPath, file);
+      try {
+        await fs.unlink(filePath);
+      } catch {
+        // File might already be deleted, ignore
+      }
+    }
+  }
+
+  // Load content
+  const result = await loader.load(webSourceConfig, localPath);
+
+  if (!result.success) {
+    throw new Error(`Zip refresh failed: ${result.error}`);
+  }
+
+  const metadata: SourceMetadata = {
+    source_url: sourceUrl,
+    source_type: "zip",
+    downloaded_at: new Date().toISOString(),
+    files_count: result.files.length,
+    files: result.files,
+    docset_id: docsetId,
+  };
+
+  // Store content hash for future change detection
+  const metadataWithHash = {
+    ...metadata,
+    content_hash: result.contentHash,
+  };
+
+  await fs.writeFile(
+    sourceMetadataPath,
+    JSON.stringify(metadataWithHash, null, 2),
+  );
+
+  return metadata;
 }
 
 // Reuse utility functions from init.ts

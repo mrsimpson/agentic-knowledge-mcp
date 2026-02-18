@@ -35,9 +35,25 @@ export interface GitRepoSourceConfig extends BaseSourceConfig {
 }
 
 /**
+ * Zip file source configuration
+ */
+export interface ZipSourceConfig extends BaseSourceConfig {
+  type: "zip";
+  /** Local path to zip file (mutually exclusive with url) */
+  path?: string;
+  /** Remote URL to download zip from (mutually exclusive with path) */
+  url?: string;
+  /** Specific paths to extract (optional) */
+  paths?: string[];
+}
+
+/**
  * Union type for all source configurations
  */
-export type SourceConfig = LocalFolderSourceConfig | GitRepoSourceConfig;
+export type SourceConfig =
+  | LocalFolderSourceConfig
+  | GitRepoSourceConfig
+  | ZipSourceConfig;
 
 /**
  * Configuration for a single docset
