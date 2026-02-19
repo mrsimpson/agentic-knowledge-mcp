@@ -22,3 +22,12 @@ docsets:
           - README.md
           - docs/en
           - template/
+  - id: pipeship-full
+    name: pipeship-full-docs
+    description: >-
+      Zip archive:
+      https://bahnhub.tech.rz.db.de/artifactory/pipeship-generic-stage-dev-local/docs-as-code/latest/pipeship-docs.tar.gz
+    sources:
+      - type: zip
+        url: >-
+          https://bahnhub.tech.rz.db.de/artifactory/pipeship-generic-stage-dev-local/docs-as-code/latest/pipeship-docs.tar.gz

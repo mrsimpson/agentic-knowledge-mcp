@@ -6,6 +6,7 @@ import { Command } from "commander";
 import chalk from "chalk";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
+import { URL } from "node:url";
 import { ConfigManager } from "@codemcp/knowledge-core";
 import type { DocsetConfig } from "@codemcp/knowledge-core";
 
