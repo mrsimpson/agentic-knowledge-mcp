@@ -11,14 +11,20 @@ import type { DocsetConfig } from "@codemcp/knowledge-core";
 
 export const createCommand = new Command("create")
   .description("Create a new docset using presets")
-  .requiredOption("--preset <type>", "Preset type: git-repo or local-folder")
+  .requiredOption(
+    "--preset <type>",
+    "Preset type: git-repo, local-folder, or archive",
+  )
   .requiredOption("--id <id>", "Unique docset ID")
   .requiredOption("--name <name>", "Human-readable docset name")
   .option("--description <desc>", "Docset description")
-  .option("--url <url>", "Git repository URL (required for git-repo preset)")
+  .option(
+    "--url <url>",
+    "Git repository URL (git-repo) or archive file URL (archive preset)",
+  )
   .option(
     "--path <path>",
-    "Local folder path (required for local-folder preset)",
+    "Local folder path (local-folder) or local archive file path (archive preset)",
   )
   .option("--branch <branch>", "Git branch (default: main)", "main")
   .action(async (options) => {
@@ -59,9 +65,11 @@ export const createCommand = new Command("create")
         newDocset = await createGitRepoDocset(options);
       } else if (options.preset === "local-folder") {
         newDocset = await createLocalFolderDocset(options);
+      } else if (options.preset === "archive") {
+        newDocset = await createArchiveDocset(options);
       } else {
         throw new Error(
-          `Unknown preset: ${options.preset}. Use 'git-repo' or 'local-folder'`,
+          `Unknown preset: ${options.preset}. Use 'git-repo', 'local-folder', or 'archive'`,
         );
       }
 
@@ -138,5 +146,65 @@ async function createLocalFolderDocset(options: any): Promise<DocsetConfig> {
         paths: [options.path],
       },
     ],
+  };
+}
+
+async function createArchiveDocset(options: any): Promise<DocsetConfig> {
+  if (!options.path && !options.url) {
+    throw new Error("Either --path or --url is required for archive preset");
+  }
+
+  // If path is provided, validate it exists
+  if (options.path) {
+    const fullPath = path.resolve(options.path);
+    try {
+      const stat = await fs.stat(fullPath);
+      if (!stat.isFile()) {
+        throw new Error(`Path is not a file: ${options.path}`);
+      }
+      const lowerPath = options.path.toLowerCase();
+      if (
+        !lowerPath.endsWith(".zip") &&
+        !lowerPath.endsWith(".tar.gz") &&
+        !lowerPath.endsWith(".tgz")
+      ) {
+        throw new Error(
+          `File is not a supported archive format (zip, tar.gz): ${options.path}`,
+        );
+      }
+    } catch {
+      throw new Error(`Path does not exist or is invalid: ${options.path}`);
+    }
+  }
+
+  // If URL is provided, validate it's a valid URL
+  if (options.url) {
+    try {
+      new URL(options.url);
+    } catch {
+      throw new Error(`Invalid URL format: ${options.url}`);
+    }
+  }
+
+  const source: any = {
+    type: "archive",
+  };
+
+  if (options.path) {
+    source.path = options.path;
+  }
+  if (options.url) {
+    source.url = options.url;
+  }
+  if (options.paths) {
+    source.paths = options.paths.split(",");
+  }
+
+  return {
+    id: options.id,
+    name: options.name,
+    description:
+      options.description || `Archive: ${options.path || options.url}`,
+    sources: [source],
   };
 }

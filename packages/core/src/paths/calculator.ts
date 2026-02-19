@@ -70,8 +70,8 @@ export function calculateLocalPath(
       return join(configDir, "docsets", docset.id);
     }
 
-    if (primarySource.type === "zip") {
-      // For zip sources, use standardized path: .knowledge/docsets/{id}
+    if (primarySource.type === "archive") {
+      // For archive sources, use standardized path: .knowledge/docsets/{id}
       return join(configDir, "docsets", docset.id);
     }
 
@@ -136,8 +136,8 @@ export async function calculateLocalPathWithSymlinks(
     return join(configDir, "docsets", docset.id);
   }
 
-  if (primarySource.type === "zip") {
-    // For zip sources, use standardized path: .knowledge/docsets/{id}
+  if (primarySource.type === "archive") {
+    // For archive sources, use standardized path: .knowledge/docsets/{id}
     return join(configDir, "docsets", docset.id);
   }
 

@@ -14,7 +14,10 @@ import {
   calculateLocalPath,
   ensureKnowledgeGitignoreSync,
 } from "@codemcp/knowledge-core";
-import { ZipLoader, WebSourceType } from "@codemcp/knowledge-content-loader";
+import {
+  ArchiveLoader,
+  WebSourceType,
+} from "@codemcp/knowledge-content-loader";
 
 interface DocsetMetadata {
   docset_id: string;
@@ -169,8 +172,8 @@ async function refreshDocset(
         );
         totalFiles += sourceFiles.files_count;
         refreshedSources.push(sourceFiles);
-      } else if (source.type === "zip") {
-        const sourceFiles = await refreshZipSource(
+      } else if (source.type === "archive") {
+        const sourceFiles = await refreshArchiveSource(
           source,
           localPath,
           index,
@@ -372,7 +375,7 @@ async function refreshGitSource(
   }
 }
 
-async function refreshZipSource(
+async function refreshArchiveSource(
   source: any,
   localPath: string,
   index: number,
@@ -393,10 +396,10 @@ async function refreshZipSource(
   }
 
   const sourceUrl = source.url || source.path || "";
-  const loader = new ZipLoader();
+  const loader = new ArchiveLoader();
   const webSourceConfig = {
     url: sourceUrl,
-    type: WebSourceType.ZIP,
+    type: WebSourceType.ARCHIVE,
     options: {
       paths: source.paths || [],
     },
@@ -439,12 +442,12 @@ async function refreshZipSource(
   const result = await loader.load(webSourceConfig, localPath);
 
   if (!result.success) {
-    throw new Error(`Zip refresh failed: ${result.error}`);
+    throw new Error(`Archive refresh failed: ${result.error}`);
   }
 
   const metadata: SourceMetadata = {
     source_url: sourceUrl,
-    source_type: "zip",
+    source_type: "archive",
     downloaded_at: new Date().toISOString(),
     files_count: result.files.length,
     files: result.files,
