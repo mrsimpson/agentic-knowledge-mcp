@@ -285,7 +285,7 @@ function validateSource(source: unknown): source is SourceConfig {
     return true;
   }
 
-  if (type === "zip") {
+  if (type === "archive") {
     const hasPath =
       obj["path"] !== undefined &&
       typeof obj["path"] === "string" &&

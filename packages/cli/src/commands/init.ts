@@ -16,7 +16,7 @@ import {
 } from "@codemcp/knowledge-core";
 import {
   GitRepoLoader,
-  ZipLoader,
+  ArchiveLoader,
   WebSourceType,
 } from "@codemcp/knowledge-content-loader";
 
@@ -267,16 +267,18 @@ export const initCommand = new Command("init")
               path.join(localPath, `.agentic-source-${index}.json`),
               JSON.stringify(metadata, null, 2),
             );
-          } else if (source.type === "zip") {
-            // Handle zip file initialization
-            const loader = new ZipLoader();
+          } else if (source.type === "archive") {
+            // Handle archive file initialization (zip, tar.gz, etc.)
+            const loader = new ArchiveLoader();
             const sourceUrl = source.url || source.path || "";
 
-            console.log(chalk.gray(`  Using ZipLoader for zip extraction`));
+            console.log(
+              chalk.gray(`  Using ArchiveLoader for archive extraction`),
+            );
 
             const webSourceConfig = {
               url: sourceUrl,
-              type: WebSourceType.ZIP,
+              type: WebSourceType.ARCHIVE,
               options: {
                 paths: source.paths || [],
               },
@@ -286,15 +288,15 @@ export const initCommand = new Command("init")
             const validation = loader.validateConfig(webSourceConfig);
             if (validation !== true) {
               throw new Error(
-                `Invalid zip source configuration: ${validation}`,
+                `Invalid archive source configuration: ${validation}`,
               );
             }
 
-            // Load content using ZipLoader
+            // Load content using ArchiveLoader
             const result = await loader.load(webSourceConfig, localPath);
 
             if (!result.success) {
-              throw new Error(`Zip loading failed: ${result.error}`);
+              throw new Error(`Archive loading failed: ${result.error}`);
             }
 
             // Collect discovered paths for config update
@@ -303,7 +305,7 @@ export const initCommand = new Command("init")
             totalFiles += result.files.length;
             console.log(
               chalk.green(
-                `    ✅ Extracted ${result.files.length} files from zip`,
+                `    ✅ Extracted ${result.files.length} files from archive`,
               ),
             );
 

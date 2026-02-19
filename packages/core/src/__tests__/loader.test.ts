@@ -431,16 +431,16 @@ template: "Global: {{keywords}} in {{local_path}}"`;
       expect(validateConfig(config)).toBe(false);
     });
 
-    test("should accept zip source with url", () => {
+    test("should accept archive source with url", () => {
       const config = {
         version: "1.0",
         docsets: [
           {
-            id: "zip-docs",
-            name: "Zip Docs",
+            id: "archive-docs",
+            name: "Archive Docs",
             sources: [
               {
-                type: "zip",
+                type: "archive",
                 url: "https://example.com/docs.zip",
               },
             ],
@@ -451,16 +451,16 @@ template: "Global: {{keywords}} in {{local_path}}"`;
       expect(validateConfig(config)).toBe(true);
     });
 
-    test("should accept zip source with path", () => {
+    test("should accept archive source with path", () => {
       const config = {
         version: "1.0",
         docsets: [
           {
-            id: "zip-docs",
-            name: "Zip Docs",
+            id: "archive-docs",
+            name: "Archive Docs",
             sources: [
               {
-                type: "zip",
+                type: "archive",
                 path: "./archives/docs.zip",
               },
             ],
@@ -471,16 +471,16 @@ template: "Global: {{keywords}} in {{local_path}}"`;
       expect(validateConfig(config)).toBe(true);
     });
 
-    test("should reject zip source with both url and path", () => {
+    test("should reject archive source with both url and path", () => {
       const config = {
         version: "1.0",
         docsets: [
           {
-            id: "zip-docs",
-            name: "Zip Docs",
+            id: "archive-docs",
+            name: "Archive Docs",
             sources: [
               {
-                type: "zip",
+                type: "archive",
                 url: "https://example.com/docs.zip",
                 path: "./docs.zip",
               },
@@ -492,16 +492,16 @@ template: "Global: {{keywords}} in {{local_path}}"`;
       expect(validateConfig(config)).toBe(false);
     });
 
-    test("should reject zip source with neither url nor path", () => {
+    test("should reject archive source with neither url nor path", () => {
       const config = {
         version: "1.0",
         docsets: [
           {
-            id: "zip-docs",
-            name: "Zip Docs",
+            id: "archive-docs",
+            name: "Archive Docs",
             sources: [
               {
-                type: "zip",
+                type: "archive",
               },
             ],
           },
@@ -511,16 +511,16 @@ template: "Global: {{keywords}} in {{local_path}}"`;
       expect(validateConfig(config)).toBe(false);
     });
 
-    test("should accept zip source with optional paths filter", () => {
+    test("should accept archive source with optional paths filter", () => {
       const config = {
         version: "1.0",
         docsets: [
           {
-            id: "zip-docs",
-            name: "Zip Docs",
+            id: "archive-docs",
+            name: "Archive Docs",
             sources: [
               {
-                type: "zip",
+                type: "archive",
                 url: "https://example.com/docs.zip",
                 paths: ["docs/", "README.md"],
               },

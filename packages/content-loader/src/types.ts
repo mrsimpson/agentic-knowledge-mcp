@@ -28,7 +28,7 @@ export enum WebSourceType {
 
   API_DOCUMENTATION = "api_documentation",
 
-  ZIP = "zip",
+  ARCHIVE = "archive",
 }
 
 /**
@@ -66,10 +66,10 @@ export interface ApiDocumentationOptions {
 }
 
 /**
- * Configuration for zip file web sources
+ * Configuration for archive file web sources (zip, tar.gz, etc.)
  */
-export interface ZipOptions {
-  /** Specific paths to extract from the zip */
+export interface ArchiveOptions {
+  /** Specific paths to extract from the archive */
   paths?: string[];
 }
 
@@ -77,7 +77,7 @@ export interface ZipOptions {
  * Configuration for a single web source
  */
 export interface WebSourceConfig {
-  /** URL of the web source (or local path for zip sources) */
+  /** URL of the web source (or local path for archive sources) */
   url: string;
   /** Type of web source */
   type: WebSourceType;
@@ -86,7 +86,7 @@ export interface WebSourceConfig {
     | GitRepoOptions
     | DocumentationSiteOptions
     | ApiDocumentationOptions
-    | ZipOptions;
+    | ArchiveOptions;
 }
 
 /**
@@ -136,7 +136,7 @@ export enum WebSourceErrorType {
 
   GIT_REPO_ERROR = "GIT_REPO_ERROR",
 
-  ZIP_ERROR = "ZIP_ERROR",
+  ARCHIVE_ERROR = "ARCHIVE_ERROR",
 
   NOT_IMPLEMENTED = "NOT_IMPLEMENTED",
 }

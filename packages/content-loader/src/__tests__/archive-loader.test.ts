@@ -1,24 +1,24 @@
 /**
- * Tests for Zip file content loader
+ * Tests for Archive file content loader (zip, tar.gz, etc.)
  */
 
 import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import AdmZip from "adm-zip";
-import { ZipLoader } from "../content/zip-loader.js";
+import { ArchiveLoader } from "../content/archive-loader.js";
 import { WebSourceType } from "../types.js";
 
-describe("Zip Loader", () => {
-  let loader: ZipLoader;
+describe("Archive Loader", () => {
+  let loader: ArchiveLoader;
   let tempDir: string;
 
   beforeEach(async () => {
-    loader = new ZipLoader();
+    loader = new ArchiveLoader();
     tempDir = path.join(
       process.cwd(),
       ".tmp",
-      `zip-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      `archive-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     );
     await fs.mkdir(tempDir, { recursive: true });
   });
@@ -44,9 +44,9 @@ describe("Zip Loader", () => {
   }
 
   describe("canHandle", () => {
-    test("should handle ZIP type", () => {
+    test("should handle ARCHIVE type", () => {
       expect(
-        loader.canHandle({ url: "test.zip", type: WebSourceType.ZIP }),
+        loader.canHandle({ url: "test.zip", type: WebSourceType.ARCHIVE }),
       ).toBe(true);
     });
 
@@ -65,7 +65,7 @@ describe("Zip Loader", () => {
       expect(
         loader.validateConfig({
           url: "https://example.com/docs.zip",
-          type: WebSourceType.ZIP,
+          type: WebSourceType.ARCHIVE,
         }),
       ).toBe(true);
     });
@@ -74,7 +74,7 @@ describe("Zip Loader", () => {
       expect(
         loader.validateConfig({
           url: "/path/to/local.zip",
-          type: WebSourceType.ZIP,
+          type: WebSourceType.ARCHIVE,
         }),
       ).toBe(true);
     });
@@ -83,7 +83,7 @@ describe("Zip Loader", () => {
       expect(
         loader.validateConfig({
           url: "",
-          type: WebSourceType.ZIP,
+          type: WebSourceType.ARCHIVE,
         }),
       ).not.toBe(true);
     });
@@ -100,7 +100,7 @@ describe("Zip Loader", () => {
 
       const targetDir = path.join(tempDir, "output");
       const result = await loader.load(
-        { url: zipPath, type: WebSourceType.ZIP },
+        { url: zipPath, type: WebSourceType.ARCHIVE },
         targetDir,
       );
 
@@ -119,7 +119,7 @@ describe("Zip Loader", () => {
 
       const targetDir = path.join(tempDir, "output");
       const result = await loader.load(
-        { url: zipPath, type: WebSourceType.ZIP },
+        { url: zipPath, type: WebSourceType.ARCHIVE },
         targetDir,
       );
 
@@ -138,7 +138,7 @@ describe("Zip Loader", () => {
 
       const targetDir = path.join(tempDir, "output");
       const result = await loader.load(
-        { url: zipPath, type: WebSourceType.ZIP },
+        { url: zipPath, type: WebSourceType.ARCHIVE },
         targetDir,
       );
 
@@ -158,7 +158,7 @@ describe("Zip Loader", () => {
       const result = await loader.load(
         {
           url: zipPath,
-          type: WebSourceType.ZIP,
+          type: WebSourceType.ARCHIVE,
           options: { paths: ["docs/"] },
         },
         targetDir,
@@ -172,7 +172,7 @@ describe("Zip Loader", () => {
     test("should return error for non-existent local file", async () => {
       const targetDir = path.join(tempDir, "output");
       const result = await loader.load(
-        { url: "/nonexistent/file.zip", type: WebSourceType.ZIP },
+        { url: "/nonexistent/file.zip", type: WebSourceType.ARCHIVE },
         targetDir,
       );
 
@@ -187,7 +187,7 @@ describe("Zip Loader", () => {
 
       const targetDir = path.join(tempDir, "output");
       const result = await loader.load(
-        { url: zipPath, type: WebSourceType.ZIP },
+        { url: zipPath, type: WebSourceType.ARCHIVE },
         targetDir,
       );
 
@@ -205,7 +205,7 @@ describe("Zip Loader", () => {
 
       const contentId = await loader.getContentId({
         url: zipPath,
-        type: WebSourceType.ZIP,
+        type: WebSourceType.ARCHIVE,
       });
 
       expect(contentId).toBeTruthy();
@@ -218,11 +218,11 @@ describe("Zip Loader", () => {
 
       const id1 = await loader.getContentId({
         url: zip1,
-        type: WebSourceType.ZIP,
+        type: WebSourceType.ARCHIVE,
       });
       const id2 = await loader.getContentId({
         url: zip2,
-        type: WebSourceType.ZIP,
+        type: WebSourceType.ARCHIVE,
       });
 
       expect(id1).not.toBe(id2);
@@ -231,7 +231,7 @@ describe("Zip Loader", () => {
     test("should fallback gracefully for non-existent file", async () => {
       const contentId = await loader.getContentId({
         url: "/nonexistent.zip",
-        type: WebSourceType.ZIP,
+        type: WebSourceType.ARCHIVE,
       });
 
       // Should fallback to URL-based hash
@@ -250,7 +250,7 @@ describe("Zip Loader", () => {
 
       const targetDir = path.join(tempDir, "output");
       const result = await loader.load(
-        { url: zipPath, type: WebSourceType.ZIP },
+        { url: zipPath, type: WebSourceType.ARCHIVE },
         targetDir,
       );
 
@@ -271,7 +271,7 @@ describe("Zip Loader", () => {
 
       const targetDir = path.join(tempDir, "output");
       const result = await loader.load(
-        { url: zipPath, type: WebSourceType.ZIP },
+        { url: zipPath, type: WebSourceType.ARCHIVE },
         targetDir,
       );
 

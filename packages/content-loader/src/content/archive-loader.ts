@@ -1,5 +1,5 @@
 /**
- * Zip file content loader
+ * Archive file content loader (supports zip, tar.gz, etc.)
  */
 
 import { promises as fs } from "node:fs";
@@ -7,26 +7,28 @@ import * as path from "node:path";
 import * as crypto from "node:crypto";
 import https from "node:https";
 import http from "node:http";
+import { URL } from "node:url";
 import AdmZip from "adm-zip";
+import * as tar from "tar";
 import { ContentLoader, type LoadResult } from "./loader.js";
 import {
   WebSourceType,
   WebSourceConfig,
-  ZipOptions,
+  ArchiveOptions,
   WebSourceError,
   WebSourceErrorType,
 } from "../types.js";
 import { filterDocumentationFiles } from "./file-filter.js";
 
 /**
- * Content loader for zip files (local or remote)
+ * Content loader for archive files - zip, tar.gz, etc. (local or remote)
  */
-export class ZipLoader extends ContentLoader {
+export class ArchiveLoader extends ContentLoader {
   /**
    * Check if this loader can handle the given web source type
    */
   canHandle(webSource: WebSourceConfig): boolean {
-    return webSource.type === WebSourceType.ZIP;
+    return webSource.type === WebSourceType.ARCHIVE;
   }
 
   /**
@@ -34,31 +36,48 @@ export class ZipLoader extends ContentLoader {
    */
   validateConfig(webSource: WebSourceConfig): true | string {
     if (!webSource.url) {
-      return "Zip source must have a URL (remote) or local path";
+      return "Archive source must have a URL (remote) or local path";
     }
 
     return true;
   }
 
   /**
-   * Load content from a zip file
+   * Load content from an archive file
    */
   async load(
     webSource: WebSourceConfig,
     targetPath: string,
   ): Promise<LoadResult> {
     try {
-      const options = webSource.options as ZipOptions | undefined;
+      const options = webSource.options as ArchiveOptions | undefined;
       const tempDir = await this.createTempDirectory();
 
       try {
-        // Get the zip file (download if remote, or use local path)
-        const zipFilePath = await this.resolveZipFile(webSource.url, tempDir);
+        // Get the archive file (download if remote, or use local path)
+        const archiveFilePath = await this.resolveArchiveFile(
+          webSource.url,
+          tempDir,
+        );
+
+        // Detect archive type
+        const archiveType = this.detectArchiveType(archiveFilePath);
 
         // Extract to temp directory
         const extractDir = path.join(tempDir, "extracted");
         await fs.mkdir(extractDir, { recursive: true });
-        this.extractZip(zipFilePath, extractDir);
+
+        if (archiveType === "zip") {
+          this.extractZip(archiveFilePath, extractDir);
+        } else if (archiveType === "tar.gz") {
+          await this.extractTarGz(archiveFilePath, extractDir);
+        } else {
+          throw new WebSourceError(
+            WebSourceErrorType.ARCHIVE_ERROR,
+            `Unsupported archive format. Supported formats: .zip, .tar.gz`,
+            { archiveType },
+          );
+        }
 
         // Flatten single root directory
         await this.flattenSingleRoot(extractDir);
@@ -91,7 +110,7 @@ export class ZipLoader extends ContentLoader {
         success: false,
         files: [],
         contentHash: "",
-        error: `Zip loading failed: ${errorMessage}`,
+        error: `Archive loading failed: ${errorMessage}`,
       };
     }
   }
@@ -156,11 +175,28 @@ export class ZipLoader extends ContentLoader {
   }
 
   /**
-   * Resolve the zip file path - download if remote, return as-is if local
+   * Detect archive type based on file extension
    */
-  private async resolveZipFile(url: string, tempDir: string): Promise<string> {
+  private detectArchiveType(filePath: string): "zip" | "tar.gz" | "unknown" {
+    const lowerPath = filePath.toLowerCase();
+    if (lowerPath.endsWith(".tar.gz") || lowerPath.endsWith(".tgz")) {
+      return "tar.gz";
+    }
+    if (lowerPath.endsWith(".zip")) {
+      return "zip";
+    }
+    return "unknown";
+  }
+
+  /**
+   * Resolve the archive file path - download if remote, return as-is if local
+   */
+  private async resolveArchiveFile(
+    url: string,
+    tempDir: string,
+  ): Promise<string> {
     if (this.isRemoteUrl(url)) {
-      return this.downloadZip(url, tempDir);
+      return this.downloadArchive(url, tempDir);
     }
 
     // Local file - verify it exists
@@ -169,18 +205,21 @@ export class ZipLoader extends ContentLoader {
       return url;
     } catch {
       throw new WebSourceError(
-        WebSourceErrorType.ZIP_ERROR,
-        `Local zip file not found: ${url}`,
+        WebSourceErrorType.ARCHIVE_ERROR,
+        `Local archive file not found: ${url}`,
         { url },
       );
     }
   }
 
   /**
-   * Download a zip file from a remote URL
+   * Download an archive file from a remote URL
    */
-  private async downloadZip(url: string, tempDir: string): Promise<string> {
-    const zipPath = path.join(tempDir, "download.zip");
+  private async downloadArchive(url: string, tempDir: string): Promise<string> {
+    // Determine filename from URL
+    const urlPath = new URL(url).pathname;
+    const filename = path.basename(urlPath) || "download.archive";
+    const archivePath = path.join(tempDir, filename);
 
     return new Promise((resolve, reject) => {
       const protocol = url.startsWith("https") ? https : http;
@@ -201,8 +240,8 @@ export class ZipLoader extends ContentLoader {
           response.on("end", async () => {
             try {
               const buffer = Buffer.concat(chunks);
-              await fs.writeFile(zipPath, buffer);
-              resolve(zipPath);
+              await fs.writeFile(archivePath, buffer);
+              resolve(archivePath);
             } catch (error) {
               reject(error);
             }
@@ -215,8 +254,8 @@ export class ZipLoader extends ContentLoader {
       request.on("error", (error) => {
         reject(
           new WebSourceError(
-            WebSourceErrorType.ZIP_ERROR,
-            `Failed to download zip from ${url}: ${error instanceof Error ? error.message : String(error)}`,
+            WebSourceErrorType.ARCHIVE_ERROR,
+            `Failed to download archive from ${url}: ${error instanceof Error ? error.message : String(error)}`,
             { url },
           ),
         );
@@ -233,9 +272,31 @@ export class ZipLoader extends ContentLoader {
       zip.extractAllTo(targetDir, true);
     } catch (error) {
       throw new WebSourceError(
-        WebSourceErrorType.ZIP_ERROR,
+        WebSourceErrorType.ARCHIVE_ERROR,
         `Failed to extract zip: ${error instanceof Error ? error.message : String(error)}`,
         { zipPath },
+      );
+    }
+  }
+
+  /**
+   * Extract a tar.gz file to a directory
+   */
+  private async extractTarGz(
+    tarGzPath: string,
+    targetDir: string,
+  ): Promise<void> {
+    try {
+      await tar.extract({
+        file: tarGzPath,
+        cwd: targetDir,
+        strip: 0,
+      });
+    } catch (error) {
+      throw new WebSourceError(
+        WebSourceErrorType.ARCHIVE_ERROR,
+        `Failed to extract tar.gz: ${error instanceof Error ? error.message : String(error)}`,
+        { tarGzPath },
       );
     }
   }
@@ -267,7 +328,7 @@ export class ZipLoader extends ContentLoader {
   }
 
   /**
-   * Extract content from extracted zip to target directory
+   * Extract content from extracted archive to target directory
    */
   private async extractContent(
     sourceDir: string,
@@ -423,7 +484,7 @@ export class ZipLoader extends ContentLoader {
     const tempDir = path.join(
       process.cwd(),
       ".tmp",
-      `zip-extract-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      `archive-extract-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     );
     await fs.mkdir(tempDir, { recursive: true });
     return tempDir;
