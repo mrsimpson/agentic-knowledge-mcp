@@ -2,14 +2,7 @@
  * Path calculation utilities
  */
 
-import {
-  resolve,
-  dirname,
-  isAbsolute,
-  join,
-  normalize,
-  relative,
-} from "node:path";
+import { dirname, join, normalize, relative } from "node:path";
 import { promises as fs } from "node:fs";
 import * as fsSync from "node:fs";
 import * as pathModule from "node:path";
@@ -42,12 +35,15 @@ export function calculateLocalPath(
     }
 
     if (primarySource.type === "local_folder") {
-      // For local folders, return relative path from project root
+      // For local folders, use standardized path: .knowledge/docsets/{id}
+      // This ensures consistency with git_repo and archive types,
+      // and prevents accidentally modifying source directories during init
       if (!primarySource.paths || primarySource.paths.length === 0) {
         throw new Error(
           `Local folder source for docset '${docset.id}' has no paths configured`,
         );
       }
+      // Validate that at least one path is configured
       const firstPath = primarySource.paths[0];
       if (!firstPath) {
         throw new Error(
@@ -55,14 +51,8 @@ export function calculateLocalPath(
         );
       }
 
-      if (isAbsolute(firstPath)) {
-        // If absolute path, return as-is
-        return normalize(firstPath);
-      }
-
-      // If relative path, resolve from project root and return relative
-      const resolvedPath = resolve(projectRoot, firstPath);
-      return relative(projectRoot, resolvedPath) || ".";
+      // Return the standard docset directory, symlinks will be created there
+      return join(configDir, "docsets", docset.id);
     }
 
     if (primarySource.type === "git_repo") {

@@ -4,7 +4,7 @@
 
 import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { promises as fs } from "node:fs";
-import { join, resolve, isAbsolute } from "node:path";
+import { join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import {
   calculateLocalPath,
@@ -34,6 +34,8 @@ describe("Path Calculation", () => {
 
   describe("calculateLocalPath", () => {
     test("should handle absolute paths", () => {
+      // Even with absolute source paths, calculateLocalPath should return
+      // the standard docset directory for consistency
       const docset: DocsetConfig = {
         id: "test",
         name: "Test",
@@ -46,11 +48,14 @@ describe("Path Calculation", () => {
       };
 
       const result = calculateLocalPath(docset, configPath);
-      expect(result).toBe("/absolute/path/to/docs");
-      expect(isAbsolute(result)).toBe(true);
+      // Should return .knowledge/docsets/{id}, not the source path
+      const expected = join(tempDir, ".knowledge", "docsets", "test");
+      expect(result).toBe(expected);
     });
 
-    test("should resolve relative paths from project root", () => {
+    test("should resolve relative paths to standard docset directory", () => {
+      // For local_folder, calculateLocalPath should return the standard
+      // docset directory .knowledge/docsets/{id} where symlinks will be created
       const docset: DocsetConfig = {
         id: "test",
         name: "Test",
@@ -63,10 +68,12 @@ describe("Path Calculation", () => {
       };
 
       const result = calculateLocalPath(docset, configPath);
-      expect(result).toBe("docs");
+      const expected = join(tempDir, ".knowledge", "docsets", "test");
+      expect(result).toBe(expected);
     });
 
-    test("should resolve parent directory paths", () => {
+    test("should resolve parent directory paths to standard docset directory", () => {
+      // Even with parent directory paths, should return standard docset directory
       const docset: DocsetConfig = {
         id: "test",
         name: "Test",
@@ -79,10 +86,12 @@ describe("Path Calculation", () => {
       };
 
       const result = calculateLocalPath(docset, configPath);
-      expect(result).toBe("../shared-docs");
+      const expected = join(tempDir, ".knowledge", "docsets", "test");
+      expect(result).toBe(expected);
     });
 
-    test("should normalize complex relative paths", () => {
+    test("should normalize complex relative paths to standard docset directory", () => {
+      // Even with complex paths, should return standard docset directory
       const docset: DocsetConfig = {
         id: "test",
         name: "Test",
@@ -95,7 +104,8 @@ describe("Path Calculation", () => {
       };
 
       const result = calculateLocalPath(docset, configPath);
-      expect(result).toBe("guides");
+      const expected = join(tempDir, ".knowledge", "docsets", "test");
+      expect(result).toBe(expected);
     });
 
     test("should handle invalid config path gracefully", () => {
@@ -115,6 +125,7 @@ describe("Path Calculation", () => {
     });
 
     test("should handle multiple paths in local_folder source", () => {
+      // Uses the docset id for the directory, not the source paths
       const docset: DocsetConfig = {
         id: "multi-docs",
         name: "Multiple Documentation",
@@ -127,7 +138,8 @@ describe("Path Calculation", () => {
       };
 
       const result = calculateLocalPath(docset, configPath);
-      expect(result).toBe("docs");
+      const expected = join(tempDir, ".knowledge", "docsets", "multi-docs");
+      expect(result).toBe(expected);
     });
 
     test("should handle git repo without optional fields", () => {
@@ -272,16 +284,15 @@ describe("Path Calculation", () => {
         ],
       };
 
-      // Calculate path
+      // Calculate path - should return standard docset directory
       const calculatedPath = calculateLocalPath(docset, configPath);
 
-      // Should return relative path
-      expect(calculatedPath).toBe("docs");
+      // Should return .knowledge/docsets/{id} path
+      const expected = join(tempDir, ".knowledge", "docsets", "test");
+      expect(calculatedPath).toBe(expected);
 
-      // Validate actual path exists (resolve relative to project root)
-      const absolutePath = resolve(tempDir, calculatedPath);
-      const pathExists = await validatePath(absolutePath);
-      expect(pathExists).toBe(true);
+      // The docset directory won't exist until init is run,
+      // but the path calculation should be consistent
     });
 
     test("should handle complex nested directory structure", async () => {
@@ -314,14 +325,15 @@ describe("Path Calculation", () => {
 
       const result = calculateLocalPath(docset, projectConfig);
 
-      // Should return relative path
-      expect(result).toBe("src/components");
-
-      // Validate actual path exists
-      const projectRoot = join(tempDir, "project");
-      const absolutePath = resolve(projectRoot, result);
-      const validated = await validatePath(absolutePath);
-      expect(validated).toBe(true);
+      // Should return standard docset directory
+      const expected = join(
+        tempDir,
+        "project",
+        ".knowledge",
+        "docsets",
+        "components",
+      );
+      expect(result).toBe(expected);
     });
   });
 });
