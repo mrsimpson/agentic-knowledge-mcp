@@ -186,7 +186,7 @@ Returns JSON object with:
 - generalized_search_terms: Broader terms for context
 - path: Local directory path to search in
 
-Use the path and search terms with your text search tools (grep, rg, ripgrep, find).`;
+Use the path and search terms with your available text search tools.`;
 
     return {
       tools: [
