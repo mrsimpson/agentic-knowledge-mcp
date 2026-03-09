@@ -197,7 +197,9 @@ docsets:
       // Should return an error
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toContain("not initialized");
-      expect(result.content[0].text).toContain("agentic-knowledge init");
+      expect(result.content[0].text).toContain(
+        "npx agentic-knowledge-mcp init",
+      );
     });
   });
 });
