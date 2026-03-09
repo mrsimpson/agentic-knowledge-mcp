@@ -164,7 +164,7 @@ export class KnowledgeError extends Error {
 /**
  * Default instruction template
  */
-export const DEFAULT_TEMPLATE = `Use available text search tools to search for {{keywords}} in {{local_path}}. Try broader terms if needed. Skip: node_modules/, .git/, build/, dist/.`;
+export const DEFAULT_TEMPLATE = `Use available text search tools to search for {{keywords}} in {{local_path}} and its sub folders. Try broader terms if needed. Skip: node_modules/, .git/, build/, dist/.`;
 
 /**
  * Allowed template variables that can be used in instruction templates

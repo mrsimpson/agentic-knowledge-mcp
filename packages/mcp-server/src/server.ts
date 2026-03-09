@@ -178,15 +178,7 @@ After configuring, the tool will show available docsets here.`,
 
 📚 **AVAILABLE DOCSETS:**
 ${docsetInfo}
-
-🔍 **STRUCTURED RESPONSE:**
-Returns JSON object with:
-- instructions: Search guidance text
-- search_terms: Primary keywords to search for
-- generalized_search_terms: Broader terms for context
-- path: Local directory path to search in
-
-Use the path and search terms with your available text search tools.`;
+`;
 
     return {
       tools: [
@@ -273,10 +265,7 @@ Use the path and search terms with your available text search tools.`;
             const availableIds = config.docsets.map((d) => d.id).join(", ");
             throw new Error(
               `Docset '${docset_id}' not found.\n\n` +
-                `Available docsets: ${availableIds}\n\n` +
-                `To create a new docset:\n` +
-                `agentic-knowledge create --preset git-repo --id ${docset_id} --name "My Docs" --url <repo-url>\n` +
-                `agentic-knowledge init ${docset_id}`,
+                `Available docsets: ${availableIds}\n\n`,
             );
           }
 
@@ -298,9 +287,7 @@ Use the path and search terms with your available text search tools.`;
                 `Docset '${docset_id}' is not initialized.\n\n` +
                   `The docset is configured but hasn't been initialized yet.\n\n` +
                   `To initialize this docset:\n` +
-                  `agentic-knowledge init ${docset_id}\n\n` +
-                  `To check status of all docsets:\n` +
-                  `agentic-knowledge status`,
+                  `npx agentic-knowledge-mcp init ${docset_id}\n\n`,
               );
             }
 
@@ -329,9 +316,7 @@ Use the path and search terms with your available text search tools.`;
                 `Docset '${docset_id}' is not initialized.\n\n` +
                   `The docset is configured but hasn't been initialized yet.\n\n` +
                   `To initialize this docset:\n` +
-                  `agentic-knowledge init ${docset_id}\n\n` +
-                  `To check status of all docsets:\n` +
-                  `agentic-knowledge status`,
+                  `npx agentic-knowledge-mcp init ${docset_id}\n\n`,
               );
             }
           } else {
