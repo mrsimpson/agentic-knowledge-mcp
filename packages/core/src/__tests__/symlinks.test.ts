@@ -28,11 +28,9 @@ describe("Symlink Management", () => {
     sourceDir = join(tempDir, "docs");
     targetDir = join(tempDir, ".knowledge", "docsets", "test-docs");
 
-    // Create directory structure
     await fs.mkdir(join(tempDir, ".knowledge"), { recursive: true });
     await fs.mkdir(sourceDir, { recursive: true });
 
-    // Create some test files
     await fs.writeFile(join(sourceDir, "README.md"), "# Test Documentation");
     await fs.writeFile(join(sourceDir, "guide.md"), "# User Guide");
   });
@@ -42,67 +40,67 @@ describe("Symlink Management", () => {
   });
 
   describe("createSymlinks", () => {
-    test("should create symlinks for local paths", async () => {
-      const sourcePaths = ["./docs"];
+    test("should link source contents directly into targetDir (no extra subfolder)", async () => {
+      await createSymlinks(["./docs"], targetDir, projectRoot);
 
-      await createSymlinks(sourcePaths, targetDir, projectRoot);
+      const readme = join(targetDir, "README.md");
+      const guide = join(targetDir, "guide.md");
 
-      // Check that symlink was created
-      const symlinkPath = join(targetDir, "docs");
-      const stats = await fs.lstat(symlinkPath);
-      expect(stats.isSymbolicLink()).toBe(true);
+      expect((await fs.lstat(readme)).isSymbolicLink()).toBe(true);
+      expect((await fs.lstat(guide)).isSymbolicLink()).toBe(true);
 
-      // Check that symlink points to correct target
-      const target = await fs.readlink(symlinkPath);
-      expect(target).toBe(sourceDir);
+      expect(await fs.readlink(readme)).toBe(join(sourceDir, "README.md"));
+      expect(await fs.readlink(guide)).toBe(join(sourceDir, "guide.md"));
     });
 
-    test("should create symlinks for multiple paths", async () => {
-      // Create additional source directory
+    test("should handle trailing slash in source path", async () => {
+      await createSymlinks([sourceDir + "/"], targetDir, projectRoot);
+
+      expect(
+        (await fs.lstat(join(targetDir, "README.md"))).isSymbolicLink(),
+      ).toBe(true);
+      await expect(fs.access(join(targetDir, "unknown"))).rejects.toThrow();
+    });
+
+    test("should merge contents of multiple source paths into targetDir", async () => {
       const sourceDir2 = join(tempDir, "guides");
       await fs.mkdir(sourceDir2);
       await fs.writeFile(join(sourceDir2, "tutorial.md"), "# Tutorial");
 
-      const sourcePaths = ["./docs", "./guides"];
+      await createSymlinks(["./docs", "./guides"], targetDir, projectRoot);
 
-      await createSymlinks(sourcePaths, targetDir, projectRoot);
-
-      // Check both symlinks exist
-      const symlink1 = join(targetDir, "docs");
-      const symlink2 = join(targetDir, "guides");
-
-      expect((await fs.lstat(symlink1)).isSymbolicLink()).toBe(true);
-      expect((await fs.lstat(symlink2)).isSymbolicLink()).toBe(true);
+      expect(
+        (await fs.lstat(join(targetDir, "README.md"))).isSymbolicLink(),
+      ).toBe(true);
+      expect(
+        (await fs.lstat(join(targetDir, "guide.md"))).isSymbolicLink(),
+      ).toBe(true);
+      expect(
+        (await fs.lstat(join(targetDir, "tutorial.md"))).isSymbolicLink(),
+      ).toBe(true);
     });
 
-    test("should handle absolute paths", async () => {
-      const sourcePaths = [sourceDir];
+    test("should handle absolute source paths", async () => {
+      await createSymlinks([sourceDir], targetDir, projectRoot);
 
-      await createSymlinks(sourcePaths, targetDir, projectRoot);
-
-      const symlinkPath = join(targetDir, "docs");
-      expect((await fs.lstat(symlinkPath)).isSymbolicLink()).toBe(true);
+      expect(
+        (await fs.lstat(join(targetDir, "README.md"))).isSymbolicLink(),
+      ).toBe(true);
     });
 
     test("should throw error for non-existent source", async () => {
-      const sourcePaths = ["./non-existent"];
-
       await expect(
-        createSymlinks(sourcePaths, targetDir, projectRoot),
+        createSymlinks(["./non-existent"], targetDir, projectRoot),
       ).rejects.toThrow("Source path does not exist");
     });
 
-    test("should replace existing symlinks", async () => {
-      const sourcePaths = ["./docs"];
+    test("should replace existing symlinks on re-run", async () => {
+      await createSymlinks(["./docs"], targetDir, projectRoot);
+      await createSymlinks(["./docs"], targetDir, projectRoot);
 
-      // Create initial symlink
-      await createSymlinks(sourcePaths, targetDir, projectRoot);
-
-      // Create again (should replace)
-      await createSymlinks(sourcePaths, targetDir, projectRoot);
-
-      const symlinkPath = join(targetDir, "docs");
-      expect((await fs.lstat(symlinkPath)).isSymbolicLink()).toBe(true);
+      expect(
+        (await fs.lstat(join(targetDir, "README.md"))).isSymbolicLink(),
+      ).toBe(true);
     });
   });
 
@@ -117,7 +115,6 @@ describe("Symlink Management", () => {
     test("should return false for broken symlinks", async () => {
       await createSymlinks(["./docs"], targetDir, projectRoot);
 
-      // Remove source directory to break symlink
       await fs.rm(sourceDir, { recursive: true });
 
       const isValid = await validateSymlinks(targetDir);
@@ -134,15 +131,10 @@ describe("Symlink Management", () => {
     test("should remove all symlinks in directory", async () => {
       await createSymlinks(["./docs"], targetDir, projectRoot);
 
-      // Verify symlink exists
-      const symlinkPath = join(targetDir, "docs");
-      expect((await fs.lstat(symlinkPath)).isSymbolicLink()).toBe(true);
-
-      // Remove symlinks
       await removeSymlinks(targetDir);
 
-      // Verify symlink is gone
-      await expect(fs.access(symlinkPath)).rejects.toThrow();
+      await expect(fs.access(join(targetDir, "README.md"))).rejects.toThrow();
+      await expect(fs.access(join(targetDir, "guide.md"))).rejects.toThrow();
     });
 
     test("should handle non-existent directory gracefully", async () => {
@@ -167,12 +159,10 @@ describe("Symlink Management", () => {
 
       const result = await calculateLocalPathWithSymlinks(docset, configPath);
 
-      // Should return relative path to symlink directory
       expect(result).toBe(".knowledge/docsets/test-docs");
-
-      // Verify symlink was created
-      const symlinkPath = join(targetDir, "docs");
-      expect((await fs.lstat(symlinkPath)).isSymbolicLink()).toBe(true);
+      expect(
+        (await fs.lstat(join(targetDir, "README.md"))).isSymbolicLink(),
+      ).toBe(true);
     });
 
     test("should handle git_repo sources without symlinks", async () => {
@@ -189,7 +179,6 @@ describe("Symlink Management", () => {
 
       const result = await calculateLocalPathWithSymlinks(docset, configPath);
 
-      // Should return absolute path for git repos
       const expected = join(tempDir, ".knowledge", "docsets", "git-docs");
       expect(result).toBe(expected);
     });

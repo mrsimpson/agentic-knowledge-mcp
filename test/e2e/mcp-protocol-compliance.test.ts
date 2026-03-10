@@ -56,11 +56,12 @@ describe("MCP Protocol Compliance E2E Tests", () => {
       const tools = await client.listTools();
 
       expect(tools.tools).toBeDefined();
-      expect(tools.tools).toHaveLength(2);
+      expect(tools.tools).toHaveLength(3);
 
       const toolNames = tools.tools.map((tool) => tool.name);
       expect(toolNames).toContain("search_docs");
       expect(toolNames).toContain("list_docsets");
+      expect(toolNames).toContain("init_docset");
     });
   });
 
