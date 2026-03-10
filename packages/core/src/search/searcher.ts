@@ -276,17 +276,29 @@ async function* walkFiles(dir: string): AsyncGenerator<string> {
   for (const entry of entries) {
     const absPath = join(dir, entry.name);
 
-    if (entry.isDirectory()) {
+    // For symlinks, stat() follows the link to get the real type.
+    // entry.isDirectory() / entry.isFile() return false for symlinks.
+    let isDir = entry.isDirectory();
+    let isFile = entry.isFile();
+    if (entry.isSymbolicLink()) {
+      try {
+        const s = await stat(absPath);
+        isDir = s.isDirectory();
+        isFile = s.isFile();
+      } catch {
+        continue; // broken symlink — skip
+      }
+    }
+
+    if (isDir) {
       if (!IGNORED_NAMES.has(entry.name)) {
         yield* walkFiles(absPath);
       }
-    } else if (entry.isFile()) {
+    } else if (isFile) {
       if (!IGNORED_FILES.has(entry.name)) {
         yield absPath;
       }
     }
-    // symlinks: follow only if they point to files (readdir withFileTypes
-    // resolves symlinks on most platforms)
   }
 }
 
