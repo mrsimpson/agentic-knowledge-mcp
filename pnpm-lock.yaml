@@ -132,6 +132,9 @@ importers:
 
   packages/content-loader:
     dependencies:
+      "@codemcp/knowledge-core":
+        specifier: workspace:*
+        version: link:../core
       adm-zip:
         specifier: 0.5.16
         version: 0.5.16
@@ -197,6 +200,9 @@ importers:
 
   packages/mcp-server:
     dependencies:
+      "@codemcp/knowledge-content-loader":
+        specifier: workspace:*
+        version: link:../content-loader
       "@codemcp/knowledge-core":
         specifier: workspace:*
         version: link:../core

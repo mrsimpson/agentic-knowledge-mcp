@@ -16,10 +16,14 @@ import {
   createTemplateContext,
   getEffectiveTemplate,
   createStructuredResponse,
+  ConfigManager,
+  ensureKnowledgeGitignoreSync,
   type KnowledgeConfig,
 } from "@codemcp/knowledge-core";
+import { initDocset } from "@codemcp/knowledge-content-loader";
 import { existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
+import * as path from "node:path";
 
 /**
  * Create an agentic knowledge MCP server
@@ -159,6 +163,27 @@ After configuring, the tool will show available docsets here.`,
               additionalProperties: false,
             },
           },
+          {
+            name: "init_docset",
+            description:
+              "Initialize a docset by downloading and preparing its content sources. Run this when a docset is configured but not yet initialized.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                docset_id: {
+                  type: "string",
+                  description: "The identifier of the docset to initialize.",
+                },
+                force: {
+                  type: "boolean",
+                  description:
+                    "Force re-initialization even if the docset already exists.",
+                },
+              },
+              required: ["docset_id"],
+              additionalProperties: false,
+            },
+          },
         ],
       };
     }
@@ -215,6 +240,30 @@ ${docsetInfo}
           inputSchema: {
             type: "object",
             properties: {},
+            additionalProperties: false,
+          },
+        },
+        {
+          name: "init_docset",
+          description: `Initialize a docset by downloading and preparing its content sources. Run this when a docset is configured but not yet initialized.
+
+📚 **AVAILABLE DOCSETS TO INITIALIZE:**
+${config.docsets.map((d) => `• **${d.id}** (${d.name})`).join("\n")}`,
+          inputSchema: {
+            type: "object",
+            properties: {
+              docset_id: {
+                type: "string",
+                description: "The identifier of the docset to initialize.",
+                enum: config.docsets.map((d) => d.id),
+              },
+              force: {
+                type: "boolean",
+                description:
+                  "Force re-initialization even if the docset already exists.",
+              },
+            },
+            required: ["docset_id"],
             additionalProperties: false,
           },
         },
@@ -437,6 +486,63 @@ ${docsetInfo}
                 text: summary,
               },
             ],
+          };
+        }
+
+        case "init_docset": {
+          const { docset_id, force = false } = args as {
+            docset_id: string;
+            force?: boolean;
+          };
+
+          if (!docset_id || typeof docset_id !== "string") {
+            throw new Error("docset_id is required and must be a string");
+          }
+
+          const configManager = new ConfigManager();
+          const { config, configPath } = await configManager.loadConfig(
+            process.cwd(),
+          );
+
+          // Invalidate cache so the next search_docs call sees the new state
+          configCache = null;
+          configLoadTime = 0;
+
+          ensureKnowledgeGitignoreSync(configPath);
+
+          const docset = config.docsets.find((d) => d.id === docset_id);
+          if (!docset) {
+            throw new Error(
+              `Docset '${docset_id}' not found. Available: ${config.docsets.map((d) => d.id).join(", ")}`,
+            );
+          }
+
+          const result = await initDocset(docset_id, docset, configPath, {
+            force,
+          });
+
+          if (result.alreadyInitialized) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `Docset '${docset_id}' is already initialized. Use force: true to re-initialize.`,
+                },
+              ],
+            };
+          }
+
+          const summary = [
+            `Successfully initialized docset '${docset_id}' (${docset.name}).`,
+            `Location: ${result.localPath}`,
+            `Total files: ${result.totalFiles}`,
+            ...result.sourceResults.map(
+              (r) => `Source ${r.index + 1} (${r.type}): ${r.message}`,
+            ),
+          ].join("\n");
+
+          return {
+            content: [{ type: "text", text: summary }],
           };
         }
 
