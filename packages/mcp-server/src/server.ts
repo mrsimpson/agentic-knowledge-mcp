@@ -23,7 +23,6 @@ import {
 import { initDocset } from "@codemcp/knowledge-content-loader";
 import { existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
-import * as path from "node:path";
 
 /**
  * Create an agentic knowledge MCP server

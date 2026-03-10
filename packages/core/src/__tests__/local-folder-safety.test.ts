@@ -15,7 +15,6 @@ describe("Local Folder Cleanup Safety", () => {
   let sourceFile: string;
 
   beforeEach(async () => {
-    // Create test directories
     testDir = path.join(tmpdir(), `agentic-safety-test-${Date.now()}`);
     sourceDir = path.join(testDir, "source");
     targetDir = path.join(testDir, "target");
@@ -23,7 +22,6 @@ describe("Local Folder Cleanup Safety", () => {
     await fs.mkdir(sourceDir, { recursive: true });
     await fs.mkdir(targetDir, { recursive: true });
 
-    // Create a source directory with actual files
     const actualSourceFolder = path.join(sourceDir, "src");
     await fs.mkdir(actualSourceFolder, { recursive: true });
     sourceFile = path.join(actualSourceFolder, "important-file.js");
@@ -35,34 +33,26 @@ describe("Local Folder Cleanup Safety", () => {
   });
 
   it("CRITICAL: should NOT delete source files when removing symlinks", async () => {
-    // Create symlink to source directory
     await createSymlinks(["src"], targetDir, sourceDir);
 
-    // Verify symlink was created
-    const symlinkPath = path.join(targetDir, "src");
-    const linkStat = await fs.lstat(symlinkPath);
-    expect(linkStat.isSymbolicLink()).toBe(true);
+    const symlinkPath = path.join(targetDir, "important-file.js");
+    expect((await fs.lstat(symlinkPath)).isSymbolicLink()).toBe(true);
+    expect(await fs.readFile(symlinkPath, "utf-8")).toBe(
+      "CRITICAL DATA - DO NOT DELETE",
+    );
 
-    // Verify we can access the source file through the symlink
-    const fileViaSymlink = path.join(symlinkPath, "important-file.js");
-    const content = await fs.readFile(fileViaSymlink, "utf-8");
-    expect(content).toBe("CRITICAL DATA - DO NOT DELETE");
-
-    // Remove symlinks
     await removeSymlinks(targetDir);
 
-    // CRITICAL: Source file must still exist!
+    // CRITICAL: removing the symlink must never touch the source
     const stillExists = await fs
       .access(sourceFile)
       .then(() => true)
       .catch(() => false);
     expect(stillExists).toBe(true);
+    expect(await fs.readFile(sourceFile, "utf-8")).toBe(
+      "CRITICAL DATA - DO NOT DELETE",
+    );
 
-    // Verify content is unchanged
-    const originalContent = await fs.readFile(sourceFile, "utf-8");
-    expect(originalContent).toBe("CRITICAL DATA - DO NOT DELETE");
-
-    // Symlink should be gone
     const symlinkGone = await fs
       .lstat(symlinkPath)
       .then(() => false)
@@ -71,107 +61,88 @@ describe("Local Folder Cleanup Safety", () => {
   });
 
   it("CRITICAL: should NOT delete source files when clearing target directory", async () => {
-    // Create symlink
     await createSymlinks(["src"], targetDir, sourceDir);
 
-    // Verify source file exists
-    expect(await fs.readFile(sourceFile, "utf-8")).toBe(
-      "CRITICAL DATA - DO NOT DELETE",
-    );
-
-    // Simulate clearing target directory (what --force does)
-    // This is the DANGEROUS operation we need to test
+    // Simulate --force: delete the whole docset directory
     await fs.rm(targetDir, { recursive: true, force: true });
 
-    // CRITICAL: Source file must STILL exist after removing target!
+    // CRITICAL: fs.rm must not follow symlinks into the source
     const stillExists = await fs
       .access(sourceFile)
       .then(() => true)
       .catch(() => false);
-
     expect(stillExists).toBe(
       true,
       "CRITICAL FAILURE: Source file was deleted!",
     );
 
     if (stillExists) {
-      const content = await fs.readFile(sourceFile, "utf-8");
-      expect(content).toBe("CRITICAL DATA - DO NOT DELETE");
+      expect(await fs.readFile(sourceFile, "utf-8")).toBe(
+        "CRITICAL DATA - DO NOT DELETE",
+      );
     }
   });
 
   it("CRITICAL: should handle nested symlinks safely", async () => {
-    // Create nested structure in source
     const nestedDir = path.join(sourceDir, "src", "nested");
     await fs.mkdir(nestedDir, { recursive: true });
     const nestedFile = path.join(nestedDir, "nested-file.js");
     await fs.writeFile(nestedFile, "NESTED CRITICAL DATA");
 
-    // Create symlink
     await createSymlinks(["src"], targetDir, sourceDir);
-
-    // Clear target directory
     await fs.rm(targetDir, { recursive: true, force: true });
 
-    // CRITICAL: All source files must still exist
-    const sourceExists = await fs
-      .access(sourceFile)
-      .then(() => true)
-      .catch(() => false);
-    const nestedExists = await fs
-      .access(nestedFile)
-      .then(() => true)
-      .catch(() => false);
-
-    expect(sourceExists).toBe(true, "Source file was deleted!");
-    expect(nestedExists).toBe(true, "Nested source file was deleted!");
+    // CRITICAL: All source files must survive target removal
+    expect(
+      await fs
+        .access(sourceFile)
+        .then(() => true)
+        .catch(() => false),
+    ).toBe(true, "Source file was deleted!");
+    expect(
+      await fs
+        .access(nestedFile)
+        .then(() => true)
+        .catch(() => false),
+    ).toBe(true, "Nested source file was deleted!");
   });
 
   it("should safely handle mixed content (symlinks and regular files)", async () => {
-    // Create symlink
     await createSymlinks(["src"], targetDir, sourceDir);
 
-    // Add a regular file to target directory
     const regularFile = path.join(targetDir, "regular-file.txt");
     await fs.writeFile(regularFile, "This can be deleted");
 
-    // Clear target directory
     await fs.rm(targetDir, { recursive: true, force: true });
 
-    // Source file must still exist
-    const sourceExists = await fs
-      .access(sourceFile)
-      .then(() => true)
-      .catch(() => false);
-    expect(sourceExists).toBe(true);
-
-    // Target directory should be gone
-    const targetExists = await fs
-      .access(targetDir)
-      .then(() => true)
-      .catch(() => false);
-    expect(targetExists).toBe(false);
+    expect(
+      await fs
+        .access(sourceFile)
+        .then(() => true)
+        .catch(() => false),
+    ).toBe(true);
+    expect(
+      await fs
+        .access(targetDir)
+        .then(() => true)
+        .catch(() => false),
+    ).toBe(false);
   });
 
   it("should document Node.js symlink behavior", async () => {
-    // This test documents how Node.js handles symlinks with fs.rm
-    // According to Node.js docs, fs.rm should NOT follow symlinks
-
+    // fs.rm with recursive:true must NOT follow symlinks — this test pins that contract.
     await createSymlinks(["src"], targetDir, sourceDir);
-    const symlinkPath = path.join(targetDir, "src");
+    const symlinkPath = path.join(targetDir, "important-file.js");
 
-    // Verify it's a symlink
-    const stats = await fs.lstat(symlinkPath);
-    expect(stats.isSymbolicLink()).toBe(true);
+    expect((await fs.lstat(symlinkPath)).isSymbolicLink()).toBe(true);
 
-    // Remove just the symlink using fs.unlink
     await fs.unlink(symlinkPath);
 
-    // Source should still exist
-    const sourceExists = await fs
-      .access(sourceFile)
-      .then(() => true)
-      .catch(() => false);
-    expect(sourceExists).toBe(true);
+    expect(
+      await fs
+        .access(sourceFile)
+        .then(() => true)
+        .catch(() => false),
+    ).toBe(true);
   });
 });

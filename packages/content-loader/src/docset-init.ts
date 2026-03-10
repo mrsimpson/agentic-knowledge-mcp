@@ -1,5 +1,5 @@
 /**
- * Shared docset initialization logic used by both the CLI and MCP server.
+ * Docset initialization logic shared between CLI and MCP server.
  */
 
 import { promises as fs } from "node:fs";
@@ -39,13 +39,8 @@ export interface InitDocsetOptions {
 }
 
 /**
- * Initialize the sources for a docset: download / symlink content, write
- * metadata files.  Pure logic — no console output, no config loading.
- *
- * @param docsetId   Docset identifier (used in metadata)
- * @param docset     Already-resolved DocsetConfig
- * @param configPath Absolute path to the `.knowledge/config.yaml` file
- * @param options    Optional flags and progress callback
+ * Download / symlink all sources for a docset and write metadata files.
+ * Does not load config or produce console output — callers handle both.
  */
 export async function initDocset(
   docsetId: string,
@@ -61,13 +56,12 @@ export async function initDocset(
 
   const localPath = calculateLocalPath(docset, configPath);
 
-  // Check if already initialized
   let existsAlready = false;
   try {
     const stat = await fs.stat(localPath);
     if (stat.isDirectory()) existsAlready = true;
   } catch {
-    // Directory doesn't exist yet — that's fine
+    // not yet created
   }
 
   if (existsAlready && !force) {

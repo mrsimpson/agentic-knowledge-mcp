@@ -18,35 +18,34 @@ export async function createSymlinks(
   projectRoot: string,
 ): Promise<void> {
   try {
-    // Ensure target directory exists
     await fs.mkdir(targetDir, { recursive: true });
 
     for (const sourcePath of sourcePaths) {
-      // Resolve source path to absolute
       const absoluteSourcePath = isAbsolute(sourcePath)
         ? sourcePath
         : resolve(projectRoot, sourcePath);
 
-      // Check if source exists
       try {
         await fs.access(absoluteSourcePath);
       } catch {
         throw new Error(`Source path does not exist: ${absoluteSourcePath}`);
       }
 
-      // Determine target symlink path
-      const sourceName = sourcePath.split("/").pop() || "unknown";
-      const symlinkPath = join(targetDir, sourceName);
+      // Link each entry inside the source directory directly into targetDir
+      // so that the docset root is flat — consistent with git_repo / archive.
+      const entries = await fs.readdir(absoluteSourcePath);
+      for (const entry of entries) {
+        const symlinkPath = join(targetDir, entry);
+        const entryAbsPath = join(absoluteSourcePath, entry);
 
-      // Remove existing symlink if it exists
-      try {
-        await fs.unlink(symlinkPath);
-      } catch {
-        // Ignore if doesn't exist
+        try {
+          await fs.unlink(symlinkPath);
+        } catch {
+          // ignore — entry doesn't exist yet
+        }
+
+        await fs.symlink(entryAbsPath, symlinkPath);
       }
-
-      // Create symlink
-      await fs.symlink(absoluteSourcePath, symlinkPath);
     }
   } catch (error) {
     throw new KnowledgeError(
@@ -70,7 +69,6 @@ export async function validateSymlinks(targetDir: string): Promise<boolean> {
       if (entry.isSymbolicLink()) {
         const symlinkPath = join(targetDir, entry.name);
 
-        // Check if symlink target exists
         try {
           await fs.access(symlinkPath);
         } catch {

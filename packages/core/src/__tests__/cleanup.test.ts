@@ -33,7 +33,6 @@ describe("Safe Directory Cleanup", () => {
 
   describe("safelyClearDirectory", () => {
     it("should clear directory with regular files", async () => {
-      // Create some files
       await fs.writeFile(path.join(targetDir, "file1.txt"), "content1");
       await fs.writeFile(path.join(targetDir, "file2.txt"), "content2");
       await fs.mkdir(path.join(targetDir, "subdir"), { recursive: true });
@@ -42,10 +41,8 @@ describe("Safe Directory Cleanup", () => {
         "content3",
       );
 
-      // Clear directory
       await safelyClearDirectory(targetDir);
 
-      // Directory should not exist
       const exists = await fs
         .access(targetDir)
         .then(() => true)
@@ -54,78 +51,63 @@ describe("Safe Directory Cleanup", () => {
     });
 
     it("should handle non-existent directory gracefully", async () => {
-      const nonExistent = path.join(testDir, "does-not-exist");
-
-      // Should not throw
-      await expect(safelyClearDirectory(nonExistent)).resolves.not.toThrow();
+      await expect(
+        safelyClearDirectory(path.join(testDir, "does-not-exist")),
+      ).resolves.not.toThrow();
     });
 
     it("should clear directory with symlinks without deleting source files", async () => {
-      // Create source file
       const srcFolder = path.join(sourceDir, "src");
       await fs.mkdir(srcFolder, { recursive: true });
       const sourceFile = path.join(srcFolder, "important.js");
       await fs.writeFile(sourceFile, "IMPORTANT DATA");
 
-      // Create symlink
       await createSymlinks(["src"], targetDir, sourceDir);
 
-      // Verify symlink exists
-      const symlinkPath = path.join(targetDir, "src");
-      const stat = await fs.lstat(symlinkPath);
-      expect(stat.isSymbolicLink()).toBe(true);
+      const symlinkPath = path.join(targetDir, "important.js");
+      expect((await fs.lstat(symlinkPath)).isSymbolicLink()).toBe(true);
 
-      // Clear target directory
       await safelyClearDirectory(targetDir);
 
-      // Source file must still exist!
-      const sourceContent = await fs.readFile(sourceFile, "utf-8");
-      expect(sourceContent).toBe("IMPORTANT DATA");
-
-      // Target directory should be gone
-      const targetExists = await fs
-        .access(targetDir)
-        .then(() => true)
-        .catch(() => false);
-      expect(targetExists).toBe(false);
+      // Source must survive removal of the docset directory
+      expect(await fs.readFile(sourceFile, "utf-8")).toBe("IMPORTANT DATA");
+      expect(
+        await fs
+          .access(targetDir)
+          .then(() => true)
+          .catch(() => false),
+      ).toBe(false);
     });
   });
 
   describe("containsSymlinks", () => {
     it("should detect symlinks", async () => {
-      // Create a source folder
       const srcFolder = path.join(sourceDir, "src");
       await fs.mkdir(srcFolder, { recursive: true });
       await fs.writeFile(path.join(srcFolder, "file.js"), "content");
 
-      // Create symlink
       await createSymlinks(["src"], targetDir, sourceDir);
 
-      const hasSymlinks = await containsSymlinks(targetDir);
-      expect(hasSymlinks).toBe(true);
+      expect(await containsSymlinks(targetDir)).toBe(true);
     });
 
     it("should return false for directory with no symlinks", async () => {
       await fs.writeFile(path.join(targetDir, "regular.txt"), "content");
 
-      const hasSymlinks = await containsSymlinks(targetDir);
-      expect(hasSymlinks).toBe(false);
+      expect(await containsSymlinks(targetDir)).toBe(false);
     });
 
     it("should return false for non-existent directory", async () => {
-      const hasSymlinks = await containsSymlinks(path.join(testDir, "nope"));
-      expect(hasSymlinks).toBe(false);
+      expect(await containsSymlinks(path.join(testDir, "nope"))).toBe(false);
     });
   });
 
   describe("getDirectoryInfo", () => {
     it("should count different entry types", async () => {
-      // Create mixed content
       await fs.writeFile(path.join(targetDir, "file1.txt"), "content");
       await fs.writeFile(path.join(targetDir, "file2.txt"), "content");
       await fs.mkdir(path.join(targetDir, "subdir"), { recursive: true });
 
-      // Create symlink
       const srcFolder = path.join(sourceDir, "src");
       await fs.mkdir(srcFolder, { recursive: true });
       await fs.writeFile(path.join(srcFolder, "file.js"), "content");
