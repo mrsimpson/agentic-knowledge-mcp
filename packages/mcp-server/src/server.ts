@@ -12,17 +12,29 @@ import {
   loadConfig,
   findConfigPath,
   calculateLocalPath,
-  processTemplate,
-  createTemplateContext,
-  getEffectiveTemplate,
-  createStructuredResponse,
   ConfigManager,
   ensureKnowledgeGitignoreSync,
+  buildFileIndex,
+  searchDocset,
+  formatSearchResult,
   type KnowledgeConfig,
+  type DocsetIndex,
 } from "@codemcp/knowledge-core";
 import { initDocset } from "@codemcp/knowledge-content-loader";
 import { existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
+
+/** Shared keywords parameter description advertised to agents */
+const KEYWORDS_DESCRIPTION =
+  "Primary search terms or concepts you're looking for. " +
+  'Supports full regex syntax (e.g. "log.*Error", "function\\s+\\w+", "auth|login"). ' +
+  "Returns file path, line number, matched line, and surrounding context lines. " +
+  'Be specific: "authentication middleware", "useData hook", "sidebar.items".';
+
+const GENERALIZED_KEYWORDS_DESCRIPTION =
+  "Broader synonyms or related terms used as a fallback when the primary keywords " +
+  'return no results (e.g. for "authentication" you might include "login|signin|oauth"). ' +
+  "Also supports regex syntax.";
 
 /**
  * Create an agentic knowledge MCP server
@@ -46,6 +58,9 @@ export function createAgenticKnowledgeServer() {
     null;
   let configLoadTime: number = 0;
   const CONFIG_CACHE_TTL = 60000; // 1 minute cache
+
+  // Per-docset search index cache (keyed by docset id)
+  const indexCache = new Map<string, DocsetIndex>();
 
   /**
    * Load configuration with caching (returns null if no config found)
@@ -83,6 +98,53 @@ export function createAgenticKnowledgeServer() {
     }
   }
 
+  /**
+   * Resolve the absolute local path for an initialized docset.
+   * Throws if the docset has not been initialized yet.
+   */
+  function resolveDocsetPath(
+    docset: { id: string; sources?: Array<{ type: string }> },
+    configPath: string,
+  ): string {
+    const primarySource = docset.sources?.[0];
+    const configDir = dirname(configPath);
+
+    if (primarySource?.type === "local_folder") {
+      const symlinkDir = resolve(configDir, "docsets", docset.id);
+      const metadataPath = resolve(symlinkDir, ".agentic-metadata.json");
+      if (!existsSync(metadataPath)) {
+        throw new Error(`Docset '${docset.id}' hasn't been initialized yet.`);
+      }
+      return symlinkDir;
+    }
+
+    if (
+      primarySource?.type === "git_repo" ||
+      primarySource?.type === "archive"
+    ) {
+      const localRelPath = calculateLocalPath(
+        docset as Parameters<typeof calculateLocalPath>[0],
+        configPath,
+      );
+      const projectRoot = dirname(configDir);
+      const absolutePath = resolve(projectRoot, localRelPath);
+      const metadataPath = resolve(absolutePath, ".agentic-metadata.json");
+      if (!existsSync(metadataPath)) {
+        throw new Error(`Docset '${docset.id}' hasn't been initialized yet.`);
+      }
+      return absolutePath;
+    }
+
+    // Fallback — unknown source type, no initialization check
+    return resolve(
+      dirname(configDir),
+      calculateLocalPath(
+        docset as Parameters<typeof calculateLocalPath>[0],
+        configPath,
+      ),
+    );
+  }
+
   // Register tool handlers
   server.setRequestHandler(ListToolsRequestSchema, async () => {
     // Load configuration to get available docsets
@@ -94,7 +156,7 @@ export function createAgenticKnowledgeServer() {
         tools: [
           {
             name: "search_docs",
-            description: `Search for documentation in configured docsets. Returns structured response with search instructions and parameters.
+            description: `Search for documentation in configured docsets. Returns file path, line number, matched content, and surrounding context.
 
 ⚠️ **NO DOCSETS CONFIGURED**
 
@@ -139,13 +201,11 @@ After configuring, the tool will show available docsets here.`,
                 },
                 keywords: {
                   type: "string",
-                  description:
-                    'Primary search terms or concepts you\'re looking for. Be specific about what you want to find (e.g., "authentication middleware", "user validation", "API rate limiting").',
+                  description: KEYWORDS_DESCRIPTION,
                 },
                 generalized_keywords: {
                   type: "string",
-                  description:
-                    "Related terms, synonyms, or contextual keywords that may appear alongside your primary keywords but are not your main target.",
+                  description: GENERALIZED_KEYWORDS_DESCRIPTION,
                 },
               },
               required: ["docset_id", "keywords"],
@@ -198,11 +258,9 @@ After configuring, the tool will show available docsets here.`,
       })
       .join("\n");
 
-    const searchDocsDescription = `Search for documentation in available docsets. Returns structured response with search instructions and parameters.
-
-📚 **AVAILABLE DOCSETS:**
-${docsetInfo}
-`;
+    const searchDocsDescription =
+      `Search for documentation in available docsets. Returns file path, line number, matched content, and surrounding context lines.\n\n` +
+      `📚 **AVAILABLE DOCSETS:**\n${docsetInfo}`;
 
     return {
       tools: [
@@ -219,13 +277,17 @@ ${docsetInfo}
               },
               keywords: {
                 type: "string",
-                description:
-                  'Primary search terms or concepts you\'re looking for. Be specific about what you want to find (e.g., "authentication middleware", "user validation", "API rate limiting"). Include the exact terms you expect to appear in the documentation.',
+                description: KEYWORDS_DESCRIPTION,
               },
               generalized_keywords: {
                 type: "string",
+                description: GENERALIZED_KEYWORDS_DESCRIPTION,
+              },
+              context_lines: {
+                type: "number",
                 description:
-                  'Related terms, synonyms, or contextual keywords that may appear alongside your primary keywords but are not your main target. These help broaden the search context and catch relevant content that might use different terminology (e.g., for "authentication" you might include "login, signin, oauth, credentials, tokens"). Think of terms that would appear in the same sections or discussions as your main keywords.',
+                  "Number of lines to show before and after each matching line (default: 0). " +
+                  "Increase to 1–3 when you need surrounding context to understand a match.",
               },
             },
             required: ["docset_id", "keywords"],
@@ -276,11 +338,13 @@ ${config.docsets.map((d) => `• **${d.id}** (${d.name})`).join("\n")}`,
     try {
       switch (name) {
         case "search_docs": {
-          const { docset_id, keywords, generalized_keywords } = args as {
-            docset_id: string;
-            keywords: string;
-            generalized_keywords?: string;
-          };
+          const { docset_id, keywords, generalized_keywords, context_lines } =
+            args as {
+              docset_id: string;
+              keywords: string;
+              generalized_keywords?: string;
+              context_lines?: number;
+            };
 
           // Validate required parameters
           if (!docset_id || typeof docset_id !== "string") {
@@ -312,88 +376,38 @@ ${config.docsets.map((d) => `• **${d.id}** (${d.name})`).join("\n")}`,
           if (!docset) {
             const availableIds = config.docsets.map((d) => d.id).join(", ");
             throw new Error(
-              `Docset '${docset_id}' not found.\n\n` +
-                `Available docsets: ${availableIds}\n\n`,
+              `Docset '${docset_id}' not found.\n\nAvailable docsets: ${availableIds}`,
             );
           }
 
-          // Determine path calculation method and validate initialization
-          const primarySource = docset.sources?.[0];
-          let localPath: string;
+          // Resolve the absolute local path (also validates initialization)
+          const absoluteLocalPath = resolveDocsetPath(docset, configPath);
 
-          if (primarySource?.type === "local_folder") {
-            // For local folders, use symlinked path
-            localPath = calculateLocalPath(docset, configPath);
-
-            // Check if initialized by verifying .agentic-metadata.json exists
-            const configDir = dirname(configPath);
-            const symlinkDir = resolve(configDir, "docsets", docset.id);
-            const metadataPath = resolve(symlinkDir, ".agentic-metadata.json");
-
-            if (!existsSync(metadataPath)) {
-              throw new Error(
-                `Docset '${docset_id}' hasn't been initialized yet.`,
-              );
-            }
-
-            // Return the symlinked path for consistency
-            localPath = resolve(configDir, "docsets", docset.id);
-            const projectRoot2 = dirname(configDir);
-            localPath = resolve(projectRoot2, localPath).replace(
-              projectRoot2 + "/",
-              "",
-            );
-          } else if (primarySource?.type === "git_repo") {
-            // For git repos, use standard path calculation
-            localPath = calculateLocalPath(docset, configPath);
-
-            // Check if .agentic-metadata.json exists
-            const configDir = dirname(configPath);
-            const projectRoot = dirname(configDir);
-            const absolutePath = resolve(projectRoot, localPath);
-            const metadataPath = resolve(
-              absolutePath,
-              ".agentic-metadata.json",
-            );
-
-            if (!existsSync(metadataPath)) {
-              throw new Error(
-                `Docset '${docset_id}' hasn't been initialized yet.\n\n`,
-              );
-            }
-          } else {
-            // Fallback to standard calculation for unknown types
-            localPath = calculateLocalPath(docset, configPath);
+          // Get or build the search index for this docset
+          let index = indexCache.get(docset_id);
+          if (!index) {
+            index = await buildFileIndex(absoluteLocalPath);
+            indexCache.set(docset_id, index);
           }
 
-          // Create template context with proper function signature
-          const templateContext = createTemplateContext(
-            localPath,
+          // Perform the search
+          const fallbackPattern = generalized_keywords?.trim();
+          const searchOptions: import("@agentic-knowledge/core").SearchOptions =
+            {};
+          if (fallbackPattern) searchOptions.fallbackPattern = fallbackPattern;
+          if (typeof context_lines === "number")
+            searchOptions.contextLines = context_lines;
+          const result = await searchDocset(
+            absoluteLocalPath,
             keywords.trim(),
-            (generalized_keywords || "").trim(),
-            docset,
+            searchOptions,
+            index,
           );
 
-          // Get effective template and process it
-          const effectiveTemplate = getEffectiveTemplate(
-            docset,
-            config.template,
-          );
-          const instructions = processTemplate(
-            effectiveTemplate,
-            templateContext,
-          );
-
-          // Create structured response
-          const structuredResponse = createStructuredResponse(
-            instructions,
-            keywords.trim(),
-            (generalized_keywords || "").trim(),
-            localPath,
-          );
+          const text = formatSearchResult(result);
 
           return {
-            structuredContent: structuredResponse,
+            content: [{ type: "text", text }],
           };
         }
 
@@ -497,9 +511,11 @@ ${config.docsets.map((d) => `• **${d.id}** (${d.name})`).join("\n")}`,
             process.cwd(),
           );
 
-          // Invalidate cache so the next search_docs call sees the new state
+          // Invalidate config cache and search index cache so the next
+          // search_docs call sees the newly initialized content
           configCache = null;
           configLoadTime = 0;
+          indexCache.delete(docset_id);
 
           ensureKnowledgeGitignoreSync(configPath);
 

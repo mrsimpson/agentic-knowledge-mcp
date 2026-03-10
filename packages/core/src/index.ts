@@ -50,3 +50,11 @@ export {
   createTemplateContext,
   createStructuredResponse,
 } from "./templates/processor.js";
+
+// Export search functionality
+export {
+  buildFileIndex,
+  searchDocset,
+  formatSearchResult,
+  type DocsetIndex,
+} from "./search/searcher.js";
