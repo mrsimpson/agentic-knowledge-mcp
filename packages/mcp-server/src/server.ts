@@ -332,10 +332,7 @@ ${config.docsets.map((d) => `• **${d.id}** (${d.name})`).join("\n")}`,
 
             if (!existsSync(metadataPath)) {
               throw new Error(
-                `Docset '${docset_id}' is not initialized.\n\n` +
-                  `The docset is configured but hasn't been initialized yet.\n\n` +
-                  `To initialize this docset:\n` +
-                  `npx agentic-knowledge-mcp init ${docset_id}\n\n`,
+                `Docset '${docset_id}' hasn't been initialized yet.`,
               );
             }
 
@@ -361,10 +358,7 @@ ${config.docsets.map((d) => `• **${d.id}** (${d.name})`).join("\n")}`,
 
             if (!existsSync(metadataPath)) {
               throw new Error(
-                `Docset '${docset_id}' is not initialized.\n\n` +
-                  `The docset is configured but hasn't been initialized yet.\n\n` +
-                  `To initialize this docset:\n` +
-                  `npx agentic-knowledge-mcp init ${docset_id}\n\n`,
+                `Docset '${docset_id}' hasn't been initialized yet.\n\n`,
               );
             }
           } else {
