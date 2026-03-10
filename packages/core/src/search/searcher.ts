@@ -72,11 +72,10 @@ async function tryLoadMiniSearch(): Promise<
 /** Opaque handle returned by {@link buildFileIndex}. */
 export interface DocsetIndex {
   /** MiniSearch instance (null when MiniSearch could not be loaded) */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   _ms: {
     search(
-      query: string,
-      opts?: Record<string, unknown>,
+      _query: string,
+      _opts?: Record<string, unknown>,
     ): Array<{ id: unknown; score: number }>;
   } | null;
   /** Absolute path to the docset root used to build this index */
@@ -98,8 +97,13 @@ export async function buildFileIndex(rootPath: string): Promise<DocsetIndex> {
     return { _ms: null, rootPath, _idToPath: new Map() };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ms = new (MiniSearch as any)({
+  type MiniSearchInstance = DocsetIndex["_ms"] & {
+    addAllAsync(_docs: Array<{ id: number; content: string }>): Promise<void>;
+  };
+  type MiniSearchCtor = new (
+    _opts: Record<string, unknown>,
+  ) => MiniSearchInstance;
+  const ms = new (MiniSearch as unknown as MiniSearchCtor)({
     fields: ["content"],
     storeFields: [],
   });
@@ -416,13 +420,16 @@ function escapeRegex(s: string): string {
  * Only used for the `include` file-filter option; not a full glob engine.
  */
 function matchGlob(filePath: string, pattern: string): boolean {
-  // Convert simple glob to regex
+  // Convert simple glob to regex.
+  // Use a rare Unicode placeholder (U+FFFE) to temporarily represent **
+  // so that the single-* replacement doesn't clobber it.
+  const DOUBLE_STAR = "\uFFFE";
   const regexStr = pattern
     .replace(/[.+^${}()|[\]\\]/g, "\\$&") // escape regex chars (not * and ?)
-    .replace(/\*\*/g, "\x00") // placeholder for **
+    .replace(/\*\*/g, DOUBLE_STAR) // placeholder for **
     .replace(/\*/g, "[^/]*") // * → any chars except /
     .replace(/\?/g, "[^/]") // ? → single char except /
-    .replace(/\x00/g, ".*"); // ** → any chars including /
+    .replace(new RegExp(DOUBLE_STAR, "g"), ".*"); // ** → any chars including /
 
   return new RegExp(regexStr + "$", "i").test(filePath);
 }
