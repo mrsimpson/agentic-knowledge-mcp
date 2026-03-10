@@ -19,6 +19,7 @@ import {
   formatSearchResult,
   type KnowledgeConfig,
   type DocsetIndex,
+  type SearchOptions,
 } from "@codemcp/knowledge-core";
 import { initDocset } from "@codemcp/knowledge-content-loader";
 import { existsSync } from "node:fs";
@@ -392,8 +393,7 @@ ${config.docsets.map((d) => `• **${d.id}** (${d.name})`).join("\n")}`,
 
           // Perform the search
           const fallbackPattern = generalized_keywords?.trim();
-          const searchOptions: import("@agentic-knowledge/core").SearchOptions =
-            {};
+          const searchOptions: SearchOptions = {};
           if (fallbackPattern) searchOptions.fallbackPattern = fallbackPattern;
           if (typeof context_lines === "number")
             searchOptions.contextLines = context_lines;
