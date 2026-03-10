@@ -97,6 +97,7 @@ export interface SearchDocsParams {
 
 /**
  * Response from the search_docs tool
+ * @deprecated Use SearchDocsResult for actual search results
  */
 export interface SearchDocsResponse {
   /** Instructions for the agent on how to search */
@@ -107,6 +108,58 @@ export interface SearchDocsResponse {
   generalized_search_terms: string;
   /** The calculated local path for searching */
   path: string;
+}
+
+/**
+ * A single line match from a file search
+ */
+export interface SearchMatch {
+  /** Path to the file, relative to the docset root */
+  file: string;
+  /** 1-based line number of the match */
+  line: number;
+  /** The full content of the matched line (trimmed) */
+  content: string;
+  /** Lines immediately before the match (up to contextLines lines) */
+  context_before: string[];
+  /** Lines immediately after the match (up to contextLines lines) */
+  context_after: string[];
+}
+
+/**
+ * Result returned by the search_docs tool when performing an actual search
+ */
+export interface SearchDocsResult {
+  /** All matched lines across all searched files */
+  matches: SearchMatch[];
+  /** Total number of matches found (may be higher than matches.length if truncated) */
+  total_matches: number;
+  /** Number of files inspected during the search */
+  searched_files: number;
+  /** The pattern that was actually used (may differ from input if fallback was triggered) */
+  used_pattern: string;
+  /** True when results were capped at the maximum match limit */
+  truncated: boolean;
+}
+
+/**
+ * Options controlling search behaviour
+ */
+export interface SearchOptions {
+  /**
+   * Fallback pattern used when the primary pattern yields no results.
+   * Typically the value of the `generalized_keywords` tool parameter.
+   */
+  fallbackPattern?: string;
+  /** Number of context lines to include before and after each match (default: 2) */
+  contextLines?: number;
+  /** Maximum number of matches to return before truncating (default: 50) */
+  maxMatches?: number;
+  /**
+   * Glob-style pattern to restrict which files are searched (e.g. "*.md", "*.{ts,js}").
+   * When omitted all non-binary files are searched.
+   */
+  include?: string;
 }
 
 /**

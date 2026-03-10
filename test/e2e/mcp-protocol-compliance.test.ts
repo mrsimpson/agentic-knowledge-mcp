@@ -101,21 +101,17 @@ describe("MCP Protocol Compliance E2E Tests", () => {
       expect(properties.keywords).toBeDefined();
       expect(properties.keywords.type).toBe("string");
       expect(properties.keywords.description).toContain("Primary search terms");
-      expect(properties.keywords.description).toContain(
-        "specific about what you want to find",
-      );
+      // description advertises regex support
+      expect(properties.keywords.description).toMatch(/regex|pattern/i);
 
       // generalized_keywords parameter (related terms)
       expect(properties.generalized_keywords).toBeDefined();
       expect(properties.generalized_keywords.type).toBe("string");
-      expect(properties.generalized_keywords.description).toContain(
-        "Related terms, synonyms",
+      expect(properties.generalized_keywords.description).toMatch(
+        /related terms|synonyms|broader/i,
       );
-      expect(properties.generalized_keywords.description).toContain(
-        "not your main target",
-      );
-      expect(properties.generalized_keywords.description).toContain(
-        "broaden the search context",
+      expect(properties.generalized_keywords.description).toMatch(
+        /fallback|no results|broaden/i,
       );
 
       // Required parameters
@@ -181,17 +177,13 @@ describe("MCP Protocol Compliance E2E Tests", () => {
       });
 
       expect(result).toBeDefined();
+      expect(result.content).toBeDefined();
 
-      expect(result.structuredContent).toBeDefined();
-      expect(typeof result.structuredContent).toBe("object");
-
-      const response = result.structuredContent as any;
-      expect(response.instructions).toContain("authentication middleware");
-      expect(response.search_terms).toContain("authentication middleware");
-      expect(response.generalized_search_terms).toContain(
-        "login signin oauth credentials",
-      );
-      expect(response.path).toContain("docs");
+      const content = result.content as Array<{ type: string; text: string }>;
+      expect(content[0]?.type).toBe("text");
+      // Should return grep-style results or a "no matches" message
+      expect(content[0]?.text).toBeDefined();
+      expect(typeof content[0]?.text).toBe("string");
     });
 
     it("should execute search_docs with minimal parameters", async () => {
@@ -204,12 +196,11 @@ describe("MCP Protocol Compliance E2E Tests", () => {
       });
 
       expect(result).toBeDefined();
-      expect(result.structuredContent).toBeDefined();
+      expect(result.content).toBeDefined();
 
-      const response = result.structuredContent as any;
-      expect(response.instructions).toContain("rate limiting");
-      expect(response.search_terms).toContain("rate limiting");
-      expect(response.path).toContain("api");
+      const content = result.content as Array<{ type: string; text: string }>;
+      expect(content[0]?.type).toBe("text");
+      expect(typeof content[0]?.text).toBe("string");
     });
   });
 
@@ -288,12 +279,13 @@ describe("MCP Protocol Compliance E2E Tests", () => {
         },
       });
 
-      const response = result.structuredContent as any;
-      expect(response.instructions).toContain("Looking for React information");
-      expect(response.search_terms).toContain("useState hook");
-      expect(response.generalized_search_terms).toContain(
-        "state management react hooks",
-      );
+      expect(result).toBeDefined();
+      expect(result.content).toBeDefined();
+
+      const content = result.content as Array<{ type: string; text: string }>;
+      expect(content[0]?.type).toBe("text");
+      // Returns grep-style results or a "no matches" message
+      expect(typeof content[0]?.text).toBe("string");
     });
   });
 

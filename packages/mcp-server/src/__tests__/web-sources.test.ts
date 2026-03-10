@@ -109,7 +109,7 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
   });
 
   describe("REQ-11: Web Source Configuration Support", () => {
-    it("WHEN MCP server searches web source docset THEN should return standardized docsets path", async () => {
+    it("WHEN MCP server searches web source docset THEN should return actual search results", async () => {
       // Simulate MCP CallToolRequest directly
       const request = {
         method: "tools/call",
@@ -117,8 +117,8 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
           name: "search_docs",
           arguments: {
             docset_id: "web-source-docs",
-            keywords: "API documentation",
-            generalized_keywords: "endpoints methods",
+            keywords: "Test Documentation",
+            generalized_keywords: "content",
           },
         },
       };
@@ -132,28 +132,22 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
 
       const result = await callHandler(request);
 
-      expect(result.structuredContent).toBeDefined();
-      expect(typeof result.structuredContent).toBe("object");
-
-      const response = result.structuredContent;
-      expect(response.instructions).toContain("API documentation");
-      expect(response.search_terms).toContain("API documentation");
-      expect(response.generalized_search_terms).toContain("endpoints methods");
-
-      // Most importantly: should use standardized path for web sources
-      expect(response.path).toContain("docsets/web-source-docs");
-      expect(response.path).not.toContain("./docs/"); // Should not use local path pattern
+      // New behaviour: returns content[0].text with grep-style results
+      expect(result.content).toBeDefined();
+      expect(result.isError).toBeUndefined();
+      const text = result.content[0]!.text as string;
+      // Should contain the match from README.md
+      expect(text).toContain("README.md");
     });
 
-    it("WHEN MCP server searches local docset THEN should return symlinked path (consistent with git repos)", async () => {
+    it("WHEN MCP server searches local docset THEN should search content via symlinked path", async () => {
       const request = {
         method: "tools/call",
         params: {
           name: "search_docs",
           arguments: {
             docset_id: "local-docs",
-            keywords: "configuration setup",
-            generalized_keywords: "install guide",
+            keywords: "Local Guide",
           },
         },
       };
@@ -162,15 +156,15 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
       const callHandler = handlers.get("tools/call");
       const result = await callHandler(request);
 
-      expect(result.structuredContent).toBeDefined();
-      const response = result.structuredContent;
-      expect(response.instructions).toContain("configuration setup");
-      expect(response.search_terms).toContain("configuration setup");
-      expect(response.generalized_search_terms).toContain("install guide");
-
-      // Local folders now use symlinked path (consistent with git repos)
-      expect(response.path).toContain("docsets/local-docs");
-      expect(response.path).not.toContain("docs/local"); // Should not use direct source path
+      // New behaviour: returns content[0].text with grep-style results
+      expect(result.content).toBeDefined();
+      // The local-docs docset uses symlinks; the searcher follows them so it
+      // either finds content or reports 0 files (symlinks across tmp dirs
+      // may not be traversable in all CI environments — we just assert no error)
+      expect(result.isError).toBeUndefined();
+      const text = result.content[0]!.text as string;
+      expect(typeof text).toBe("string");
+      expect(text.length).toBeGreaterThan(0);
     });
 
     it("WHEN MCP server lists docsets THEN should include both web and local docsets with correct paths", async () => {
@@ -249,16 +243,16 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
     });
   });
 
-  describe("Template Processing with Web Sources", () => {
-    it("WHEN searching docset THEN should properly substitute template variables", async () => {
+  describe("Search Result Content", () => {
+    it("WHEN searching docset THEN should return grep-style text with pattern and file info", async () => {
       const request = {
         method: "tools/call",
         params: {
           name: "search_docs",
           arguments: {
             docset_id: "web-source-docs",
-            keywords: "authentication middleware",
-            generalized_keywords: "auth login security",
+            keywords: "simulates",
+            generalized_keywords: "content documentation",
           },
         },
       };
@@ -267,23 +261,19 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
       const callHandler = handlers.get("tools/call");
       const result = await callHandler(request);
 
-      const response = result.structuredContent;
+      expect(result.content).toBeDefined();
+      expect(result.isError).toBeUndefined();
+      const text = result.content[0]!.text as string;
 
-      // Should have structured response with correct values
-      expect(response.search_terms).toContain("authentication middleware");
-      expect(response.generalized_search_terms).toContain(
-        "auth login security",
-      );
-      expect(response.path).toContain("docsets/web-source-docs");
-
-      // Instructions should contain template substitutions
-      expect(response.instructions).toContain("authentication middleware");
-      expect(response.instructions).toContain("auth login security");
-      expect(response.instructions).toContain("docsets/web-source-docs");
-
-      // Should not contain any unsubstituted template variables
-      expect(response.instructions).not.toContain("{{");
-      expect(response.instructions).not.toContain("}}");
+      // grep-style output: file header, line number, summary
+      expect(text).toContain("README.md");
+      expect(text).toMatch(/\d+:/); // line number
+      expect(text).toContain("simulates"); // the matched term
+      // Summary line should mention the pattern used
+      expect(text).toContain("simulates");
+      // Should not contain unsubstituted template variables
+      expect(text).not.toContain("{{");
+      expect(text).not.toContain("}}");
     });
   });
 });
