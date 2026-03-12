@@ -56,7 +56,7 @@ Since the packages aren't published to npm yet, you can install them locally:
 
 4. **Verify installation:**
    ```bash
-   ade-knowledge --help
+   npx @codemcp/knowledge --help
    ```
 
 ## Docset Lifecycle
@@ -88,7 +88,7 @@ Update already-initialized docsets with the latest content from their sources.
 
 ## CLI Commands
 
-The `ade-knowledge` CLI provides commands to manage your documentation lifecycle. When you run `ade-knowledge` without arguments, it starts the MCP server. With arguments, it executes CLI commands.
+The `npx @codemcp/knowledge` CLI provides commands to manage your documentation lifecycle. When you run `npx @codemcp/knowledge-server` without arguments, it starts the MCP server. With arguments to `npx @codemcp/knowledge`, it executes CLI commands.
 
 ### `create` - Create New Docset Configuration
 
@@ -271,7 +271,7 @@ react-docs (React Documentation)
 api-docs (API Documentation)
    Not initialized | 1 source(s) configured
 
-   💡 Run: ade-knowledge init api-docs
+   💡 Run: npx @codemcp/knowledge init api-docs
 ```
 
 ### `refresh` - Update Documentation
@@ -583,7 +583,7 @@ npx @codemcp/knowledge status my-docset --verbose
 
 ### MCP Server
 
-When you run `ade-knowledge` without arguments, it starts an MCP server that exposes two tools:
+When you run `npx @codemcp/knowledge-server` without arguments, it starts an MCP server that exposes two tools:
 
 #### `search_docs` Tool
 
@@ -647,7 +647,7 @@ Found 2 available docset(s):
   "mcpServers": {
     "agentic-knowledge": {
       "command": "npx",
-      "args": ["-y", "agentic-knowledge"]
+      "args": ["-y", "@codemcp/knowledge-server"]
     }
   }
 }
@@ -664,7 +664,7 @@ If you have agentic-knowledge installed in a specific project:
   "mcpServers": {
     "agentic-knowledge": {
       "command": "npx",
-      "args": ["-y", "agentic-knowledge"],
+      "args": ["-y", "@codemcp/knowledge-server"],
       "cwd": "/absolute/path/to/your/project"
     }
   }
@@ -675,13 +675,14 @@ This runs the server in your project directory, making it use your project's `.k
 
 **Option 3: Global npm installation**
 
-If you installed globally with `npm install -g agentic-knowledge`:
+If you installed globally with `npm install -g @codemcp/knowledge-server`:
 
 ```json
 {
   "mcpServers": {
     "agentic-knowledge": {
-      "command": "agentic-knowledge"
+      "command": "npx",
+      "args": ["-y", "@codemcp/knowledge-server"]
     }
   }
 }
@@ -698,7 +699,7 @@ If you installed globally with `npm install -g agentic-knowledge`:
 For other MCP clients, use:
 
 - **Command**: `npx`
-- **Args**: `["-y", "agentic-knowledge"]`
+- **Args**: `["-y", "@codemcp/knowledge-server"]`
 - **Transport**: stdio
 
 The server will start automatically when the MCP client launches.
@@ -733,7 +734,7 @@ The AI assistant will:
 
 **Error**: "Docset 'X' is not initialized"
 
-**Solution**: Run `ade-knowledge init X`
+**Solution**: Run `npx @codemcp/knowledge init X`
 
 ### Git Clone Failures
 
@@ -748,7 +749,7 @@ The AI assistant will:
 
 ### Status Shows Old Data
 
-**Solution**: Run `ade-knowledge refresh <docset-id>` to update
+**Solution**: Run `npx @codemcp/knowledge refresh <docset-id>` to update
 
 ### Symlinks Not Working
 
@@ -758,14 +759,14 @@ The AI assistant will:
 
 - Verify the source paths exist
 - Check file permissions
-- Re-run `ade-knowledge create` with the local folder preset
+- Re-run `npx @codemcp/knowledge create` with the local folder preset
 
 ### Search Not Finding Results
 
 **Tips:**
 
 - Try broader keywords with `generalized_keywords`
-- Check the docset is initialized: `ade-knowledge status`
+- Check the docset is initialized: `npx @codemcp/knowledge status`
 - Verify the documentation actually contains the terms
 - Use verbose status to see which files are included
 

@@ -166,17 +166,17 @@ To configure docsets and use this tool:
 **Option 1: Use CLI (recommended)**
 \`\`\`bash
 # Create a docset for a Git repository
-agentic-knowledge create \\
+npx @codemcp/knowledge create \\
   --preset git-repo \\
   --id my-docs \\
   --name "My Documentation" \\
   --url https://github.com/user/repo.git
 
 # Initialize it (downloads the docs)
-agentic-knowledge init my-docs
+npx @codemcp/knowledge init my-docs
 
 # Restart the MCP server
-agentic-knowledge
+npx @codemcp/knowledge-server
 \`\`\`
 
 **Option 2: Manual configuration**
@@ -362,8 +362,8 @@ ${config.docsets.map((d) => `• **${d.id}** (${d.name})`).join("\n")}`,
               "No configuration file found.\n\n" +
                 "To configure docsets:\n\n" +
                 "**Option 1: Use CLI (recommended)**\n" +
-                'agentic-knowledge create --preset git-repo --id my-docs --name "My Docs" --url <repo-url>\n' +
-                "agentic-knowledge init my-docs\n\n" +
+                'npx @codemcp/knowledge create --preset git-repo --id my-docs --name "My Docs" --url <repo-url>\n' +
+                "npx @codemcp/knowledge init my-docs\n\n" +
                 "**Option 2: Manual configuration**\n" +
                 "Create .knowledge/config.yaml in your project root.\n" +
                 "See the search_docs tool description for example configuration.",
@@ -424,8 +424,8 @@ ${config.docsets.map((d) => `• **${d.id}** (${d.name})`).join("\n")}`,
                     "To configure docsets:\n\n" +
                     "**Option 1: Use CLI (recommended)**\n" +
                     "```bash\n" +
-                    'agentic-knowledge create --preset git-repo --id my-docs --name "My Docs" --url <repo-url>\n' +
-                    "agentic-knowledge init my-docs\n" +
+                    'npx @codemcp/knowledge create --preset git-repo --id my-docs --name "My Docs" --url <repo-url>\n' +
+                    "npx @codemcp/knowledge init my-docs\n" +
                     "```\n\n" +
                     "**Option 2: Manual configuration**\n" +
                     "Create `.knowledge/config.yaml`:\n" +
