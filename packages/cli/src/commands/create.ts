@@ -84,7 +84,7 @@ export const createCommand = new Command("create")
       console.log(chalk.gray(`   Config saved to: ${configPath}`));
       console.log(
         chalk.yellow(
-          `\n💡 Next step: Initialize the docset with 'agentic-knowledge init ${options.id}'`,
+          `\n💡 Next step: Initialize the docset with 'npx @codemcp/knowledge init ${options.id}'`,
         ),
       );
     } catch (error) {

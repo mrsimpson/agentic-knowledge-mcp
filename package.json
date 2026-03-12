@@ -1,17 +1,20 @@
 {
-  "name": "agentic-knowledge-mcp",
+  "name": "@codemcp/knowledge",
   "version": "1.6.2",
   "description": "A Model Context Protocol server for agentic knowledge guidance with web-based documentation loading and intelligent search instructions",
   "type": "module",
   "main": "packages/cli/dist/index.js",
   "bin": {
-    "agentic-knowledge": "packages/cli/dist/index.js"
+    "ade-knowledge": "packages/cli/dist/index.js"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=9.0.0"
   },
-  "packageManager": "pnpm@10.29.3",
+  "packageManager": "pnpm@10.32.1",
   "files": [
     "packages/*/dist/**/*",
     "packages/*/package.json",
@@ -27,7 +30,7 @@
     "build": "turbo run build",
     "pack:local": "node scripts/prepare-local.cjs",
     "inspector": "npx @modelcontextprotocol/inspector",
-    "dev": "turbo run dev --filter=@codemcp/knowledge-core --filter=@codemcp/knowledge",
+    "dev": "turbo run dev --filter=@codemcp/knowledge-core --filter=@codemcp/knowledge-server",
     "clean": "turbo run clean:build",
     "prepublishOnly": "npm run build",
     "lint-staged": "npx lint-staged",
@@ -45,17 +48,14 @@
     "clean:build": "turbo run clean:build"
   },
   "dependencies": {
-    "@codemcp/knowledge": "workspace:*",
-    "@codemcp/knowledge-content-loader": "workspace:*",
-    "@codemcp/knowledge-core": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.19.1",
-    "@types/js-yaml": "4.0.9",
-    "chalk": "^5.3.0",
-    "commander": "^12.0.0",
-    "js-yaml": "4.1.0",
-    "ora": "^8.0.1"
+    "adm-zip": "0.5.16",
+    "commander": "^12.0.0"
   },
   "devDependencies": {
+    "@codemcp/knowledge-content-loader": "workspace:*",
+    "@codemcp/knowledge-core": "workspace:*",
+    "@codemcp/knowledge-server": "workspace:*",
     "@eslint/js": "^9.34.0",
     "@modelcontextprotocol/inspector": "0.16.8",
     "@tsconfig/node22": "22.0.2",
@@ -71,6 +71,7 @@
     "oxlint": "1.14.0",
     "prettier": "^3.6.2",
     "rimraf": "^6.0.1",
+    "tsup": "^8.0.0",
     "turbo": "^2.5.6",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"

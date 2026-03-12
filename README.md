@@ -40,14 +40,14 @@ Add to your coding agent config something along the lines of
 
 ```bash
 # For a Git repository
-npx agentic-knowledge-mcp create \
+npx @codemcp/knowledge create \
   --preset git-repo \
   --id react-docs \
   --name "React Documentation" \
   --url https://github.com/facebook/react.git
 
 # Initialize (downloads the docs)
-npx agentic-knowledge-mcp init react-docs
+npx @codemcp/knowledge init react-docs
 
 # The MCP server starts automatically when Claude Desktop launches
 ```

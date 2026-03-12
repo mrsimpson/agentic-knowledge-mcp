@@ -185,7 +185,9 @@ function displaySummary(statuses: DocsetStatus[]) {
         ),
       );
       console.log();
-      console.log(chalk.blue(`   💡 Run: agentic-knowledge init ${docset.id}`));
+      console.log(
+        chalk.blue(`   💡 Run: npx @codemcp/knowledge init ${docset.id}`),
+      );
       continue;
     }
 
@@ -242,7 +244,7 @@ function displayDetailedStatus(status: DocsetStatus) {
       }
       console.log(
         chalk.blue(
-          "\n   💡 Run 'agentic-knowledge init " +
+          "\n   💡 Run 'npx @codemcp/knowledge init " +
             docset.id +
             "' to initialize",
         ),

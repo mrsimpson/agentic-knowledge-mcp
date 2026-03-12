@@ -18,10 +18,10 @@ Complete guide to using Agentic Knowledge for managing and searching documentati
 
 ```bash
 # Install in your project
-npm install agentic-knowledge
+npm install @codemcp/knowledge
 
 # Or use directly with npx (no installation needed)
-npx agentic-knowledge --help
+npx @codemcp/knowledge --help
 ```
 
 ### From Source
@@ -56,7 +56,7 @@ Since the packages aren't published to npm yet, you can install them locally:
 
 4. **Verify installation:**
    ```bash
-   agentic-knowledge --help
+   npx @codemcp/knowledge --help
    ```
 
 ## Docset Lifecycle
@@ -88,7 +88,7 @@ Update already-initialized docsets with the latest content from their sources.
 
 ## CLI Commands
 
-The `agentic-knowledge-mcp` CLI provides commands to manage your documentation lifecycle. When you run `agentic-knowledge-mcp` without arguments, it starts the MCP server. With arguments, it executes CLI commands.
+The `npx @codemcp/knowledge` CLI provides commands to manage your documentation lifecycle. When you run `npx @codemcp/knowledge-server` without arguments, it starts the MCP server. With arguments to `npx @codemcp/knowledge`, it executes CLI commands.
 
 ### `create` - Create New Docset Configuration
 
@@ -97,7 +97,7 @@ Create docset configurations quickly using presets. Alternatively, you can manua
 **Git Repository Preset:**
 
 ```bash
-npx agentic-knowledge create \
+npx @codemcp/knowledge create \
   --preset git-repo \
   --id mcp-sdk \
   --name "MCP TypeScript SDK" \
@@ -108,7 +108,7 @@ npx agentic-knowledge create \
 **Local Folder Preset:**
 
 ```bash
-npx agentic-knowledge create \
+npx @codemcp/knowledge create \
   --preset local-folder \
   --id my-docs \
   --name "My Documentation" \
@@ -136,19 +136,19 @@ Initialize a configured docset by downloading and preparing documentation. Use t
 
 ```bash
 # Initialize a specific docset
-npx agentic-knowledge init mcp-sdk
+npx @codemcp/knowledge init mcp-sdk
 
 # Force re-initialization (clears directory and re-extracts)
-npx agentic-knowledge init mcp-sdk --force
+npx @codemcp/knowledge init mcp-sdk --force
 
 # Discover and update path patterns in config
-npx agentic-knowledge init mcp-sdk --discover-paths
+npx @codemcp/knowledge init mcp-sdk --discover-paths
 
 # Both together (clear, re-extract, and update config)
-npx agentic-knowledge init mcp-sdk --force --discover-paths
+npx @codemcp/knowledge init mcp-sdk --force --discover-paths
 
 # Use custom config path
-npx agentic-knowledge init mcp-sdk --config /path/to/config.yaml
+npx @codemcp/knowledge init mcp-sdk --config /path/to/config.yaml
 ```
 
 **Options:**
@@ -214,7 +214,7 @@ sources:
 
 ```bash
 # Start without paths, discover what files exist
-npx agentic-knowledge init my-docset --discover-paths
+npx @codemcp/knowledge init my-docset --discover-paths
 ```
 
 This analyzes the extracted files and updates your config with optimal directory patterns instead of listing hundreds of individual files.
@@ -246,13 +246,13 @@ View the status of all docsets and their sources:
 
 ```bash
 # Basic status
-npx agentic-knowledge status
+npx @codemcp/knowledge status
 
 # Detailed status with source information
-npx agentic-knowledge status --verbose
+npx @codemcp/knowledge status --verbose
 
 # Use custom config
-npx agentic-knowledge status --config /path/to/config.yaml
+npx @codemcp/knowledge status --config /path/to/config.yaml
 ```
 
 **Example output:**
@@ -271,7 +271,7 @@ react-docs (React Documentation)
 api-docs (API Documentation)
    Not initialized | 1 source(s) configured
 
-   💡 Run: agentic-knowledge init api-docs
+   💡 Run: npx @codemcp/knowledge init api-docs
 ```
 
 ### `refresh` - Update Documentation
@@ -280,16 +280,16 @@ Update already-initialized docsets with latest content. This is a **smart, incre
 
 ```bash
 # Refresh all docsets
-npx agentic-knowledge refresh
+npx @codemcp/knowledge refresh
 
 # Refresh specific docset
-npx agentic-knowledge refresh mcp-sdk
+npx @codemcp/knowledge refresh mcp-sdk
 
 # Force refresh (ignore throttle)
-npx agentic-knowledge refresh mcp-sdk --force
+npx @codemcp/knowledge refresh mcp-sdk --force
 
 # Use custom config
-npx agentic-knowledge refresh --config /path/to/config.yaml
+npx @codemcp/knowledge refresh --config /path/to/config.yaml
 ```
 
 **Smart refresh logic:**
@@ -380,7 +380,7 @@ docsets:
 2. **Auto-discovery**: Use `--discover-paths` flag during init to automatically detect optimal paths
 
    ```bash
-   npx agentic-knowledge init my-docset --discover-paths
+   npx @codemcp/knowledge init my-docset --discover-paths
    ```
 
    This analyzes extracted files and updates config with directory patterns instead of individual files.
@@ -456,14 +456,14 @@ docsets:
 
 ```bash
 # 1. Create config for local docs
-npx agentic-knowledge create \
+npx @codemcp/knowledge create \
   --preset local-folder \
   --id my-project \
   --name "My Project Docs" \
   --path ./docs
 
 # 2. Check status
-npx agentic-knowledge status
+npx @codemcp/knowledge status
 
 # 3. Configure Claude Desktop (see MCP Integration section)
 # The server runs automatically when Claude launches
@@ -475,7 +475,7 @@ No initialization needed - local folders use symlinks!
 
 ```bash
 # 1. Create docset for a Git repository
-npx agentic-knowledge create \
+npx @codemcp/knowledge create \
   --preset git-repo \
   --id react-docs \
   --name "React Documentation" \
@@ -483,32 +483,32 @@ npx agentic-knowledge create \
   --branch main
 
 # 2. Initialize the docset (downloads docs)
-npx agentic-knowledge init react-docs
+npx @codemcp/knowledge init react-docs
 
 # 3. Check status
-npx agentic-knowledge status
+npx @codemcp/knowledge status
 
 # 4. Configure Claude Desktop (see MCP Integration section)
 # The server runs automatically when Claude launches
 
 # Later: Update documentation
-npx agentic-knowledge refresh react-docs
+npx @codemcp/knowledge refresh react-docs
 ```
 
 ### Workflow 3: Multi-Repository Setup
 
 ```bash
 # Set up multiple docsets
-npx agentic-knowledge create --preset git-repo --id frontend-docs --name "Frontend Docs" --url https://github.com/company/frontend.git
-npx agentic-knowledge create --preset git-repo --id backend-docs --name "Backend Docs" --url https://github.com/company/backend.git
-npx agentic-knowledge create --preset local-folder --id internal-docs --name "Internal Docs" --path ./docs
+npx @codemcp/knowledge create --preset git-repo --id frontend-docs --name "Frontend Docs" --url https://github.com/company/frontend.git
+npx @codemcp/knowledge create --preset git-repo --id backend-docs --name "Backend Docs" --url https://github.com/company/backend.git
+npx @codemcp/knowledge create --preset local-folder --id internal-docs --name "Internal Docs" --path ./docs
 
 # Initialize git repos
-npx agentic-knowledge init frontend-docs
-npx agentic-knowledge init backend-docs
+npx @codemcp/knowledge init frontend-docs
+npx @codemcp/knowledge init backend-docs
 
 # Check all statuses
-npx agentic-knowledge status --verbose
+npx @codemcp/knowledge status --verbose
 
 # Configure Claude Desktop (see MCP Integration section)
 # The server runs automatically when Claude launches
@@ -520,7 +520,7 @@ When you're not sure which paths to extract from a large repository:
 
 ```bash
 # 1. Create docset without specifying paths
-npx agentic-knowledge create \
+npx @codemcp/knowledge create \
   --preset git-repo \
   --id large-repo \
   --name "Large Repository Docs" \
@@ -531,10 +531,10 @@ npx agentic-knowledge create \
 # - Use smart filtering to extract documentation
 # - Analyze the extracted files
 # - Update config with optimal directory patterns (e.g., "docs/", "examples/")
-npx agentic-knowledge init large-repo --discover-paths
+npx @codemcp/knowledge init large-repo --discover-paths
 
 # 3. Check what was discovered
-npx agentic-knowledge status large-repo --verbose
+npx @codemcp/knowledge status large-repo --verbose
 
 # 4. Review and adjust the auto-generated paths in .knowledge/config.yaml
 # The discovered paths will look like:
@@ -546,7 +546,7 @@ npx agentic-knowledge status large-repo --verbose
 
 # 5. If you want to adjust and re-init with different paths:
 # Edit .knowledge/config.yaml, then:
-npx agentic-knowledge init large-repo --force
+npx @codemcp/knowledge init large-repo --force
 ```
 
 ### Workflow 5: Managing Path Configuration Changes
@@ -567,7 +567,7 @@ When you need to change which paths are extracted from a git repository:
 
 # 2. Force re-initialization to apply new configuration
 # This completely clears the old content and re-extracts based on new paths
-npx agentic-knowledge init my-docset --force
+npx @codemcp/knowledge init my-docset --force
 
 # Output you'll see:
 # 🗑️  Clearing existing directory...
@@ -576,14 +576,14 @@ npx agentic-knowledge init my-docset --force
 #     ✅ Copied 75 files using smart filtering
 
 # 3. Verify the changes
-npx agentic-knowledge status my-docset --verbose
+npx @codemcp/knowledge status my-docset --verbose
 ```
 
 ## MCP Integration
 
 ### MCP Server
 
-When you run `agentic-knowledge-mcp` without arguments, it starts an MCP server that exposes two tools:
+When you run `npx @codemcp/knowledge-server` without arguments, it starts an MCP server that exposes two tools:
 
 #### `search_docs` Tool
 
@@ -647,7 +647,7 @@ Found 2 available docset(s):
   "mcpServers": {
     "agentic-knowledge": {
       "command": "npx",
-      "args": ["-y", "agentic-knowledge"]
+      "args": ["-y", "@codemcp/knowledge-server"]
     }
   }
 }
@@ -664,7 +664,7 @@ If you have agentic-knowledge installed in a specific project:
   "mcpServers": {
     "agentic-knowledge": {
       "command": "npx",
-      "args": ["-y", "agentic-knowledge"],
+      "args": ["-y", "@codemcp/knowledge-server"],
       "cwd": "/absolute/path/to/your/project"
     }
   }
@@ -675,13 +675,14 @@ This runs the server in your project directory, making it use your project's `.k
 
 **Option 3: Global npm installation**
 
-If you installed globally with `npm install -g agentic-knowledge`:
+If you installed globally with `npm install -g @codemcp/knowledge-server`:
 
 ```json
 {
   "mcpServers": {
     "agentic-knowledge": {
-      "command": "agentic-knowledge"
+      "command": "npx",
+      "args": ["-y", "@codemcp/knowledge-server"]
     }
   }
 }
@@ -698,7 +699,7 @@ If you installed globally with `npm install -g agentic-knowledge`:
 For other MCP clients, use:
 
 - **Command**: `npx`
-- **Args**: `["-y", "agentic-knowledge"]`
+- **Args**: `["-y", "@codemcp/knowledge-server"]`
 - **Transport**: stdio
 
 The server will start automatically when the MCP client launches.
@@ -733,7 +734,7 @@ The AI assistant will:
 
 **Error**: "Docset 'X' is not initialized"
 
-**Solution**: Run `agentic-knowledge init X`
+**Solution**: Run `npx @codemcp/knowledge init X`
 
 ### Git Clone Failures
 
@@ -748,7 +749,7 @@ The AI assistant will:
 
 ### Status Shows Old Data
 
-**Solution**: Run `agentic-knowledge refresh <docset-id>` to update
+**Solution**: Run `npx @codemcp/knowledge refresh <docset-id>` to update
 
 ### Symlinks Not Working
 
@@ -758,14 +759,14 @@ The AI assistant will:
 
 - Verify the source paths exist
 - Check file permissions
-- Re-run `agentic-knowledge create` with the local folder preset
+- Re-run `npx @codemcp/knowledge create` with the local folder preset
 
 ### Search Not Finding Results
 
 **Tips:**
 
 - Try broader keywords with `generalized_keywords`
-- Check the docset is initialized: `agentic-knowledge status`
+- Check the docset is initialized: `npx @codemcp/knowledge status`
 - Verify the documentation actually contains the terms
 - Use verbose status to see which files are included
 
@@ -776,7 +777,7 @@ The AI assistant will:
 **Solution**: Use `init --force` to completely clear and re-extract:
 
 ```bash
-npx agentic-knowledge init my-docset --force
+npx @codemcp/knowledge init my-docset --force
 ```
 
 This ensures:
@@ -792,7 +793,7 @@ This ensures:
 **Solution**: Use `init --discover-paths` to auto-optimize:
 
 ```bash
-npx agentic-knowledge init my-docset --force --discover-paths
+npx @codemcp/knowledge init my-docset --force --discover-paths
 ```
 
 This will convert something like:
@@ -829,7 +830,7 @@ paths:
 
 ```bash
 # Your source files in ./docs/ will NOT be deleted
-npx agentic-knowledge init my-local-docs --force
+npx @codemcp/knowledge init my-local-docs --force
 ```
 
 Output shows:
