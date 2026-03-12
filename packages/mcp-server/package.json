@@ -1,12 +1,15 @@
 {
-  "name": "@codemcp/knowledge",
+  "name": "@codemcp/knowledge-server",
   "version": "1.6.2",
-  "description": "MCP server implementation for agentic knowledge guidance system",
+  "description": "Lightweight MCP server for agentic knowledge guidance",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "@codemcp/knowledge": "dist/bin.js"
+    "ade-knowledge-server": "dist/bin.js"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "exports": {
     ".": {

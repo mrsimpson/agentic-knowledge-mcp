@@ -12,7 +12,7 @@ export function runCli() {
   const program = new Command();
 
   program
-    .name("agentic-knowledge")
+    .name("ade-knowledge")
     .description("Manage web content sources for agentic knowledge system")
     .version("0.1.0");
 
