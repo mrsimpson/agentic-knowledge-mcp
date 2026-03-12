@@ -183,7 +183,7 @@ Complex requirements for unwanted behavior also include the If-Then keywords.
 
 - The system SHALL be distributable as NPM package
 - The system SHALL provide executable binary for MCP server
-- WHEN installed globally THEN the system SHALL be available as "ade-knowledge" command
+- WHEN installed globally THEN the system SHALL be available as "npx @codemcp/knowledge" command
 - The system SHALL follow semantic versioning for releases
 - The system SHALL include TypeScript type definitions for programmatic use
 
@@ -206,7 +206,7 @@ Complex requirements for unwanted behavior also include the If-Then keywords.
 
 **Acceptance Criteria:**
 
-- WHEN CLI command "ade-knowledge init {docset-id}" executed THEN the system SHALL clone configured Git repositories
+- WHEN CLI command "npx @codemcp/knowledge init {docset-id}" executed THEN the system SHALL clone configured Git repositories
 - WHEN Git repository requires authentication THEN the system SHALL use system Git credentials
 - WHEN Git repository URL is invalid THEN the system SHALL return clear error message
 - WHEN Git repository is unreachable THEN the system SHALL return network error with retry suggestion
@@ -234,10 +234,10 @@ Complex requirements for unwanted behavior also include the If-Then keywords.
 
 **Acceptance Criteria:**
 
-- WHEN "ade-knowledge init {docset-id}" executed AND docset has web_sources THEN the system SHALL download all configured sources
-- WHEN "ade-knowledge refresh" executed without docset-id THEN the system SHALL refresh all docsets with web_sources
-- WHEN "ade-knowledge refresh {docset-id}" executed THEN the system SHALL refresh only specified docset
-- WHEN "ade-knowledge status" executed THEN the system SHALL show last update time for each web source
+- WHEN "npx @codemcp/knowledge init {docset-id}" executed AND docset has web_sources THEN the system SHALL download all configured sources
+- WHEN "npx @codemcp/knowledge refresh" executed without docset-id THEN the system SHALL refresh all docsets with web_sources
+- WHEN "npx @codemcp/knowledge refresh {docset-id}" executed THEN the system SHALL refresh only specified docset
+- WHEN "npx @codemcp/knowledge status" executed THEN the system SHALL show last update time for each web source
 - WHEN network is unavailable during refresh THEN the system SHALL report error but continue with other sources
 - The system SHALL show progress indicators for long-running downloads
 

@@ -1,5 +1,5 @@
 /**
- * CLI implementation for agentic-knowledge web content management
+ * CLI implementation for @codemcp/knowledge web content management
  */
 
 import { Command } from "commander";
@@ -12,7 +12,7 @@ export function runCli() {
   const program = new Command();
 
   program
-    .name("ade-knowledge")
+    .name("npx @codemcp/knowledge")
     .description("Manage web content sources for agentic knowledge system")
     .version("0.1.0");
 

@@ -18,7 +18,7 @@ Complete guide to using Agentic Knowledge for managing and searching documentati
 
 ```bash
 # Install in your project
-npm install agentic-knowledge
+npm install @codemcp/knowledge
 
 # Or use directly with npx (no installation needed)
 npx @codemcp/knowledge --help

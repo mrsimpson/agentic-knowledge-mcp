@@ -44,7 +44,7 @@ const GENERALIZED_KEYWORDS_DESCRIPTION =
 export function createAgenticKnowledgeServer() {
   const server = new Server(
     {
-      name: "agentic-knowledge",
+      name: "knowledge",
       version: "0.1.0",
     },
     {
