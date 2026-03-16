@@ -6,7 +6,16 @@ export default defineConfig({
     exports: "src/exports.ts",
   },
   format: ["esm"],
-  dts: false,
+  dts: {
+    // Only emit declaration files for the public API entry point.
+    // The `index` (binary) entry doesn't need them.
+    entry: { exports: "src/exports.ts" },
+    compilerOptions: {
+      // `incremental` is incompatible with tsup's DTS worker when not emitting
+      // to a single file; disable it here.
+      incremental: false,
+    },
+  },
   clean: true,
   bundle: true,
   // External: CommonJS packages that use Node.js built-ins via require()
