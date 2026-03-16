@@ -4,40 +4,8 @@
 
 import { Command } from "commander";
 import chalk from "chalk";
-import { promises as fs } from "node:fs";
-import * as path from "node:path";
-import {
-  findConfigPathSync,
-  loadConfigSync,
-  calculateLocalPath,
-} from "@codemcp/knowledge-core";
-
-interface DocsetMetadata {
-  docset_id: string;
-  docset_name: string;
-  initialized_at: string;
-  last_refreshed?: string;
-  total_files: number;
-  sources_count: number;
-}
-
-interface SourceMetadata {
-  source_url: string;
-  source_type: string;
-  downloaded_at: string;
-  files_count: number;
-  files: string[];
-  docset_id: string;
-  last_commit?: string;
-}
-
-interface DocsetStatus {
-  docset: any;
-  initialized: boolean;
-  metadata: DocsetMetadata | null;
-  sources: SourceMetadata[];
-  error?: string;
-}
+import { getStatus } from "../api/status.js";
+import type { DocsetStatusInfo } from "../api/types.js";
 
 export const statusCommand = new Command("status")
   .description("Show status of web sources for docsets")
@@ -47,56 +15,25 @@ export const statusCommand = new Command("status")
     try {
       console.log(chalk.blue("📊 Agentic Knowledge Status\n"));
 
-      // Find and load configuration
-      const configPath = options.config || findConfigPathSync(process.cwd());
-      if (!configPath) {
-        throw new Error(
-          "No configuration file found. Run this command from a directory with .knowledge/config.yaml",
-        );
-      }
+      const result = await getStatus({ cwd: process.cwd() });
 
-      console.log(chalk.gray(`📄 Config: ${configPath}`));
-      const config = loadConfigSync(configPath);
+      console.log(chalk.gray(`📄 Config: ${result.configPath}`));
 
-      // Find docsets with web sources
-      const webDocsets = config.docsets.filter(
-        (d) => d.sources && d.sources.length > 0,
-      );
-
-      if (webDocsets.length === 0) {
-        console.log(chalk.yellow("\n⚠️  No docsets with web sources found."));
-
-        // Show all docsets for reference
-        if (config.docsets.length > 0) {
-          console.log(chalk.gray("\nAvailable docsets (local only):"));
-          for (const docset of config.docsets) {
-            console.log(chalk.gray(`  • ${docset.id} - ${docset.name}`));
-          }
-        }
+      if (result.docsets.length === 0) {
+        console.log(chalk.yellow("\n⚠️  No docsets configured."));
         return;
       }
 
       console.log(
-        chalk.green(
-          `\n✅ Found ${webDocsets.length} docset(s) with web sources\n`,
-        ),
+        chalk.green(`\n✅ Found ${result.docsets.length} docset(s)\n`),
       );
 
-      // Get status for each docset
-      const statuses: DocsetStatus[] = [];
-      for (const docset of webDocsets) {
-        const status = await getDocsetStatus(docset, configPath);
-        statuses.push(status);
-      }
+      displaySummary(result.docsets);
 
-      // Display summary
-      displaySummary(statuses);
-
-      // Display detailed status if verbose
       if (options.verbose) {
         console.log(chalk.blue("\n📋 Detailed Status\n"));
-        for (const status of statuses) {
-          displayDetailedStatus(status);
+        for (const ds of result.docsets) {
+          displayDetailed(ds);
         }
       }
     } catch (error) {
@@ -108,145 +45,65 @@ export const statusCommand = new Command("status")
     }
   });
 
-async function getDocsetStatus(
-  docset: any,
-  configPath: string,
-): Promise<DocsetStatus> {
-  try {
-    const localPath = calculateLocalPath(docset, configPath);
-    const metadataPath = path.join(localPath, ".agentic-metadata.json");
-
-    // Check if docset is initialized
-    let metadata: DocsetMetadata | null = null;
-    try {
-      const metadataContent = await fs.readFile(metadataPath, "utf8");
-      metadata = JSON.parse(metadataContent);
-    } catch {
-      return {
-        docset,
-        initialized: false,
-        metadata: null,
-        sources: [],
-      };
-    }
-
-    // Load source metadata
-    const sources: SourceMetadata[] = [];
-    for (let i = 0; i < (docset.sources?.length || 0); i++) {
-      try {
-        const sourceMetadataPath = path.join(
-          localPath,
-          `.agentic-source-${i}.json`,
-        );
-        const sourceContent = await fs.readFile(sourceMetadataPath, "utf8");
-        const sourceMetadata = JSON.parse(sourceContent);
-        sources.push(sourceMetadata);
-      } catch {
-        // Source metadata missing - this might indicate an issue
-      }
-    }
-
-    return {
-      docset,
-      initialized: true,
-      metadata,
-      sources,
-    };
-  } catch (error) {
-    return {
-      docset,
-      initialized: false,
-      metadata: null,
-      sources: [],
-      error: error instanceof Error ? error.message : String(error),
-    };
-  }
-}
-
-function displaySummary(statuses: DocsetStatus[]) {
+function displaySummary(docsets: DocsetStatusInfo[]) {
   console.log(chalk.blue("📈 Summary"));
   console.log("─".repeat(50));
 
-  for (const status of statuses) {
-    const { docset, initialized, metadata, sources, error } = status;
-
-    if (error) {
+  for (const ds of docsets) {
+    if (ds.error) {
       console.log(
-        `${chalk.red("❌")} ${chalk.bold(docset.id)} - ${chalk.red("Error: " + error)}`,
+        `${chalk.red("❌")} ${chalk.bold(ds.id)} - ${chalk.red("Error: " + ds.error)}`,
       );
       continue;
     }
 
-    if (!initialized) {
-      console.log(`${chalk.bold(docset.id)} (${docset.name})`);
+    if (!ds.initialized) {
+      console.log(`${chalk.bold(ds.id)} (${ds.name})`);
       console.log(
         chalk.gray(
-          `   Not initialized | ${docset.sources?.length || 0} source(s) configured`,
+          `   Not initialized | ${ds.sources.length} source(s) loaded`,
         ),
       );
       console.log();
       console.log(
-        chalk.blue(`   💡 Run: npx @codemcp/knowledge init ${docset.id}`),
+        chalk.blue(`   💡 Run: npx @codemcp/knowledge init ${ds.id}`),
       );
       continue;
     }
 
-    if (!metadata) {
-      console.log(
-        `${chalk.red("❌")} ${chalk.bold(docset.id)} - ${chalk.red("Metadata corrupted")}`,
-      );
-      continue;
-    }
+    const dateDisplay = ds.metadata
+      ? new Date(ds.metadata.initializedAt).toISOString().split("T")[0]
+      : "unknown";
 
-    // Format initialization date
-    const initDate = new Date(metadata.initialized_at);
-    const dateDisplay = initDate.toISOString().split("T")[0]; // YYYY-MM-DD format
-
-    console.log(`${chalk.bold(docset.id)} (${docset.name})`);
+    console.log(`${chalk.bold(ds.id)} (${ds.name})`);
     console.log(
       chalk.gray(
-        `   Initialized | ${metadata.total_files} files | ${sources.length}/${metadata.sources_count} source(s) loaded`,
+        `   Initialized | ${ds.metadata?.totalFiles ?? 0} files | ${ds.sources.length}/${ds.metadata?.sourcesCount ?? 0} source(s) loaded`,
       ),
     );
     console.log(chalk.gray(`   Initialized: ${dateDisplay}`));
   }
 }
 
-function displayDetailedStatus(status: DocsetStatus) {
-  const { docset, initialized, metadata, sources, error } = status;
-
-  console.log(chalk.bold(`🔸 ${docset.id} (${docset.name})`));
+function displayDetailed(ds: DocsetStatusInfo) {
+  console.log(chalk.bold(`🔸 ${ds.id} (${ds.name})`));
   console.log("─".repeat(40));
 
-  if (error) {
-    console.log(chalk.red(`❌ Error: ${error}`));
+  if (ds.error) {
+    console.log(chalk.red(`❌ Error: ${ds.error}`));
     console.log();
     return;
   }
 
-  if (!initialized) {
+  if (!ds.initialized) {
     console.log(chalk.yellow("⚠️  Status: Not initialized"));
     console.log(
-      chalk.gray(`📝 Description: ${docset.description || "No description"}`),
+      chalk.gray(`📝 Description: ${ds.description ?? "No description"}`),
     );
-    console.log(
-      chalk.gray(`🔗 Sources configured: ${docset.sources?.length || 0}`),
-    );
-
-    if (docset.sources && docset.sources.length > 0) {
-      console.log(chalk.gray("   Sources:"));
-      for (const [i, source] of docset.sources.entries()) {
-        console.log(
-          chalk.gray(
-            `     ${i + 1}. ${source.type === "git_repo" ? source.url : source.paths?.join(", ")} (${source.type})`,
-          ),
-        );
-      }
+    if (ds.sources.length === 0) {
       console.log(
         chalk.blue(
-          "\n   💡 Run 'npx @codemcp/knowledge init " +
-            docset.id +
-            "' to initialize",
+          `\n   💡 Run 'npx @codemcp/knowledge init ${ds.id}' to initialize`,
         ),
       );
     }
@@ -254,61 +111,42 @@ function displayDetailedStatus(status: DocsetStatus) {
     return;
   }
 
-  if (!metadata) {
-    console.log(chalk.red("❌ Status: Metadata corrupted"));
-    console.log();
-    return;
-  }
-
-  // Display basic info
   console.log(chalk.green("✅ Status: Initialized"));
   console.log(
-    chalk.gray(`📝 Description: ${docset.description || "No description"}`),
+    chalk.gray(`📝 Description: ${ds.description ?? "No description"}`),
   );
-  console.log(chalk.gray(`📄 Total files: ${metadata.total_files}`));
-  console.log(chalk.gray(`🔗 Sources: ${metadata.sources_count}`));
+  console.log(chalk.gray(`📄 Total files: ${ds.metadata?.totalFiles ?? 0}`));
+  console.log(chalk.gray(`🔗 Sources: ${ds.metadata?.sourcesCount ?? 0}`));
 
-  // Display timing info
-  const initTime = new Date(metadata.initialized_at);
-  const lastRefresh = metadata.last_refreshed
-    ? new Date(metadata.last_refreshed)
-    : null;
-
-  console.log(chalk.gray(`📅 Initialized: ${initTime.toLocaleString()}`));
-  if (lastRefresh) {
+  if (ds.metadata) {
     console.log(
-      chalk.gray(`🔄 Last refreshed: ${lastRefresh.toLocaleString()}`),
+      chalk.gray(
+        `📅 Initialized: ${new Date(ds.metadata.initializedAt).toLocaleString()}`,
+      ),
     );
-  }
-
-  // Display source details
-  if (sources.length > 0) {
-    console.log(chalk.gray("\n🔗 Sources:"));
-    for (const [i, source] of sources.entries()) {
-      const downloadTime = new Date(source.downloaded_at);
+    if (ds.metadata.lastRefreshed) {
       console.log(
         chalk.gray(
-          `   ${i + 1}. ${source.source_url} (${source.files_count} files, ${downloadTime.toLocaleString()})`,
+          `🔄 Last refreshed: ${new Date(ds.metadata.lastRefreshed).toLocaleString()}`,
         ),
       );
-      if (source.last_commit) {
+    }
+  }
+
+  if (ds.sources.length > 0) {
+    console.log(chalk.gray("\n🔗 Sources:"));
+    for (const [i, src] of ds.sources.entries()) {
+      console.log(
+        chalk.gray(
+          `   ${i + 1}. ${src.sourceUrl} (${src.filesCount} files, ${new Date(src.downloadedAt).toLocaleString()})`,
+        ),
+      );
+      if (src.lastCommit) {
         console.log(
-          chalk.gray(
-            `      Last commit: ${source.last_commit.substring(0, 8)}`,
-          ),
+          chalk.gray(`      Last commit: ${src.lastCommit.substring(0, 8)}`),
         );
       }
     }
-  }
-
-  // Display missing sources
-  const missingSources = (docset.sources?.length || 0) - sources.length;
-  if (missingSources > 0) {
-    console.log(
-      chalk.yellow(
-        `⚠️  ${missingSources} source(s) missing metadata - run refresh`,
-      ),
-    );
   }
 
   console.log();
