@@ -4,15 +4,8 @@
 
 import { Command } from "commander";
 import chalk from "chalk";
-import {
-  ConfigManager,
-  ensureKnowledgeGitignoreSync,
-  discoverDirectoryPatterns,
-} from "@codemcp/knowledge-core";
-import {
-  initDocset,
-  type SourceResult,
-} from "@codemcp/knowledge-content-loader";
+import { initDocset } from "../api/init.js";
+import type { SourceResult } from "@codemcp/knowledge-content-loader";
 
 export const initCommand = new Command("init")
   .description("Initialize sources for a docset from configuration")
@@ -32,27 +25,11 @@ export const initCommand = new Command("init")
       console.log(chalk.blue("🚀 Agentic Knowledge Integration Test"));
 
       try {
-        const configManager = new ConfigManager();
-        const { config, configPath } = await configManager.loadConfig(
-          process.cwd(),
-        );
-
-        ensureKnowledgeGitignoreSync(configPath);
-
-        const docset = config.docsets.find((d) => d.id === docsetId);
-
-        if (!docset) {
-          throw new Error(
-            `Docset '${docsetId}' not found in configuration. Available: ${config.docsets.map((d) => d.id).join(", ")}`,
-          );
-        }
-
-        console.log(chalk.green(`✅ Found docset: ${docset.name}`));
-        console.log(chalk.gray(`📝 Description: ${docset.description}`));
-        console.log(chalk.gray(`🔗 Sources: ${docset.sources.length}`));
-
-        const result = await initDocset(docsetId, docset, configPath, {
+        const result = await initDocset({
+          docsetId,
           force: options.force,
+          discoverPaths: options.discoverPaths,
+          cwd: process.cwd(),
           onSourceProgress: (sourceResult: SourceResult) => {
             const icon =
               sourceResult.type === "git_repo"
@@ -75,37 +52,14 @@ export const initCommand = new Command("init")
           return;
         }
 
-        // Update configuration with discovered paths (only if --discover-paths flag used)
-        const allFiles = result.sourceResults.flatMap((r) => r.files);
-        if (allFiles.length > 0 && options.discoverPaths) {
+        if (result.discoveredPaths && result.discoveredPaths.length > 0) {
+          const shown = result.discoveredPaths.slice(0, 5);
+          const extra = result.discoveredPaths.length > 5 ? "..." : "";
           console.log(
-            chalk.yellow(
-              `\n📝 Discovering directory patterns from extracted files...`,
+            chalk.green(
+              `    ✅ Updated config with discovered patterns: ${shown.join(", ")}${extra}`,
             ),
           );
-
-          const directoryPatterns = discoverDirectoryPatterns(allFiles);
-
-          console.log(
-            chalk.gray(
-              `    Found ${allFiles.length} files → ${directoryPatterns.length} patterns`,
-            ),
-          );
-
-          try {
-            await configManager.updateDocsetPaths(docsetId, directoryPatterns);
-            console.log(
-              chalk.green(
-                `    ✅ Updated config with discovered patterns: ${directoryPatterns.slice(0, 5).join(", ")}${directoryPatterns.length > 5 ? "..." : ""}`,
-              ),
-            );
-          } catch (configError) {
-            console.log(
-              chalk.yellow(
-                `    ⚠️  Could not update config: ${configError instanceof Error ? configError.message : String(configError)}`,
-              ),
-            );
-          }
         }
 
         console.log(
@@ -113,9 +67,6 @@ export const initCommand = new Command("init")
         );
         console.log(chalk.gray(`📁 Location: ${result.localPath}`));
         console.log(chalk.gray(`📄 Total files: ${result.totalFiles}`));
-        console.log(
-          chalk.gray(`🔗 Sources processed: ${docset.sources.length}`),
-        );
       } catch (error) {
         console.error(chalk.red("\n❌ Error:"));
         console.error(

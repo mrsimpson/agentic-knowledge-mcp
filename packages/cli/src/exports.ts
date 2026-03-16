@@ -1,7 +1,7 @@
 /**
- * CLI exports for agentic-knowledge
+ * Typed programmatic API for @codemcp/knowledge-cli.
+ *
+ * Import from this module to use CLI features without the binary.
  */
 
-export * from "./commands/init.js";
-export * from "./commands/refresh.js";
-export * from "./commands/status.js";
+export * from "./api/index.js";

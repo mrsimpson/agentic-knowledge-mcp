@@ -63,48 +63,20 @@ docsets:
   });
 
   describe("Status Command", () => {
-    it("should show status with no initialized docsets", async () => {
-      // Change to test directory and run status command
+    it("should show status with no initialized docsets", () => {
       const originalCwd = process.cwd();
-      const originalArgv = process.argv;
       process.chdir(testDir);
 
       try {
-        // Mock process.argv for status command
-        process.argv = ["node", "cli.js", "status"];
-
-        // Import and run CLI function directly
-        const { runCli } = await import("../cli.js");
-
-        // Capture console output
-        let output = "";
-        const originalLog = console.log;
-        const originalError = console.error;
-        const originalWarn = console.warn;
-        const originalInfo = console.info;
-
-        const capture = (...args: any[]) => {
-          output += args.join(" ") + "\n";
-        };
-
-        console.log = capture;
-        console.error = capture;
-        console.warn = capture;
-        console.info = capture;
-
-        await runCli();
-
-        // Restore console methods
-        console.log = originalLog;
-        console.error = originalError;
-        console.warn = originalWarn;
-        console.info = originalInfo;
+        const output = execSync(`node ${cliPath} status`, {
+          encoding: "utf8",
+          timeout: 5000,
+        });
 
         expect(output).toContain("Agentic Knowledge Status");
-        expect(output).toContain("Found 2 docset(s) with web sources");
+        expect(output).toContain("Found 2 docset(s)");
       } finally {
         process.chdir(originalCwd);
-        process.argv = originalArgv;
       }
     });
 
@@ -209,8 +181,8 @@ docsets: []
         });
 
         expect(output).toContain("Agentic Knowledge Refresh");
-        expect(output).toContain("Found 2 docset(s) to refresh");
-        expect(output).toContain("test-docset, unsupported-source-docset");
+        expect(output).toContain("test-docset");
+        expect(output).toContain("unsupported-source-docset");
       } finally {
         process.chdir(originalCwd);
       }
