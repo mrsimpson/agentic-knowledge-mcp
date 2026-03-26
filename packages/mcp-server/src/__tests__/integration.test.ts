@@ -27,7 +27,7 @@ docsets:
     name: "Test Documentation" 
     description: "Test documentation for integration tests"
     local_path: "./docs"
-template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{generalized_keywords}}"
+template: "Search for '{{pattern}}' in {{local_path}}."
 `;
     await fs.writeFile(tempConfigPath, testConfig);
 
@@ -60,7 +60,7 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
       expect(server).toBeDefined();
     });
 
-    it("should distinguish between keywords and generalized_keywords in descriptions", () => {
+    it("should distinguish between pattern and fallback_pattern in descriptions", () => {
       // This validates that our implementation follows the user requirements
       // for clear parameter distinction in the tool metadata
       const server = createAgenticKnowledgeServer();
@@ -189,7 +189,7 @@ docsets:
           name: "search_docs",
           arguments: {
             docset_id: "uninitialized-docs",
-            keywords: "test",
+            pattern: "test",
           },
         },
       });

@@ -43,7 +43,7 @@ docsets:
       - type: "local_folder"
         paths: ["./docs/local"]
 
-template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{generalized_keywords}}"
+template: "Search for '{{pattern}}' in {{local_path}}."
 `;
     await fs.writeFile(join(knowledgeDir, "config.yaml"), testConfig);
 
@@ -117,8 +117,7 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
           name: "search_docs",
           arguments: {
             docset_id: "web-source-docs",
-            keywords: "Test Documentation",
-            generalized_keywords: "content",
+            pattern: "Test Documentation",
           },
         },
       };
@@ -147,7 +146,7 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
           name: "search_docs",
           arguments: {
             docset_id: "local-docs",
-            keywords: "Local Guide",
+            pattern: "Local Guide",
           },
         },
       };
@@ -199,7 +198,7 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
           name: "search_docs",
           arguments: {
             docset_id: "unknown-docset",
-            keywords: "test search",
+            pattern: "test search",
           },
         },
       };
@@ -225,7 +224,7 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
           name: "search_docs",
           arguments: {
             docset_id: "web-source-docs",
-            // Missing required 'keywords' parameter
+            // Missing required 'pattern' parameter
           },
         },
       };
@@ -238,7 +237,7 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
       expect(result.isError).toBe(true);
 
       const errorMessage = result.content[0]!.text;
-      expect(errorMessage).toContain("keywords");
+      expect(errorMessage).toContain("pattern");
       expect(errorMessage).toContain("required");
     });
   });
@@ -251,8 +250,7 @@ template: "Search for '{{keywords}}' in {{local_path}}. Also consider: {{general
           name: "search_docs",
           arguments: {
             docset_id: "web-source-docs",
-            keywords: "simulates",
-            generalized_keywords: "content documentation",
+            pattern: "simulates",
           },
         },
       };

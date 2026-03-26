@@ -1,18 +1,17 @@
 /**
  * Agentic Knowledge System
- * 
+ *
  * A standalone agentic knowledge guidance system with search_docs() interface
- * that returns intelligent navigation instructions based on docset, keywords,
- * and generalized_keywords - delegating language processing to the agent
- * while providing structured guidance.
+ * that returns intelligent search results based on docset and regex pattern -
+ * delegating language processing to the agent while providing structured guidance.
  */
 
 // Export main MCP server functionality
-export { 
-  createAgenticKnowledgeServer, 
-  startMCPServer, 
-  startServer 
-} from './packages/mcp-server/dist/index.js';
+export {
+  createAgenticKnowledgeServer,
+  startMCPServer,
+  startServer,
+} from "./packages/mcp-server/dist/index.js";
 
 // Export core functionality for advanced usage
 export {
@@ -23,8 +22,8 @@ export {
   createTemplateContext,
   getEffectiveTemplate,
   validateTemplate,
-  extractVariables
-} from './packages/core/dist/index.js';
+  extractVariables,
+} from "./packages/core/dist/index.js";
 
 // Export types
 export type {
@@ -34,7 +33,7 @@ export type {
   SearchDocsResponse,
   ListDocsetsResponse,
   TemplateContext,
-  ErrorType
-} from './packages/core/dist/index.js';
+  ErrorType,
+} from "./packages/core/dist/index.js";
 
-export { KnowledgeError } from './packages/core/dist/index.js';
+export { KnowledgeError } from "./packages/core/dist/index.js";

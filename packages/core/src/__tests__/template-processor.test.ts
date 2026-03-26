@@ -22,24 +22,23 @@ describe("Template Processing", () => {
     id: "test-docs",
     name: "Test Documentation",
     description: "Sample documentation for testing",
-    local_path: "./docs",
+    sources: [],
   };
 
   const sampleContext: TemplateContext = {
     local_path: "/project/docs",
-    keywords: "react hooks",
-    generalized_keywords: "react state management",
+    pattern: "react hooks",
     docset: sampleDocset,
   };
 
   describe("processTemplate - core functionality", () => {
     test("should replace all valid template variables", () => {
-      const template = `Search "{{keywords}}" in {{local_path}} ({{docset_name}}). Also try: {{generalized_keywords}}. Description: {{docset_description}}`;
+      const template = `Search "{{pattern}}" in {{local_path}} ({{docset_name}}). Description: {{docset_description}}`;
 
       const result = processTemplate(template, sampleContext);
 
       expect(result).toBe(
-        'Search "react hooks" in /project/docs (Test Documentation). Also try: react state management. Description: Sample documentation for testing',
+        'Search "react hooks" in /project/docs (Test Documentation). Description: Sample documentation for testing',
       );
     });
 
@@ -47,7 +46,7 @@ describe("Template Processing", () => {
       const docsetWithoutDescription: DocsetConfig = {
         id: "minimal",
         name: "Minimal Docs",
-        local_path: "./minimal",
+        sources: [],
       };
 
       const context: TemplateContext = {
@@ -62,7 +61,7 @@ describe("Template Processing", () => {
     });
 
     test("should throw error for invalid variables in processed template", () => {
-      const template = "Valid: {{keywords}}, Invalid: {{unknown_variable}}";
+      const template = "Valid: {{pattern}}, Invalid: {{unknown_variable}}";
 
       expect(() => processTemplate(template, sampleContext)).toThrow(
         KnowledgeError,
@@ -80,7 +79,7 @@ describe("Template Processing", () => {
     });
 
     test("should handle whitespace in variable names", () => {
-      const template = "Search {{ keywords }} in {{ local_path }}";
+      const template = "Search {{ pattern }} in {{ local_path }}";
 
       const result = processTemplate(template, sampleContext);
 
@@ -90,21 +89,21 @@ describe("Template Processing", () => {
 
   describe("validateTemplate - validation at startup", () => {
     test("should accept valid template with required variables", () => {
-      const validTemplate = "Search {{keywords}} in {{local_path}}";
+      const validTemplate = "Search {{pattern}} in {{local_path}}";
 
       expect(() => validateTemplate(validTemplate)).not.toThrow();
     });
 
     test("should accept template with all allowed variables", () => {
       const fullTemplate =
-        "{{keywords}} {{generalized_keywords}} {{local_path}} {{docset_id}} {{docset_name}} {{docset_description}}";
+        "{{pattern}} {{local_path}} {{docset_id}} {{docset_name}} {{docset_description}}";
 
       expect(() => validateTemplate(fullTemplate)).not.toThrow();
     });
 
     test("should reject template with invalid variables", () => {
       const invalidTemplate =
-        "Search {{keywords}} in {{local_path}} with {{invalid_variable}}";
+        "Search {{pattern}} in {{local_path}} with {{invalid_variable}}";
 
       expect(() => validateTemplate(invalidTemplate)).toThrow(KnowledgeError);
 
@@ -123,7 +122,7 @@ describe("Template Processing", () => {
     });
 
     test("should reject template missing required variables", () => {
-      const incompleteTemplate = "Only has {{keywords}}";
+      const incompleteTemplate = "Only has {{pattern}}";
 
       expect(() => validateTemplate(incompleteTemplate)).toThrow(
         KnowledgeError,
@@ -140,7 +139,7 @@ describe("Template Processing", () => {
     });
 
     test("should reject template with multiple invalid variables", () => {
-      const template = "{{keywords}} {{local_path}} {{bad_var1}} {{bad_var2}}";
+      const template = "{{pattern}} {{local_path}} {{bad_var1}} {{bad_var2}}";
 
       expect(() => validateTemplate(template)).toThrow(KnowledgeError);
 
@@ -156,12 +155,12 @@ describe("Template Processing", () => {
   describe("extractVariables - parsing functionality", () => {
     test("should extract all variables from complex template", () => {
       const template =
-        "Search {{keywords}} in {{local_path}} for {{docset_name}} ({{docset_id}})";
+        "Search {{pattern}} in {{local_path}} for {{docset_name}} ({{docset_id}})";
 
       const result = extractVariables(template);
 
       expect(result).toEqual([
-        "keywords",
+        "pattern",
         "local_path",
         "docset_name",
         "docset_id",
@@ -169,11 +168,11 @@ describe("Template Processing", () => {
     });
 
     test("should handle variables with whitespace", () => {
-      const template = "Search {{ keywords }} in {{  local_path  }}";
+      const template = "Search {{ pattern }} in {{  local_path  }}";
 
       const result = extractVariables(template);
 
-      expect(result).toEqual(["keywords", "local_path"]);
+      expect(result).toEqual(["pattern", "local_path"]);
     });
 
     test("should return empty array for template without variables", () => {
@@ -185,11 +184,11 @@ describe("Template Processing", () => {
     });
 
     test("should preserve duplicate variables", () => {
-      const template = "Search {{keywords}} and also {{keywords}} again";
+      const template = "Search {{pattern}} and also {{pattern}} again";
 
       const result = extractVariables(template);
 
-      expect(result).toEqual(["keywords", "keywords"]);
+      expect(result).toEqual(["pattern", "pattern"]);
     });
   });
 
@@ -229,9 +228,8 @@ describe("Template Processing", () => {
     test("should validate that all required variables are in default template", () => {
       const variables = extractVariables(DEFAULT_TEMPLATE);
 
-      expect(variables).toContain("keywords");
+      expect(variables).toContain("pattern");
       expect(variables).toContain("local_path");
-      // Note: generalized_keywords no longer required in template since it's provided in structured response
     });
 
     test("should ensure all variables in default template are allowed", () => {
@@ -245,7 +243,7 @@ describe("Template Processing", () => {
 
   describe("edge cases and error handling", () => {
     test("should handle template with only required variables", () => {
-      const minimalTemplate = "Search {{keywords}} in {{local_path}}";
+      const minimalTemplate = "Search {{pattern}} in {{local_path}}";
 
       expect(() => validateTemplate(minimalTemplate)).not.toThrow();
 
@@ -258,7 +256,7 @@ describe("Template Processing", () => {
     });
 
     test("should handle malformed variable syntax", () => {
-      const malformed = "Search {keywords} in {{local_path}}";
+      const malformed = "Search {pattern} in {{local_path}}";
 
       expect(() => validateTemplate(malformed)).toThrow();
     });

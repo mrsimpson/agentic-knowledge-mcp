@@ -25,17 +25,15 @@ import { initDocset } from "@codemcp/knowledge-content-loader";
 import { existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 
-/** Shared keywords parameter description advertised to agents */
-const KEYWORDS_DESCRIPTION =
-  "Primary search terms or concepts you're looking for. " +
+/** Shared pattern parameter description advertised to agents */
+const PATTERN_DESCRIPTION =
+  "The search pattern (regex) to find in the documentation. " +
   'Supports full regex syntax (e.g. "log.*Error", "function\\s+\\w+", "auth|login"). ' +
   "Returns file path, line number, matched line, and surrounding context lines. " +
-  'Be specific: "authentication middleware", "useData hook", "sidebar.items".';
-
-const GENERALIZED_KEYWORDS_DESCRIPTION =
-  "Broader synonyms or related terms used as a fallback when the primary keywords " +
-  'return no results (e.g. for "authentication" you might include "login|signin|oauth"). ' +
-  "Also supports regex syntax.";
+  "⚠️ IMPORTANT: This is a regex pattern, NOT a list of keywords. " +
+  "Spaces are literal (match a space character). " +
+  "To search for multiple alternative terms, use | (pipe): " +
+  'e.g. "auth|login" matches lines containing either "auth" OR "login".';
 
 /**
  * Create an agentic knowledge MCP server
@@ -200,16 +198,12 @@ After configuring, the tool will show available docsets here.`,
                   description:
                     "The identifier of the docset to search in. (No docsets configured - see tool description for setup instructions)",
                 },
-                keywords: {
+                pattern: {
                   type: "string",
-                  description: KEYWORDS_DESCRIPTION,
-                },
-                generalized_keywords: {
-                  type: "string",
-                  description: GENERALIZED_KEYWORDS_DESCRIPTION,
+                  description: PATTERN_DESCRIPTION,
                 },
               },
-              required: ["docset_id", "keywords"],
+              required: ["docset_id", "pattern"],
               additionalProperties: false,
             },
           },
@@ -276,22 +270,18 @@ After configuring, the tool will show available docsets here.`,
                 description: "Choose the docset to search in.",
                 enum: config.docsets.map((d) => d.id),
               },
-              keywords: {
+              pattern: {
                 type: "string",
-                description: KEYWORDS_DESCRIPTION,
-              },
-              generalized_keywords: {
-                type: "string",
-                description: GENERALIZED_KEYWORDS_DESCRIPTION,
+                description: PATTERN_DESCRIPTION,
               },
               context_lines: {
                 type: "number",
                 description:
-                  "Number of lines to show before and after each matching line (default: 0). " +
-                  "Increase to 1–3 when you need surrounding context to understand a match.",
+                  "Number of lines to show before and after each matching line (default: 2). " +
+                  "Set to 0 for just the matching lines, or increase for more context.",
               },
             },
-            required: ["docset_id", "keywords"],
+            required: ["docset_id", "pattern"],
             additionalProperties: false,
           },
         },
@@ -339,20 +329,18 @@ ${config.docsets.map((d) => `• **${d.id}** (${d.name})`).join("\n")}`,
     try {
       switch (name) {
         case "search_docs": {
-          const { docset_id, keywords, generalized_keywords, context_lines } =
-            args as {
-              docset_id: string;
-              keywords: string;
-              generalized_keywords?: string;
-              context_lines?: number;
-            };
+          const { docset_id, pattern, context_lines } = args as {
+            docset_id: string;
+            pattern: string;
+            context_lines?: number;
+          };
 
           // Validate required parameters
           if (!docset_id || typeof docset_id !== "string") {
             throw new Error("docset_id is required and must be a string");
           }
-          if (!keywords || typeof keywords !== "string") {
-            throw new Error("keywords is required and must be a string");
+          if (!pattern || typeof pattern !== "string") {
+            throw new Error("pattern is required and must be a string");
           }
 
           // Load configuration
@@ -392,14 +380,12 @@ ${config.docsets.map((d) => `• **${d.id}** (${d.name})`).join("\n")}`,
           }
 
           // Perform the search
-          const fallbackPattern = generalized_keywords?.trim();
           const searchOptions: SearchOptions = {};
-          if (fallbackPattern) searchOptions.fallbackPattern = fallbackPattern;
           if (typeof context_lines === "number")
             searchOptions.contextLines = context_lines;
           const result = await searchDocset(
             absoluteLocalPath,
-            keywords.trim(),
+            pattern.trim(),
             searchOptions,
             index,
           );

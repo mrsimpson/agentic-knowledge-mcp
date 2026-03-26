@@ -27,8 +27,7 @@ export function processTemplate(
     // Replace template variables using double curly brace syntax
     const variables: Record<string, string> = {
       local_path: context.local_path,
-      keywords: context.keywords,
-      generalized_keywords: context.generalized_keywords,
+      pattern: context.pattern,
       docset_id: context.docset.id,
       docset_name: context.docset.name,
       docset_description: context.docset.description || "",
@@ -143,21 +142,18 @@ export function extractVariables(template: string): string[] {
 /**
  * Create template context from search parameters
  * @param localPath - Calculated local path
- * @param keywords - Search keywords
- * @param generalizedKeywords - Generalized keywords
+ * @param pattern - Search pattern
  * @param docset - Docset configuration
  * @returns Template context object
  */
 export function createTemplateContext(
   localPath: string,
-  keywords: string,
-  generalizedKeywords: string,
+  pattern: string,
   docset: DocsetConfig,
 ): TemplateContext {
   return {
     local_path: localPath,
-    keywords,
-    generalized_keywords: generalizedKeywords,
+    pattern,
     docset,
   };
 }
@@ -165,21 +161,19 @@ export function createTemplateContext(
 /**
  * Create structured search response
  * @param instructions - Processed instruction text
- * @param keywords - Search keywords
- * @param generalizedKeywords - Generalized keywords
+ * @param pattern - Search pattern
  * @param localPath - Calculated local path
  * @returns Structured response object
  */
 export function createStructuredResponse(
   instructions: string,
-  keywords: string,
-  generalizedKeywords: string,
+  pattern: string,
   localPath: string,
 ): import("../types.js").SearchDocsResponse {
   return {
     instructions,
-    search_terms: keywords,
-    generalized_search_terms: generalizedKeywords,
+    search_terms: pattern,
+    generalized_search_terms: "",
     path: localPath,
   };
 }
