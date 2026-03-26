@@ -97,27 +97,16 @@ describe("MCP Protocol Compliance E2E Tests", () => {
         "Choose the docset to search",
       );
 
-      // keywords parameter (primary search terms)
-      expect(properties.keywords).toBeDefined();
-      expect(properties.keywords.type).toBe("string");
-      expect(properties.keywords.description).toContain("Primary search terms");
+      // pattern parameter (primary search pattern)
+      expect(properties.pattern).toBeDefined();
+      expect(properties.pattern.type).toBe("string");
+      expect(properties.pattern.description).toContain("search pattern");
       // description advertises regex support
-      expect(properties.keywords.description).toMatch(/regex|pattern/i);
-
-      // generalized_keywords parameter (related terms)
-      expect(properties.generalized_keywords).toBeDefined();
-      expect(properties.generalized_keywords.type).toBe("string");
-      expect(properties.generalized_keywords.description).toMatch(
-        /related terms|synonyms|broader/i,
-      );
-      expect(properties.generalized_keywords.description).toMatch(
-        /fallback|no results|broaden/i,
-      );
+      expect(properties.pattern.description).toMatch(/regex|pattern/i);
 
       // Required parameters
       expect(schema.required).toContain("docset_id");
-      expect(schema.required).toContain("keywords");
-      expect(schema.required).not.toContain("generalized_keywords"); // Optional
+      expect(schema.required).toContain("pattern");
     });
 
     it("should have correct list_docsets tool schema", async () => {
@@ -171,8 +160,7 @@ describe("MCP Protocol Compliance E2E Tests", () => {
         name: "search_docs",
         arguments: {
           docset_id: "test-docs",
-          keywords: "authentication middleware",
-          generalized_keywords: "login signin oauth credentials",
+          pattern: "authentication middleware",
         },
       });
 
@@ -191,7 +179,7 @@ describe("MCP Protocol Compliance E2E Tests", () => {
         name: "search_docs",
         arguments: {
           docset_id: "api-docs",
-          keywords: "rate limiting",
+          pattern: "rate limiting",
         },
       });
 
@@ -216,7 +204,7 @@ describe("MCP Protocol Compliance E2E Tests", () => {
         name: "search_docs",
         arguments: {
           docset_id: "nonexistent-docset",
-          keywords: "test",
+          pattern: "test",
         },
       });
 
@@ -232,14 +220,14 @@ describe("MCP Protocol Compliance E2E Tests", () => {
         name: "search_docs",
         arguments: {
           docset_id: "test-docs",
-          // Missing required 'keywords' parameter
+          // Missing required 'pattern' parameter
         },
       });
 
       expect(result).toBeDefined();
       const content = result.content as Array<{ type: string; text: string }>;
       expect(content[0]?.text).toContain("Error:");
-      expect(content[0]?.text).toContain("keywords is required");
+      expect(content[0]?.text).toContain("pattern is required");
     });
 
     it("should handle invalid tool name", async () => {
@@ -274,8 +262,7 @@ describe("MCP Protocol Compliance E2E Tests", () => {
         name: "search_docs",
         arguments: {
           docset_id: "react-docs",
-          keywords: "useState hook",
-          generalized_keywords: "state management react hooks",
+          pattern: "useState hook",
         },
       });
 

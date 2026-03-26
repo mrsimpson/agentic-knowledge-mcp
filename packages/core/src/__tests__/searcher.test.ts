@@ -191,27 +191,6 @@ describe("searchDocset – context lines", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Fallback behaviour
-// ---------------------------------------------------------------------------
-
-describe("searchDocset – fallback pattern", () => {
-  test("uses fallbackPattern when primary yields no results", async () => {
-    const result = await searchDocset(fixtureDir, "xyzzy_no_match_ever", {
-      fallbackPattern: "authentication",
-    });
-    expect(result.total_matches).toBeGreaterThan(0);
-    expect(result.used_pattern).toBe("authentication");
-  });
-
-  test("does not fall back when primary yields results", async () => {
-    const result = await searchDocset(fixtureDir, "authentication", {
-      fallbackPattern: "xyzzy_no_match_ever",
-    });
-    expect(result.used_pattern).toBe("authentication");
-  });
-});
-
-// ---------------------------------------------------------------------------
 // Ignored paths
 // ---------------------------------------------------------------------------
 

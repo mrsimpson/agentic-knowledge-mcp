@@ -89,10 +89,8 @@ export interface KnowledgeConfig {
 export interface SearchDocsParams {
   /** ID of the docset to search */
   docset: string;
-  /** Specific keywords to search for */
-  keywords: string;
-  /** Generalized keywords for broader search context */
-  generalized_keywords: string;
+  /** Search pattern (regex) to find in the documentation */
+  pattern: string;
 }
 
 /**
@@ -140,17 +138,14 @@ export interface SearchDocsResult {
   used_pattern: string;
   /** True when results were capped at the maximum match limit */
   truncated: boolean;
+  /** True when the input pattern was invalid regex and was escaped to a literal string */
+  pattern_was_escaped?: boolean;
 }
 
 /**
  * Options controlling search behaviour
  */
 export interface SearchOptions {
-  /**
-   * Fallback pattern used when the primary pattern yields no results.
-   * Typically the value of the `generalized_keywords` tool parameter.
-   */
-  fallbackPattern?: string;
   /** Number of context lines to include before and after each match (default: 2) */
   contextLines?: number;
   /** Maximum number of matches to return before truncating (default: 50) */
@@ -178,10 +173,8 @@ export interface ListDocsetsResponse {
 export interface TemplateContext {
   /** Path to search in */
   local_path: string;
-  /** Keywords to search for */
-  keywords: string;
-  /** Generalized keywords */
-  generalized_keywords: string;
+  /** Search pattern */
+  pattern: string;
   /** Docset information */
   docset: DocsetConfig;
 }
@@ -217,15 +210,14 @@ export class KnowledgeError extends Error {
 /**
  * Default instruction template
  */
-export const DEFAULT_TEMPLATE = `Use available text search tools to search for {{keywords}} in {{local_path}} and its sub folders. Try broader terms if needed. Skip: node_modules/, .git/, build/, dist/.`;
+export const DEFAULT_TEMPLATE = `Use available text search tools to search for {{pattern}} in {{local_path}} and its sub folders. Try broader terms if needed. Skip: node_modules/, .git/, build/, dist/.`;
 
 /**
  * Allowed template variables that can be used in instruction templates
  */
 export const ALLOWED_TEMPLATE_VARIABLES = [
   "local_path",
-  "keywords",
-  "generalized_keywords",
+  "pattern",
   "docset_id",
   "docset_name",
   "docset_description",
@@ -234,7 +226,7 @@ export const ALLOWED_TEMPLATE_VARIABLES = [
 /**
  * Required template variables that must be present in every template
  */
-export const REQUIRED_TEMPLATE_VARIABLES = ["local_path", "keywords"] as const;
+export const REQUIRED_TEMPLATE_VARIABLES = ["local_path", "pattern"] as const;
 
 /**
  * Configuration file name pattern

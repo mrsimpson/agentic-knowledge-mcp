@@ -161,11 +161,10 @@ docsets:
       - type: "local_folder"
         paths: ["./api"]
 template: |
-  Search for '{{keywords}}' in {{docset_name}} ({{docset_description}}).
+  Search for '{{pattern}}' in {{docset_name}} ({{docset_description}}).
   
   **Location**: {{local_path}}
-  **Primary Terms**: {{keywords}}
-  **Related Terms**: {{generalized_keywords}}
+  **Search Pattern**: {{pattern}}
   
   Use tools like grep, rg, or find to search for these terms.
 `,
@@ -218,9 +217,8 @@ docsets:
       - type: "local_folder"
         paths: ["./react-docs"]
     template: |
-      Looking for React information about '{{keywords}}' in {{local_path}}.
+      Looking for React information about '{{pattern}}' in {{local_path}}.
       Search for component names, props, hooks, and patterns.
-      Related concepts: {{generalized_keywords}}
       
       Focus on:
       1. Component documentation

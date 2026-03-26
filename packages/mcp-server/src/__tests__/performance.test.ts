@@ -27,7 +27,7 @@ docsets:
     name: "Test Documentation" 
     description: "Test documentation for performance tests"
     local_path: "./docs"
-template: "Search for '{{keywords}}' in {{local_path}}. Related: {{generalized_keywords}}"
+template: "Search for '{{pattern}}' in {{local_path}}."
 `;
     await fs.writeFile(tempConfigPath, testConfig);
 

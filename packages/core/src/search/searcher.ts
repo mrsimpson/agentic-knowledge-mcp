@@ -23,7 +23,7 @@ import type { SearchDocsResult, SearchMatch, SearchOptions } from "../types.js";
 // Constants
 // ---------------------------------------------------------------------------
 
-const DEFAULT_CONTEXT_LINES = 0;
+const DEFAULT_CONTEXT_LINES = 2;
 const DEFAULT_MAX_MATCHES = 50;
 
 /** Directories / files that are never useful to search inside a docset. */
@@ -133,7 +133,7 @@ export async function buildFileIndex(rootPath: string): Promise<DocsetIndex> {
  * Search `rootPath` for lines matching `pattern` (a regex string).
  *
  * @param rootPath  Absolute path to the docset directory.
- * @param pattern   Primary search pattern. Supports full JS regex syntax
+ * @param pattern   Search pattern. Supports full JS regex syntax
  *                  (e.g. `"auth|login"`, `"function\\s+\\w+"`, `"TODO.*fix"`).
  *                  The match is always case-insensitive.
  * @param options   Optional tuning parameters.
@@ -149,27 +149,12 @@ export async function searchDocset(
   const contextLines = options.contextLines ?? DEFAULT_CONTEXT_LINES;
   const maxMatches = options.maxMatches ?? DEFAULT_MAX_MATCHES;
 
-  // --- primary search ---
-  const primary = await runSearch(
+  return runSearch(
     rootPath,
     pattern,
     { contextLines, maxMatches, include: options.include },
     index,
   );
-
-  if (primary.total_matches > 0 || !options.fallbackPattern?.trim()) {
-    return primary;
-  }
-
-  // --- fallback search ---
-  const fallback = await runSearch(
-    rootPath,
-    options.fallbackPattern.trim(),
-    { contextLines, maxMatches, include: options.include },
-    index,
-  );
-
-  return fallback;
 }
 
 // ---------------------------------------------------------------------------
@@ -189,11 +174,13 @@ async function runSearch(
   index?: DocsetIndex,
 ): Promise<SearchDocsResult> {
   let regex: RegExp;
+  let patternWasEscaped = false;
   try {
     regex = new RegExp(pattern, "i");
   } catch {
-    // Invalid regex: treat as literal string
+    // Invalid regex: treat as literal string and flag it
     regex = new RegExp(escapeRegex(pattern), "i");
+    patternWasEscaped = true;
   }
 
   // Decide which files to scan
@@ -251,13 +238,17 @@ async function runSearch(
     }
   }
 
-  return {
+  const result: SearchDocsResult = {
     matches,
     total_matches: totalMatches,
     searched_files: searchedFiles,
     used_pattern: pattern,
     truncated,
   };
+  if (patternWasEscaped) {
+    result.pattern_was_escaped = true;
+  }
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -455,11 +446,36 @@ function matchGlob(filePath: string, pattern: string): boolean {
  * suitable for returning as MCP tool content.
  */
 export function formatSearchResult(result: SearchDocsResult): string {
-  if (result.matches.length === 0) {
-    return `No matches found for pattern: ${result.used_pattern}\n(searched ${result.searched_files} file${result.searched_files === 1 ? "" : "s"})`;
+  // Warning header for escaped patterns
+  const warnings: string[] = [];
+  if (result.pattern_was_escaped) {
+    warnings.push(
+      `⚠️ Pattern "${result.used_pattern}" contained invalid regex syntax and was treated as a literal string.`,
+      `   If you intended to use regex, check for unescaped special characters like ( ) [ ] { } etc.`,
+      ``,
+    );
   }
 
-  const lines: string[] = [];
+  if (result.matches.length === 0) {
+    const hints = [
+      `No matches found for pattern: "${result.used_pattern}"`,
+      `(searched ${result.searched_files} file${result.searched_files === 1 ? "" : "s"})`,
+      ``,
+      `💡 Tips to improve your search:`,
+      `• Use | for alternatives: "auth|login|session" matches any of these`,
+      `• Use .* for flexible matching: "config.*timeout" matches "configTimeout", "config_timeout", etc.`,
+      `• Use \\b for word boundaries: "\\bapi\\b" avoids matching "capital"`,
+      `• Simplify: try a single distinctive term instead of a phrase`,
+    ];
+    if (!result.used_pattern.includes("|")) {
+      hints.push(
+        `• If you used spaces, note they are literal — use | to search for multiple terms`,
+      );
+    }
+    return [...warnings, ...hints].join("\n");
+  }
+
+  const lines: string[] = [...warnings];
 
   let currentFile = "";
   for (const match of result.matches) {
@@ -478,9 +494,13 @@ export function formatSearchResult(result: SearchDocsResult): string {
     }
   }
 
+  const truncatedHint = result.truncated
+    ? ` [truncated at ${DEFAULT_MAX_MATCHES} — use a more specific pattern to narrow results]`
+    : "";
+
   const summary = [
     ``,
-    `--- ${result.total_matches} match${result.total_matches === 1 ? "" : "es"} in ${result.searched_files} file${result.searched_files === 1 ? "" : "s"} (pattern: "${result.used_pattern}")${result.truncated ? ` [truncated at ${DEFAULT_MAX_MATCHES}]` : ""}`,
+    `--- ${result.total_matches} match${result.total_matches === 1 ? "" : "es"} in ${result.searched_files} file${result.searched_files === 1 ? "" : "s"} (pattern: "${result.used_pattern}")${truncatedHint}`,
   ];
 
   return [...lines, ...summary].join("\n");

@@ -35,13 +35,13 @@ docsets:
     sources:
       - type: "local_folder"
         paths: ["./docs"]
-    template: "Custom template for {{keywords}} in {{local_path}}"
+    template: "Custom template for {{pattern}} in {{local_path}}"
   - id: "api-docs"
     name: "API Documentation"
     sources:
       - type: "local_folder"
         paths: ["/absolute/path"]
-template: "Global template for {{keywords}} in {{local_path}}"`;
+template: "Global template for {{pattern}} in {{local_path}}"`;
     await fs.writeFile(validConfigPath, validConfig);
 
     // Create invalid config file (missing required fields)
@@ -133,7 +133,7 @@ docsets:
     sources:
       - type: "local_folder"
         paths: ["./docs"]
-template: "Global template with {{keywords}} and {{invalid_variable}}"`;
+template: "Global template with {{pattern}} and {{invalid_variable}}"`;
       await fs.writeFile(invalidTemplateConfigPath, invalidTemplateConfig);
 
       await expect(loadConfig(invalidTemplateConfigPath)).rejects.toThrow(
@@ -165,7 +165,7 @@ docsets:
     sources:
       - type: "local_folder"
         paths: ["./docs"]
-    template: "Docset template missing {{keywords}} but has {{bad_var}}"`;
+    template: "Docset template missing {{pattern}} but has {{bad_var}}"`;
       await fs.writeFile(
         invalidDocsetTemplateConfigPath,
         invalidDocsetTemplateConfig,
@@ -197,8 +197,8 @@ docsets:
     sources:
       - type: "local_folder"
         paths: ["./docs"]
-    template: "Search {{keywords}} in {{local_path}}"
-template: "Global: {{keywords}} in {{local_path}}"`;
+    template: "Search {{pattern}} in {{local_path}}"
+template: "Global: {{pattern}} in {{local_path}}"`;
       await fs.writeFile(validTemplateConfigPath, validTemplateConfig);
 
       const config = await loadConfig(validTemplateConfigPath);
