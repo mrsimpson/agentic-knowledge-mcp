@@ -30,17 +30,17 @@
   },
   "dependencies": {
     "@codemcp/knowledge-core": "workspace:*",
-    "adm-zip": "0.5.16",
+    "adm-zip": "0.5.17",
     "simple-git": "^3.22.0",
-    "tar": "7.5.11"
+    "tar": "7.5.15"
   },
   "devDependencies": {
-    "@eslint/js": "^9.34.0",
+    "@eslint/js": "9.39.2",
     "@types/adm-zip": "0.5.7",
     "@types/node": "^24.3.0",
     "@types/tar": "7.0.87",
     "eslint": "^9.34.0",
-    "rimraf": "^6.0.1",
+    "rimraf": "6.0.1",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   },
