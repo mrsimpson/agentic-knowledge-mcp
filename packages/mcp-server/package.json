@@ -44,7 +44,7 @@
   "devDependencies": {
     "@codemcp/knowledge-content-loader": "workspace:*",
     "@codemcp/knowledge-core": "workspace:*",
-    "@eslint/js": "9.39.2",
+    "@eslint/js": "9.39.4",
     "@types/node": "^24.3.0",
     "eslint": "^9.34.0",
     "rimraf": "6.0.1",
