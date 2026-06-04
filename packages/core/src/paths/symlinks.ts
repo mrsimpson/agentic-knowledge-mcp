@@ -44,7 +44,16 @@ export async function createSymlinks(
           // ignore — entry doesn't exist yet
         }
 
-        await fs.symlink(entryAbsPath, symlinkPath);
+        const entryStat = await fs.stat(entryAbsPath);
+        if (process.platform === "win32") {
+          if (entryStat.isDirectory()) {
+            await fs.symlink(entryAbsPath, symlinkPath, "junction");
+          } else {
+            await fs.copyFile(entryAbsPath, symlinkPath);
+          }
+        } else {
+          await fs.symlink(entryAbsPath, symlinkPath);
+        }
       }
     }
   } catch (error) {
@@ -104,3 +113,4 @@ export async function removeSymlinks(targetDir: string): Promise<void> {
     }
   }
 }
+
