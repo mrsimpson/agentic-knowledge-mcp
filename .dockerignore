@@ -1,0 +1,15 @@
+node_modules
+**/node_modules
+**/dist
+**/.turbo
+**/*.tsbuildinfo
+.git
+.github
+.idea
+.vibe
+.beads
+.crowd
+.knowledge/docsets
+dist-local
+*.tgz
+test
