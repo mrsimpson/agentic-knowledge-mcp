@@ -1,6 +1,11 @@
 # Stage 1 – build
 FROM node:22-alpine AS build
 
+# Run install/build steps as root. Required for rootless Podman, where the
+# container defaults to a non-root uid and corepack cannot create symlinks in
+# the root-owned /usr/local/bin (EACCES). Docker builds as root by default.
+USER root
+
 RUN corepack enable && corepack prepare pnpm@10.32.1 --activate
 
 WORKDIR /app
@@ -17,6 +22,11 @@ RUN pnpm run build
 
 # Stage 2 – runtime
 FROM node:22-alpine AS runtime
+
+# Same as build stage: corepack needs root to write its symlinks under
+# /usr/local/bin (rootless Podman defaults to a non-root uid). We switch to the
+# unprivileged `node` user further down, before the ENTRYPOINT.
+USER root
 
 RUN corepack enable && corepack prepare pnpm@10.32.1 --activate
 
