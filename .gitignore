@@ -12,3 +12,9 @@ node_modules
 dist-local
 
 *.tgz
+
+# IDE
+.idea/
+
+# npm lockfiles (this is a pnpm workspace — only pnpm-lock.yaml is tracked)
+**/package-lock.json
