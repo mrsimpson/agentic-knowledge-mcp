@@ -37,7 +37,7 @@ COPY packages/cli/package.json packages/cli/
 COPY packages/mcp-server/package.json packages/mcp-server/
 COPY packages/content-loader/package.json packages/content-loader/
 
-RUN pnpm install --frozen-lockfile --prod --ignore-scripts
+RUN pnpm install --frozen-lockfile --production --ignore-scripts
 
 COPY --from=build /app/packages/core/dist packages/core/dist
 COPY --from=build /app/packages/cli/dist packages/cli/dist
