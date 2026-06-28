@@ -127,4 +127,4 @@ use — no product API change.
 - CI/CD pipeline (GitHub Actions) for automated image builds: TBD
 - Image registry and versioning strategy (`:latest` vs. `:2.3.0`): TBD
 - Wrapper script to auto-extract `local_folder` paths from `config.yaml` and
-  generate `docker run` volume mounts: [issue #53](https://github.com/mrsimpson/agentic-knowledge-mcp/issues/53)
+  generate `docker run` volume mounts: [issue #54](https://github.com/mrsimpson/agentic-knowledge-mcp/issues/54)
