@@ -21,6 +21,22 @@ export const initAllCommand = new Command("init-all")
       return;
     }
 
+    // ADR-003: The container image only supports local_folder docsets.
+    // Reject git_repo and archive sources with a clear, actionable error.
+    for (const docset of config.docsets) {
+      for (const source of docset.sources) {
+        if (source.type !== "local_folder") {
+          process.stderr.write(
+            `ERROR: Docset '${docset.id}' uses unsupported source type '${source.type}'. ` +
+              `The container image only supports 'local_folder' sources. ` +
+              `Materialize ${source.type} docsets on the host (using the CLI), ` +
+              `then mount them as local_folder sources.\n`,
+          );
+          process.exit(1);
+        }
+      }
+    }
+
     for (const docset of config.docsets) {
       process.stderr.write(`Initializing docset: ${docset.id}\n`);
       try {

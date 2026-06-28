@@ -25,10 +25,10 @@ docker run -i \
   agentic-knowledge-mcp
 ```
 
-| Mount | Purpose |
-|---|---|
-| `<WORKSPACE>\.knowledge` → `/knowledge/.knowledge` | `config.yaml` + persisted docsets (writable) |
-| `<WORKSPACE>\my-docs` → `/knowledge/my-docs:ro` | Source files (docs, knowledge, tests) — read-only |
+| Mount                                              | Purpose                                           |
+| -------------------------------------------------- | ------------------------------------------------- |
+| `<WORKSPACE>\.knowledge` → `/knowledge/.knowledge` | `config.yaml` + persisted docsets (writable)      |
+| `<WORKSPACE>\my-docs` → `/knowledge/my-docs:ro`    | Source files (docs, knowledge, tests) — read-only |
 
 - Container WORKDIR: `/knowledge`
 - Config discovery finds `/knowledge/.knowledge/config.yaml` (walk-up from CWD)
@@ -43,26 +43,30 @@ docker run -i \
 1. Check whether /knowledge/.knowledge/config.yaml exists
    → no: error message on stderr, exit 1
 
-2. Extract docset IDs from config.yaml
-   (grep/sed on lines of the form "- id:", CRLF stripped via `tr -d '\r'`)
-   For each ID:
-     node /app/packages/cli/dist/index.js init <id>
-   - Idempotency is handled by the init command itself (skips already-initialized docsets)
-   - All init output goes to stderr (1>&2 2>&1) so that stdout stays clean for the
-     JSON-RPC stream
-   - A failure of a single docset does not abort startup (|| true)
+2. Run `init-all` — a CLI subcommand that:
+   a. Loads config.yaml using js-yaml (proper YAML parsing)
+   b. Validates that all docsets use `local_folder` sources (ADR-003)
+      → rejects `git_repo`/`archive` with a clear error and exits 1
+   c. Initializes each docset (idempotent: skips already-initialized ones)
+   d. Fails fast on any error (set -e in entrypoint)
 
 3. Start the MCP server (stdio):
    exec node /app/packages/mcp-server/dist/bin.js
 ```
 
-The `init` command is idempotent: docsets that are already initialized (detected via
-`.agentic-metadata.json`) are skipped. The entrypoint therefore calls `init` for all docsets on
-every start — on the second container start this is effectively a no-op, because the metadata is
+The `init-all` command is idempotent: docsets that are already initialized (detected via
+`.agentic-metadata.json`) are skipped. The entrypoint therefore calls `init-all` on every
+container start — on the second start this is effectively a no-op, because the metadata is
 persisted in the writable `.knowledge` volume.
 
-> Note: ID extraction is a simple grep/sed over lines of the form `- id:` and assumes that format
-> in `config.yaml` (it is not a full YAML parser).
+## Source type support (ADR-003)
+
+The container image only supports `local_folder` docsets. If a `git_repo` or `archive` source
+is detected in `config.yaml`, `init-all` exits with code 1 and a clear error message pointing
+the user to materialize the docset on the host first.
+
+`git_repo` and `archive` loaders remain fully available in the npm package / CLI for host-side
+use — no product API change.
 
 ## Symlinks inside the container
 
@@ -73,22 +77,24 @@ persisted in the writable `.knowledge` volume.
 
 ## Files
 
-| File | Purpose |
-|---|---|
-| `Dockerfile` ✅ | Multi-stage build: pnpm/turbo (build) → node:22-alpine (runtime) |
-| `docker-entrypoint.sh` ✅ | Lazy init (see above) + MCP server start |
-| `.dockerignore` ✅ | Excludes `node_modules`, `dist`, `.git`, `.turbo`, etc. |
+| File                      | Purpose                                                          |
+| ------------------------- | ---------------------------------------------------------------- |
+| `Dockerfile` ✅           | Multi-stage build: pnpm/turbo (build) → node:22-alpine (runtime) |
+| `docker-entrypoint.sh` ✅ | Lazy init (see above) + MCP server start                         |
+| `.dockerignore` ✅        | Excludes `node_modules`, `dist`, `.git`, `.turbo`, etc.          |
 
 ### Dockerfile (structure)
 
 **Stage 1 – build** (`node:22-alpine`):
+
 - `corepack enable && corepack prepare pnpm@10.32.1 --activate`
 - `pnpm install --frozen-lockfile` (incl. devDeps)
 - `pnpm run build` (turbo builds all packages in parallel)
 
 **Stage 2 – runtime** (`node:22-alpine`):
+
 - `corepack enable && corepack prepare pnpm@10.32.1 --activate`
-- `pnpm install --frozen-lockfile --prod --ignore-scripts`
+- `pnpm install --frozen-lockfile --production --ignore-scripts`
 - Copy the `dist/` directories of all packages from stage 1
 - Unprivileged user `node`
 - WORKDIR `/knowledge` (mount point)
@@ -102,9 +108,13 @@ persisted in the writable `.knowledge` volume.
     "knowledge": {
       "command": "docker",
       "args": [
-        "run", "--rm", "-i",
-        "-v", "<WORKSPACE>\\.knowledge:/knowledge/.knowledge",
-        "-v", "<WORKSPACE>\\my-docs:/knowledge/my-docs:ro",
+        "run",
+        "--rm",
+        "-i",
+        "-v",
+        "<WORKSPACE>\\.knowledge:/knowledge/.knowledge",
+        "-v",
+        "<WORKSPACE>\\my-docs:/knowledge/my-docs:ro",
         "agentic-knowledge-mcp"
       ]
     }
@@ -115,7 +125,6 @@ persisted in the writable `.knowledge` volume.
 ## Open points
 
 - CI/CD pipeline (GitHub Actions) for automated image builds: TBD
-- Image registry and versioning strategy (`:latest` vs. `:2.2.0`): TBD
-- Behavior on `init` failure in the entrypoint: **resolved** — single docset failures are
-  tolerated (`|| true`) and the server still starts. It remains open whether a failed docset
-  should be signaled more strongly (e.g. exit code / healthcheck): TBD
+- Image registry and versioning strategy (`:latest` vs. `:2.3.0`): TBD
+- Wrapper script to auto-extract `local_folder` paths from `config.yaml` and
+  generate `docker run` volume mounts: [issue #53](https://github.com/mrsimpson/agentic-knowledge-mcp/issues/53)
