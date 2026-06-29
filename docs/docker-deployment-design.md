@@ -73,26 +73,9 @@ Host-/Paket-Nutzung der CLI relevant.
 
 ## 4. Build-Architektur (Multi-Stage)
 
-```
-┌── Stage build (node:22-alpine + corepack pnpm@10.32.1) ──┐
-│ COPY lockfile + workspace + alle packages/*/package.json │
-│ pnpm install --frozen-lockfile        (HUSKY=0)          │
-│ COPY sources                                             │
-│ pnpm run build                        (turbo → tsup)     │
-│ pnpm --filter @codemcp/knowledge-server deploy --prod \  │
-│        /deploy   → flacht pnpm-Symlinks zu echtem        │
-│                    node_modules (sdk, adm-zip) + dist    │
-└──────────────────────────────────────────────────────────┘
-┌── Stage runtime (node:22-alpine) ───────────────────────┐
-│ (kein git — ADR-003: nur local_folder im Image)         │
-│ pnpm install --frozen-lockfile --prod --ignore-scripts   │
-│ COPY --from=build packages/*/dist  (gebaute Bundles)     │
-│ COPY docker-entrypoint.sh → /usr/local/bin               │
-│ WORKDIR /knowledge   (Mount-Punkt für .knowledge/)       │
-│ USER node                                                │
-│ ENTRYPOINT ["docker-entrypoint.sh"]  (init-all + server) │
-└──────────────────────────────────────────────────────────┘
-```
+Die konkrete Stage-Struktur des `Dockerfile` (Build → Runtime, kopierte `dist/`,
+ENTRYPOINT) steht in **`docs/docker.md`** → _Dockerfile (structure)_ und wird hier
+nicht dupliziert. Dieser Abschnitt hält nur die **Begründungen** fest.
 
 Designentscheidungen:
 
@@ -119,38 +102,23 @@ Designentscheidungen:
 
 ## 5. Netzwerk
 
-Anders als bruno-mcp (brauchte `--network host`, um eine lokale API zu erreichen)
-benötigt dieser Server nur **Standard-Egress** zum Klonen öffentlicher Git-Repos.
-Default-Bridge genügt; kein Host-Networking nötig.
+Per **ADR-003** lädt das Image beim Start nichts nach (`local_folder`-only,
+mount & serve) → es benötigt **kein Netzwerk beim Start**. Anders als bruno-mcp
+(brauchte `--network host`, um eine lokale API zu erreichen) ist hier weder
+Host-Networking noch Egress nötig.
+
+Das Klonen öffentlicher Git-Repos (`execSync("git …")`) braucht Standard-Egress —
+das passiert aber **auf dem Host** über die CLI/das npm-Paket, nicht im Image.
 
 ## 6. Nutzung (Soll)
 
-`mcp.json` / Client-Config:
+Design-relevante Eigenschaft: unter dem (beschreibbaren) `.knowledge`-Mount liegt
+`config.yaml`; Config-Discovery läuft aufwärts ab `WORKDIR /knowledge`, und
+`init_docset` lädt Docsets in dasselbe persistente Volume.
 
-```json
-{
-  "mcpServers": {
-    "agentic-knowledge": {
-      "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "-v",
-        "${workspaceFolder}/.knowledge:/knowledge/.knowledge",
-        "-v",
-        "${workspaceFolder}/my-docs:/knowledge/my-docs:ro",
-        "agentic-knowledge-mcp:latest"
-      ]
-    }
-  }
-}
-```
-
-Voraussetzung: unter dem (beschreibbaren) `.knowledge`-Mount liegt `config.yaml`.
-Config-Discovery läuft aufwärts ab `WORKDIR /knowledge`. `init_docset` lädt Docsets
-in dasselbe persistente Volume. Konkrete Volume-/Schreibrechte-Details (uid 1000):
-`docs/docker.md`.
+Das konkrete `mcp.json`-Beispiel, Volume-Layout und die Schreibrechte-Details
+(uid 1000) stehen in **`docs/docker.md`** (operative Referenz) — hier nicht
+dupliziert.
 
 ## 7. R1 — stdout-Hygiene (übernommen)
 
@@ -165,7 +133,12 @@ Der MCP-Kanal _ist_ stdout. Server loggt bereits ausschließlich nach stderr
    Antworten; `tools/list` zeigt `search_docs`, `list_docsets`, `init_docset`.
 3. Bei gemountetem Volume mit `.knowledge/config.yaml` erscheinen die
    konfigurierten Docsets in der Tool-Beschreibung.
-4. (Optional) `init_docset` eines Git-Docsets klont erfolgreich (git + Netz).
+4. Der Entrypoint (`init-all`) initialisiert die konfigurierten
+   **`local_folder`**-Docsets (Symlinks + Metadata unter `.knowledge/`) und lehnt
+   `git_repo`/`archive`-Quellen mit klarer Fehlermeldung ab (ADR-003).
+
+> Git-/Archive-Materialisierung wird **auf dem Host** über die CLI getestet, nicht
+> über das Image.
 
 ## 9. Risiken / offene Punkte
 
